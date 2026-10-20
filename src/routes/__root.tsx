@@ -37,11 +37,7 @@ export const Route = createRootRoute({
 			},
 		],
 	}),
-	shellComponent: RootDocument,
-});
-
-function RootDocument({ children }: { children: React.ReactNode }) {
-	return (
+	shellComponent: ({ children }) => (
 		<html lang="en">
 			<head>
 				<HeadContent />
@@ -62,5 +58,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<Scripts />
 			</body>
 		</html>
-	);
-}
+	),
+});
