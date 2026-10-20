@@ -21,7 +21,7 @@ export function HowItWorks() {
 				<div className="mt-10 grid gap-8 md:grid-cols-3">
 					{steps.map((s, i) => (
 						<div key={s.title}>
-							<span className="flex size-10 items-center justify-center rounded-full bg-yellow-400 font-bold text-black">
+							<span className="flex size-10 items-center justify-center rounded-full bg-brand font-bold text-brand-foreground">
 								{i + 1}
 							</span>
 							<h3 className="mt-4 font-semibold text-lg">{s.title}</h3>

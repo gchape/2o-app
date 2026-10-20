@@ -13,10 +13,10 @@ export function Footer() {
 		<footer className="bg-neutral-950 text-white">
 			<div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-4">
 				<div className="md:col-span-2">
-					<Link to="/" className="font-bold text-2xl">
-						2o
+					<Link to="/" aria-label="2o home" className="block w-fit">
+						<img src="/images/logo.webp" alt="2o" className="h-12 w-auto" />
 					</Link>
-					<p className="mt-3 max-w-sm text-white/60">
+					<p className="mt-4 max-w-sm text-white/60">
 						We check wholesale stores every day and show you the cheapest deals
 						on shoes and clothing for the whole family.
 					</p>
@@ -29,7 +29,7 @@ export function Footer() {
 									target="_blank"
 									rel="noopener noreferrer"
 									aria-label={s.label}
-									className="flex size-10 items-center justify-center rounded-full border border-white/20 text-brand transition-colors hover:border-yellow-400 hover:bg-yellow-400 hover:text-black"
+									className="flex size-10 items-center justify-center rounded-full border border-white/20 text-brand transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
 								>
 									<HugeiconsIcon icon={s.icon} size={20} />
 								</a>
@@ -39,7 +39,7 @@ export function Footer() {
 				</div>
 
 				<div>
-					<h3 className="font-semibold text-sm text-yellow-400 uppercase tracking-wide">
+					<h3 className="font-semibold text-brand text-sm uppercase tracking-wide">
 						Shop
 					</h3>
 					<ul className="mt-4 space-y-2">
@@ -58,7 +58,7 @@ export function Footer() {
 				</div>
 
 				<div>
-					<h3 className="font-semibold text-sm text-yellow-400 uppercase tracking-wide">
+					<h3 className="font-semibold text-brand text-sm uppercase tracking-wide">
 						Good to know
 					</h3>
 					<ul className="mt-4 space-y-2 text-white/70">

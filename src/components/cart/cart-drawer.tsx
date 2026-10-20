@@ -97,10 +97,7 @@ export function CartDrawer() {
 							Shipping and taxes are calculated at checkout.
 						</p>
 						{/* Link this to your checkout route once it exists */}
-						<Button
-							size="lg"
-							className="w-full bg-yellow-400 text-black hover:bg-yellow-300"
-						>
+						<Button size="lg" className="w-full">
 							Checkout
 						</Button>
 					</SheetFooter>

@@ -10,7 +10,7 @@ export function TrustStrip() {
 			<div className="mx-auto grid max-w-6xl gap-3 px-4 py-5 text-sm sm:grid-cols-3">
 				{highlights.map((h) => (
 					<div key={h.title} className="flex items-center gap-3">
-						<span className="size-2 shrink-0 rounded-full bg-yellow-400" />
+						<span className="size-2 shrink-0 rounded-full bg-brand" />
 						<p>
 							<span className="font-semibold">{h.title}</span>
 							<span className="text-white/60"> · {h.text}</span>

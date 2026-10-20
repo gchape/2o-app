@@ -24,10 +24,11 @@ export function Header() {
 	const [open, setOpen] = useState(false);
 
 	return (
-		<header className="border-b">
+		// "dark" switches every shadcn component inside the header to the dark tokens
+		<header className="dark border-b bg-background text-foreground">
 			<div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-				<Link to="/" className="font-bold text-xl">
-					2o
+				<Link to="/" aria-label="2o home" className="block">
+					<img src="/images/logo.webp" alt="2o" className="h-9 w-auto" />
 				</Link>
 
 				<div className="flex items-center gap-2">

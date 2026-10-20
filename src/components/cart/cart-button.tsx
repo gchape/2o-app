@@ -20,7 +20,7 @@ export function CartButton() {
 			{count > 0 && (
 				<span
 					key={count}
-					className="fade-in zoom-in-50 absolute -top-1.5 -right-1.5 flex size-5 animate-in items-center justify-center rounded-full bg-yellow-400 font-bold text-black text-xs ring-2 ring-white duration-200"
+					className="fade-in zoom-in-50 absolute -top-1.5 -right-1.5 flex size-5 animate-in items-center justify-center rounded-full bg-brand font-bold text-brand-foreground text-xs ring-2 ring-background duration-200"
 				>
 					{count}
 				</span>

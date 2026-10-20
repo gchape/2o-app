@@ -11,10 +11,10 @@ export function Hero() {
 			/>
 			<div className="absolute inset-0 -z-10 bg-linear-to-r from-black/70 via-black/30 to-transparent" />
 			<div className="mx-auto w-full max-w-6xl px-4 text-white">
-				<span className="inline-block rounded-full bg-yellow-400 px-4 py-1 font-bold text-black text-sm uppercase tracking-wide">
+				<span className="inline-block rounded-full bg-brand px-4 py-1 font-bold text-brand-foreground text-sm uppercase tracking-wide">
 					Up to 70% off today
 				</span>
-				<h1 className="mt-5 max-w-xl text-balance font-bold text-4xl tracking-tight md:text-6xl">
+				<h1 className="mt-5 max-w-xl text-balance font-extrabold text-4xl tracking-tight md:text-6xl">
 					Big brands. Small prices.
 				</h1>
 				<p className="mt-4 max-w-md text-lg text-white/80">
@@ -24,7 +24,7 @@ export function Hero() {
 				<Button
 					size="lg"
 					nativeButton={false}
-					className="mt-8 bg-yellow-400 text-black hover:bg-yellow-300"
+					className="mt-8 h-12 px-8 text-base"
 					render={
 						<Link to="/$department" params={{ department: "women" }}>
 							Shop today's deals
