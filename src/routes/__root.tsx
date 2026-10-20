@@ -1,7 +1,10 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-
+import { CartDrawer } from "#/components/cart/cart-drawer";
+import { Footer } from "#/components/footer";
+import { Header } from "#/components/header";
+import { CartProvider } from "#/lib/cart";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -43,7 +46,14 @@ export const Route = createRootRoute({
 				<HeadContent />
 			</head>
 			<body>
-				{children}
+				<CartProvider>
+					<div className="flex min-h-screen flex-col">
+						<Header />
+						<div className="flex-1">{children}</div>
+						<Footer />
+					</div>
+					<CartDrawer />
+				</CartProvider>
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",
