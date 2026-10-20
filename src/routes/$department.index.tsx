@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { type Product, ProductCard } from "#/components/product-card";
+import { type Product, ProductCard } from "#/components/product/product-card";
 import {
 	Breadcrumb,
 	BreadcrumbItem,

@@ -11,7 +11,9 @@
 			"**",
 			"!**/routeTree.gen.ts",
 			"!src/generated",
-			"!src/components/ui"
+			"!src/components/ui",
+			"!src/components/auth",
+			"!src/lib/auth"
 		]
 	},
 	"formatter": {

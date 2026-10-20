@@ -1,10 +1,11 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { AnnouncementBar } from "#/components/announcement-bar";
+import { AnnouncementBar } from "#/components/layout/announcement-bar";
 import { CartDrawer } from "#/components/cart/cart-drawer";
-import { Footer } from "#/components/footer";
+import { Footer } from "#/components/layout/footer";
 import { Header } from "#/components/header";
+import { Providers } from "#/components/providers";
 import { CartProvider } from "#/lib/cart";
 import appCss from "../styles.css?url";
 
@@ -47,15 +48,17 @@ export const Route = createRootRoute({
 				<HeadContent />
 			</head>
 			<body>
-				<CartProvider>
-					<div className="flex min-h-screen flex-col">
-						<AnnouncementBar />
-						<Header />
-						<div className="flex-1">{children}</div>
-						<Footer />
-					</div>
-					<CartDrawer />
-				</CartProvider>
+				<Providers>
+					<CartProvider>
+						<div className="flex min-h-screen flex-col">
+							<AnnouncementBar />
+							<Header />
+							<div className="flex-1">{children}</div>
+							<Footer />
+						</div>
+						<CartDrawer />
+					</CartProvider>
+				</Providers>
 				<TanStackDevtools
 					config={{
 						position: "bottom-left",

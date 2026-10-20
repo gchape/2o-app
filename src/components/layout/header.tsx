@@ -19,12 +19,12 @@ import {
 	SheetTrigger,
 } from "#/components/ui/sheet";
 import { departments } from "#/lib/site";
+import { UserButton } from "./auth/user/user-button";
 
 export function Header() {
 	const [open, setOpen] = useState(false);
 
 	return (
-		// "dark" switches every shadcn component inside the header to the dark tokens
 		<header className="dark border-b bg-background text-foreground">
 			<div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
 				<Link to="/" aria-label="2o home" className="block">
@@ -50,6 +50,7 @@ export function Header() {
 						</NavigationMenuList>
 					</NavigationMenu>
 
+					<UserButton />
 					<CartButton />
 
 					{/* Mobile menu */}

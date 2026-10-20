@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DepartmentRouteImport } from './routes/$department'
 import { Route as DepartmentIndexRouteImport } from './routes/$department.index'
 import { Route as DepartmentCategoryRouteImport } from './routes/$department.$category'
+import { Route as AuthPathRouteImport } from './routes/auth/$path'
+import { Route as SettingsPathRouteImport } from './routes/settings/$path'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +37,16 @@ const DepartmentCategoryRoute = DepartmentCategoryRouteImport.update({
   path: '/$category',
   getParentRoute: () => DepartmentRoute,
 } as any)
+const AuthPathRoute = AuthPathRouteImport.update({
+  id: '/auth/$path',
+  path: '/auth/$path',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsPathRoute = SettingsPathRouteImport.update({
+  id: '/settings/$path',
+  path: '/settings/$path',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -45,12 +57,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$department': typeof DepartmentRouteWithChildren
   '/$department/$category': typeof DepartmentCategoryRoute
+  '/auth/$path': typeof AuthPathRoute
+  '/settings/$path': typeof SettingsPathRoute
   '/$department/': typeof DepartmentIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$department/$category': typeof DepartmentCategoryRoute
+  '/auth/$path': typeof AuthPathRoute
+  '/settings/$path': typeof SettingsPathRoute
   '/$department': typeof DepartmentIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -59,6 +75,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$department': typeof DepartmentRouteWithChildren
   '/$department/$category': typeof DepartmentCategoryRoute
+  '/auth/$path': typeof AuthPathRoute
+  '/settings/$path': typeof SettingsPathRoute
   '/$department/': typeof DepartmentIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -68,15 +86,25 @@ export interface FileRouteTypes {
     | '/'
     | '/$department'
     | '/$department/$category'
+    | '/auth/$path'
+    | '/settings/$path'
     | '/$department/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$department/$category' | '/$department' | '/api/auth/$'
+  to:
+    | '/'
+    | '/$department/$category'
+    | '/auth/$path'
+    | '/settings/$path'
+    | '/$department'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
     | '/$department'
     | '/$department/$category'
+    | '/auth/$path'
+    | '/settings/$path'
     | '/$department/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -84,6 +112,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DepartmentRoute: typeof DepartmentRouteWithChildren
+  AuthPathRoute: typeof AuthPathRoute
+  SettingsPathRoute: typeof SettingsPathRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -117,6 +147,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DepartmentCategoryRouteImport
       parentRoute: typeof DepartmentRoute
     }
+    '/auth/$path': {
+      id: '/auth/$path'
+      path: '/auth/$path'
+      fullPath: '/auth/$path'
+      preLoaderRoute: typeof AuthPathRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/$path': {
+      id: '/settings/$path'
+      path: '/settings/$path'
+      fullPath: '/settings/$path'
+      preLoaderRoute: typeof SettingsPathRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -144,6 +188,8 @@ const DepartmentRouteWithChildren = DepartmentRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DepartmentRoute: DepartmentRouteWithChildren,
+  AuthPathRoute: AuthPathRoute,
+  SettingsPathRoute: SettingsPathRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
