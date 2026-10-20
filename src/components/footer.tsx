@@ -29,7 +29,7 @@ export function Footer() {
 									target="_blank"
 									rel="noopener noreferrer"
 									aria-label={s.label}
-									className="flex size-10 items-center justify-center rounded-full border border-white/20 text-white/70 transition-colors hover:border-yellow-400 hover:bg-yellow-400 hover:text-black"
+									className="flex size-10 items-center justify-center rounded-full border border-white/20 text-brand transition-colors hover:border-yellow-400 hover:bg-yellow-400 hover:text-black"
 								>
 									<HugeiconsIcon icon={s.icon} size={20} />
 								</a>
