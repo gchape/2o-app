@@ -7,21 +7,33 @@ import appCss from "../styles.css?url";
 export const Route = createRootRoute({
 	head: () => ({
 		meta: [
+			{ charSet: "utf-8" },
+			{ name: "viewport", content: "width=device-width, initial-scale=1" },
+			{ title: "2o | Big brands. Small prices." },
 			{
-				charSet: "utf-8",
-			},
-			{
-				name: "viewport",
-				content: "width=device-width, initial-scale=1",
-			},
-			{
-				title: "TanStack Start Starter",
+				name: "description",
+				content:
+					"Daily deals on shoes and clothing for men, women and kids, checked across wholesale stores.",
 			},
 		],
 		links: [
+			{ rel: "icon", href: "/favicon.ico", sizes: "32x32" },
+			{ rel: "apple-touch-icon", href: "/apple-icon-180x180.png" },
+			{ rel: "stylesheet", href: appCss },
+		],
+		scripts: [
 			{
-				rel: "stylesheet",
-				href: appCss,
+				children: `
+				var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+				(function(){
+					var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+					s1.async=true;
+					s1.src='https://embed.tawk.to/6ad5e6b5611f3d34c113d575/1k59oqdbn';
+					s1.charset='UTF-8';
+					s1.setAttribute('crossorigin','*');
+					s0.parentNode.insertBefore(s1,s0);
+				})();
+			`,
 			},
 		],
 	}),
