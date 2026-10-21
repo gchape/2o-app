@@ -1,0 +1,54 @@
+import { defineRelationsPart } from "drizzle-orm";
+import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+
+export const user = pgTable("user", {
+	id: text("id").primaryKey(),
+	name: text("name").notNull(),
+	email: text("email").notNull().unique(),
+	emailVerified: boolean("email_verified").default(false).notNull(),
+	image: text("image"),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at")
+		.defaultNow()
+		.$onUpdate(() => /* @__PURE__ */ new Date())
+		.notNull(),
+});
+
+export const account = pgTable(
+	"account",
+	{
+		id: text("id").primaryKey(),
+		accountId: text("account_id").notNull(),
+		providerId: text("provider_id").notNull(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		accessToken: text("access_token"),
+		refreshToken: text("refresh_token"),
+		idToken: text("id_token"),
+		accessTokenExpiresAt: timestamp("access_token_expires_at"),
+		refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+		scope: text("scope"),
+		password: text("password"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+	},
+	(table) => [index("account_userId_idx").on(table.userId)],
+);
+
+export const authRelations = defineRelationsPart({ user, account }, (r) => ({
+	user: {
+		accounts: r.many.account({
+			from: r.user.id,
+			to: r.account.userId,
+		}),
+	},
+	account: {
+		user: r.one.user({
+			from: r.account.userId,
+			to: r.user.id,
+		}),
+	},
+}));

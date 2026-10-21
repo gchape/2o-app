@@ -19,7 +19,7 @@ import {
 	SheetTrigger,
 } from "#/components/ui/sheet";
 import { departments } from "#/lib/site";
-import { UserButton } from "./auth/user/user-button";
+import { UserButton } from "../auth/user/user-button";
 
 export function Header() {
 	const [open, setOpen] = useState(false);

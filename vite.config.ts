@@ -9,6 +9,14 @@ import { defineConfig } from "vite";
 
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
+
+	optimizeDeps: {
+		exclude: ["@valkey/valkey-glide"],
+	},
+	ssr: {
+		external: ["@valkey/valkey-glide"],
+	},
+
 	plugins: [
 		devtools(),
 		nitro({ rollupConfig: { external: [/^@sentry\//] } }),
