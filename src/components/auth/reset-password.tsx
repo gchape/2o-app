@@ -5,24 +5,24 @@ import {
 	validateStringLength,
 } from "@better-auth-ui/core";
 import { useAuth, useResetPassword } from "@better-auth-ui/react";
-import { cn } from "cn";
+import { cn } from "#/lib/utils";
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import {
 	Field,
 	FieldDescription,
 	FieldError,
 	FieldGroup,
 	FieldLabel,
-} from "@/components/ui/field";
+} from "#/components/ui/field";
 import {
 	InputGroup,
 	InputGroupAddon,
 	InputGroupButton,
 	InputGroupInput,
-} from "@/components/ui/input-group";
+} from "#/components/ui/input-group";
 import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form";
 import { PasswordStrengthMeter } from "./password-strength-meter";
 

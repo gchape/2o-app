@@ -6,17 +6,15 @@ import { HowItWorks } from "#/components/home/how-it-works";
 import { PromoCarousel } from "#/components/home/promo-carousel";
 import { TrustStrip } from "#/components/home/trust-strip";
 
-export const Route = createFileRoute("/")({ component: Home });
-
-function Home() {
-	return (
-		<main>
+export const Route = createFileRoute("/")({
+	component: () => (
+		<div>
 			<Hero />
 			<TrustStrip />
 			<PromoCarousel />
 			<DepartmentTiles />
 			<HowItWorks />
 			<ClosingBanner />
-		</main>
-	);
-}
+		</div>
+	),
+});

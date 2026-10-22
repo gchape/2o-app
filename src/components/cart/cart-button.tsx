@@ -1,7 +1,7 @@
 import { ShoppingCart01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useCartApi, useCartState } from "#/components/cart/cart-provider";
 import { Button } from "#/components/ui/button";
-import { useCartApi, useCartState } from "#/lib/cart";
 
 export function CartButton() {
 	const { count } = useCartState();

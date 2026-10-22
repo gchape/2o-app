@@ -17,19 +17,19 @@ import {
 import { Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+import { Button } from "#/components/ui/button"
+import { Card, CardContent, CardFooter } from "#/components/ui/card"
+import { Field, FieldError, FieldLabel } from "#/components/ui/field"
+import { Input } from "#/components/ui/input"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput
-} from "@/components/ui/input-group"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Spinner } from "@/components/ui/spinner"
-import { cn } from "cn"
+} from "#/components/ui/input-group"
+import { Skeleton } from "#/components/ui/skeleton"
+import { Spinner } from "#/components/ui/spinner"
+import { cn } from "#/lib/utils"
 import { isAuthFormFieldInvalid, useAuthForm } from "../../auth-form"
 import { OpenEmailButton } from "../../open-email-button"
 import { PasswordStrengthMeter } from "../../password-strength-meter"

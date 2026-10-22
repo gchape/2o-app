@@ -3,16 +3,16 @@
 import { getProviderId } from "@better-auth-ui/core"
 import { useAuth, useListAccounts } from "@better-auth-ui/react"
 import { Fragment } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "#/components/ui/card"
 import {
   Item,
   ItemContent,
   ItemGroup,
   ItemMedia,
   ItemSeparator
-} from "@/components/ui/item"
-import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "cn"
+} from "#/components/ui/item"
+import { Skeleton } from "#/components/ui/skeleton"
+import { cn } from "#/lib/utils"
 import { LinkedAccount } from "./linked-account"
 
 export type LinkedAccountsProps = {

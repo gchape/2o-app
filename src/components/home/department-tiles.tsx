@@ -1,10 +1,6 @@
 import { Link } from "@tanstack/react-router";
-
-const departments = [
-	{ slug: "men", label: "Men", image: "/images/men.webp" },
-	{ slug: "women", label: "Women", image: "/images/women.webp" },
-	{ slug: "kids", label: "Kids", image: "/images/kids.webp" },
-] as const;
+import { capitalize } from "es-toolkit";
+import { departmentSlugs, images } from "#/data/departments";
 
 export function DepartmentTiles() {
 	return (
@@ -18,21 +14,21 @@ export function DepartmentTiles() {
 				</p>
 			</div>
 			<div className="grid gap-4 md:grid-cols-3">
-				{departments.map((d) => (
+				{departmentSlugs.map((slug) => (
 					<Link
-						key={d.slug}
+						key={slug}
 						to="/$department"
-						params={{ department: d.slug }}
+						params={{ department: slug }}
 						className="group relative aspect-3/5 overflow-hidden rounded-xl"
 					>
 						<img
-							src={d.image}
+							src={images[slug]}
 							alt=""
 							className="size-full object-center transition-transform duration-300 group-hover:scale-105"
 						/>
 						<div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
 						<span className="absolute bottom-4 left-4 font-semibold text-2xl text-white">
-							{d.label}
+							{capitalize(slug)}
 						</span>
 					</Link>
 				))}

@@ -14,10 +14,10 @@ import {
 	useSignInSocial,
 } from "@better-auth-ui/react";
 import { useIsMutating } from "@tanstack/react-query";
-import { cn } from "cn";
+import { cn } from "#/lib/utils";
 import type { ComponentProps } from "react";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import { Button } from "#/components/ui/button";
+import { Spinner } from "#/components/ui/spinner";
 import { LastUsedBadge } from "./last-login-method/last-used-badge";
 
 export type ProviderButtonProps = {

@@ -3,8 +3,8 @@ import { useAuth, useAuthenticate } from "@better-auth-ui/react"
 import { Shield, User2 } from "lucide-react"
 import { useMemo } from "react"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { cn } from "cn"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
+import { cn } from "#/lib/utils"
 import { AccountSettings } from "./account/account-settings"
 import { SecuritySettings } from "./security/security-settings"
 

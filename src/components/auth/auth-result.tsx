@@ -6,17 +6,17 @@ import {
 	parseAuthResult,
 } from "@better-auth-ui/core";
 import { useAuth } from "@better-auth-ui/react";
-import { cn } from "cn";
+import { cn } from "#/lib/utils";
 import { CircleCheckIcon, CircleXIcon, TriangleAlertIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "#/components/ui/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@/components/ui/card";
+} from "#/components/ui/card";
 
 type AuthResultProps = {
 	className?: string;

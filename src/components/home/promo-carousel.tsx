@@ -10,7 +10,7 @@ import {
 	CarouselNext,
 	CarouselPrevious,
 } from "#/components/ui/carousel";
-import { slides } from "#/lib/site";
+import { slides } from "#/data/slides";
 import { cn } from "#/lib/utils";
 
 const tones = {

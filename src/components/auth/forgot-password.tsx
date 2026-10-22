@@ -6,15 +6,15 @@ import {
 	useFetchOptions,
 	useRequestPasswordReset,
 } from "@better-auth-ui/react";
-import { cn } from "cn";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "#/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import {
 	Field,
 	FieldDescription,
 	FieldGroup,
 	FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+} from "#/components/ui/field";
+import { Input } from "#/components/ui/input";
 import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form";
 import { RESET_LINK_SENT_STORAGE_KEY } from "./reset-link-sent";
 

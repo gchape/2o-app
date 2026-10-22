@@ -1,8 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { authClient } from "#/lib/auth-client";
 import { AuthProvider } from "./auth/auth-provider";
 import { Toaster } from "./ui/sonner";
+
+const AuthLink: NonNullable<ComponentProps<typeof AuthProvider>["Link"]> = ({
+	href,
+	...props
+}) => <Link to={href} {...props} />;
 
 export function Providers({ children }: { children: ReactNode }) {
 	const navigate = useNavigate();
@@ -18,7 +23,7 @@ export function Providers({ children }: { children: ReactNode }) {
 			redirectTo="/"
 			socialProviders={["google", "facebook"]}
 			navigate={navigate}
-			Link={({ href, ...props }) => <Link to={href} {...props} />}
+			Link={AuthLink}
 		>
 			{children}
 			<Toaster />

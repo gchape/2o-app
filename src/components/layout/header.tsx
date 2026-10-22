@@ -18,7 +18,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "#/components/ui/sheet";
-import { departments } from "#/lib/site";
+import { departmentSlugs } from "#/data/departments";
 import { UserButton } from "../auth/user/user-button";
 
 export function Header() {
@@ -34,14 +34,14 @@ export function Header() {
 				<div className="flex items-center gap-2">
 					{/* Desktop navigation */}
 					<NavigationMenu className="hidden md:flex">
-						<NavigationMenuList>
-							{departments.map((d) => (
-								<NavigationMenuItem key={d.slug}>
+						<NavigationMenuList className="capitalize">
+							{departmentSlugs.map((slug) => (
+								<NavigationMenuItem key={slug}>
 									<NavigationMenuLink
 										className={navigationMenuTriggerStyle()}
 										render={
-											<Link to="/$department" params={{ department: d.slug }}>
-												{d.label}
+											<Link to="/$department" params={{ department: slug }}>
+												{slug}
 											</Link>
 										}
 									/>
@@ -71,16 +71,16 @@ export function Header() {
 							<SheetHeader>
 								<SheetTitle>Menu</SheetTitle>
 							</SheetHeader>
-							<nav className="flex flex-col gap-1 px-4">
-								{departments.map((d) => (
+							<nav className="flex flex-col gap-1 px-4 capitalize">
+								{departmentSlugs.map((slug) => (
 									<Link
-										key={d.slug}
+										key={slug}
 										to="/$department"
-										params={{ department: d.slug }}
+										params={{ department: slug }}
 										onClick={() => setOpen(false)}
 										className="rounded-md px-3 py-2 text-base hover:bg-accent"
 									>
-										{d.label}
+										{slug}
 									</Link>
 								))}
 							</nav>

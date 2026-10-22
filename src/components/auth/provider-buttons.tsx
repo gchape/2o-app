@@ -2,7 +2,7 @@
 
 import { type AuthView, getProviderId } from "@better-auth-ui/core";
 import { useAuth } from "@better-auth-ui/react";
-import { cn } from "cn";
+import { cn } from "#/lib/utils";
 import { useMemo } from "react";
 import { ProviderButton } from "./provider-button";
 

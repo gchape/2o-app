@@ -1,13 +1,13 @@
 "use client";
 
 import { useAuth, useSendVerificationEmail } from "@better-auth-ui/react";
-import { cn } from "cn";
+import { cn } from "#/lib/utils";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FieldDescription } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
+import { Button } from "#/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
+import { FieldDescription } from "#/components/ui/field";
+import { Spinner } from "#/components/ui/spinner";
 import { OpenEmailButton } from "./open-email-button";
 import { useIsHydrated } from "./use-is-hydrated";
 

@@ -12,8 +12,8 @@ export const Route = createFileRoute("/auth/$path")({
 		meta: [{ title: "Sign in | 2o" }, { name: "robots", content: "noindex" }],
 	}),
 	component: () => (
-		<main className="flex justify-center px-4 py-12 md:py-20">
+		<div className="flex justify-center px-4 py-12 md:py-20">
 			<Auth path={Route.useParams().path} />
-		</main>
+		</div>
 	),
 });

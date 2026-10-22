@@ -3,11 +3,11 @@
 import type { UsernameAuthClient } from "@better-auth-ui/core/plugins/username";
 import { useAuth, useSession } from "@better-auth-ui/react";
 import type { User } from "better-auth";
-import { cn } from "cn";
+import { cn } from "#/lib/utils";
 import { User2 } from "lucide-react";
 import type { ReactNode } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
+import { Skeleton } from "#/components/ui/skeleton";
 
 export type UserAvatarProps = {
 	className?: string;

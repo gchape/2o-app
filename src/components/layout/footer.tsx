@@ -1,6 +1,7 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "@tanstack/react-router";
-import { departments, socials } from "#/lib/site";
+import { departmentSlugs } from "#/data/departments";
+import { socials } from "#/data/socials";
 
 const info = [
 	"Prices checked every day",
@@ -43,14 +44,14 @@ export function Footer() {
 						Shop
 					</h3>
 					<ul className="mt-4 space-y-2">
-						{departments.map((d) => (
-							<li key={d.slug}>
+						{departmentSlugs.map((slug) => (
+							<li key={slug}>
 								<Link
 									to="/$department"
-									params={{ department: d.slug }}
-									className="text-white/70 transition-colors hover:text-white"
+									params={{ department: slug }}
+									className="text-white/70 capitalize transition-colors hover:text-white"
 								>
-									{d.label}
+									{slug}
 								</Link>
 							</li>
 						))}

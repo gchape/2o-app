@@ -18,9 +18,9 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Spinner } from "@/components/ui/spinner"
+} from "#/components/ui/alert-dialog"
+import { Button } from "#/components/ui/button"
+import { Spinner } from "#/components/ui/spinner"
 
 type PendingAction = "other" | "all"
 

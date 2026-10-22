@@ -3,11 +3,11 @@ import {
 	isReauthenticationSignInURL,
 } from "@better-auth-ui/core";
 import { useAuth, useSignOut } from "@better-auth-ui/react";
-import { cn } from "cn";
+import { cn } from "#/lib/utils";
 import { useSyncExternalStore } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert";
+import { Button } from "#/components/ui/button";
+import { Spinner } from "#/components/ui/spinner";
 
 const subscribeToLocation = () => () => undefined;
 

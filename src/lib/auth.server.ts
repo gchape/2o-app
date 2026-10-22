@@ -2,9 +2,11 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { TimeUnit } from "@valkey/valkey-glide";
 import { betterAuth } from "better-auth";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
-import { db, valkey } from "#/index";
-import * as schema from "../db/auth-schema";
-import { sendEmail } from "./email";
+import { db } from "#/db";
+import * as schema from "#/db/auth-schema";
+import { env } from "#/lib/env.server";
+import { valkey } from "#/lib/valkey.server";
+import { sendEmail } from "./email.server";
 
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
@@ -14,8 +16,8 @@ export const auth = betterAuth({
 
 	appName: "2o",
 	basePath: "/api/auth",
-	baseURL: process.env.BETTER_AUTH_URL,
-	secret: process.env.BETTER_AUTH_SECRET,
+	baseURL: env.BETTER_AUTH_URL,
+	secret: env.BETTER_AUTH_SECRET,
 	trustedOrigins: ["https://2o.com.ge", "http://localhost:3000"],
 
 	secondaryStorage: {
@@ -90,12 +92,12 @@ export const auth = betterAuth({
 
 	socialProviders: {
 		google: {
-			clientId: process.env.GOOGLE_CLIENT_ID as string,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+			clientId: env.GOOGLE_CLIENT_ID,
+			clientSecret: env.GOOGLE_CLIENT_SECRET,
 		},
 		facebook: {
-			clientId: process.env.FACEBOOK_CLIENT_ID as string,
-			clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string,
+			clientId: env.FACEBOOK_CLIENT_ID,
+			clientSecret: env.FACEBOOK_CLIENT_SECRET,
 		},
 	},
 

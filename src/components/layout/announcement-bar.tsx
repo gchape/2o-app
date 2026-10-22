@@ -1,7 +1,6 @@
-import { HugeiconsIcon } from "@hugeicons/react";
-import { messages } from "#/lib/site";
+import { bannerMessages } from "#/data/banner";
 
-const track = [...messages, ...messages].map((message, i) => ({
+const track = [...bannerMessages, ...bannerMessages].map((message, i) => ({
 	...message,
 	id: String(i),
 }));
@@ -14,7 +13,7 @@ export function AnnouncementBar() {
 			aria-label="Announcements"
 			className="overflow-hidden bg-brand py-2.5 font-bold text-brand-foreground text-xs uppercase tracking-wider"
 		>
-			<p className="sr-only">{messages.map((m) => m.text).join(". ")}</p>
+			<p className="sr-only">{bannerMessages.map((m) => m.text).join(". ")}</p>
 			<div className="mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
 				<div
 					aria-hidden
@@ -28,8 +27,7 @@ export function AnnouncementBar() {
 									className="flex items-center whitespace-nowrap"
 								>
 									<span className="flex items-center gap-2 px-8">
-										<HugeiconsIcon
-											icon={item.icon}
+										<item.icon
 											size={16}
 											strokeWidth={2.5}
 											className="shrink-0"

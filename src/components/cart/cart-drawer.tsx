@@ -1,3 +1,8 @@
+import {
+	formatPrice,
+	useCartApi,
+	useCartState,
+} from "#/components/cart/cart-provider";
 import { Button } from "#/components/ui/button";
 import {
 	Sheet,
@@ -6,10 +11,10 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "#/components/ui/sheet";
-import { formatPrice, useCartApi, useCartState } from "#/lib/cart";
+import { MAX_QUANTITY } from "#/lib/cart.types";
 
 export function CartDrawer() {
-	const { items, isOpen, subtotal } = useCartState();
+	const { items, isOpen, subtotal, currency } = useCartState();
 	const { setOpen, setQuantity, removeItem } = useCartApi();
 
 	return (
@@ -36,20 +41,24 @@ export function CartDrawer() {
 					<ul className="flex-1 divide-y overflow-y-auto px-4">
 						{items.map((item) => (
 							<li key={item.id} className="flex gap-4 py-4">
-								<img
-									src={item.image}
-									alt={item.name}
-									className="size-20 shrink-0 rounded-md bg-muted object-cover"
-								/>
+								{item.image ? (
+									<img
+										src={item.image}
+										alt={item.name}
+										className="size-20 shrink-0 rounded-md bg-muted object-cover"
+									/>
+								) : (
+									<div className="size-20 shrink-0 rounded-md bg-muted" />
+								)}
 								<div className="flex min-w-0 flex-1 flex-col">
 									<div className="flex justify-between gap-2">
 										<p className="truncate font-medium">{item.name}</p>
 										<p className="font-semibold">
-											{formatPrice(item.price * item.quantity)}
+											{formatPrice(item.price * item.quantity, item.currency)}
 										</p>
 									</div>
 									<p className="text-muted-foreground text-sm">
-										{formatPrice(item.price)} each
+										{formatPrice(item.price, item.currency)} each
 									</p>
 									<div className="mt-auto flex items-center justify-between pt-2">
 										<div className="flex items-center gap-2">
@@ -68,6 +77,7 @@ export function CartDrawer() {
 												variant="outline"
 												size="icon-sm"
 												aria-label={`Increase quantity of ${item.name}`}
+												disabled={item.quantity >= MAX_QUANTITY}
 												onClick={() => setQuantity(item.id, item.quantity + 1)}
 											>
 												+
@@ -91,7 +101,7 @@ export function CartDrawer() {
 					<SheetFooter className="border-t">
 						<div className="flex items-center justify-between font-semibold text-lg">
 							<span>Subtotal</span>
-							<span>{formatPrice(subtotal)}</span>
+							<span>{formatPrice(subtotal, currency)}</span>
 						</div>
 						<p className="text-muted-foreground text-xs">
 							Shipping and taxes are calculated at checkout.
