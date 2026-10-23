@@ -1,5 +1,3 @@
-"use client";
-
 import {
 	type AdditionalField as AdditionalFieldConfig,
 	type AdditionalFieldFormValue,
@@ -7,11 +5,10 @@ import {
 	resolveInputType,
 } from "@better-auth-ui/core";
 import { useAuth, useCopyToClipboard } from "@better-auth-ui/react";
-import { cn } from "#/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon, Check, ChevronDownIcon, Copy } from "lucide-react";
 import { type ComponentType, useRef, useState } from "react";
 import { toast } from "sonner";
+import { CalendarIcon, Check, ChevronDownIcon, Copy } from "#/components/icons";
 import { buttonVariants } from "#/components/ui/button";
 import { Calendar } from "#/components/ui/calendar";
 import { Checkbox } from "#/components/ui/checkbox";
@@ -51,6 +48,7 @@ import {
 import { Slider } from "#/components/ui/slider";
 import { Switch } from "#/components/ui/switch";
 import { Textarea } from "#/components/ui/textarea";
+import { cn } from "#/lib/utils";
 
 export type AdditionalFieldProps = {
 	name: string;

@@ -1,14 +1,8 @@
-"use client";
-
 import {
 	authMutationKeys,
 	validateEmailAddress,
 	validateStringLength,
 } from "@better-auth-ui/core";
-import {
-	isPasskeyAutoFillEnabled,
-	withPasskeyAutoFill,
-} from "@better-auth-ui/core/plugins/passkey";
 import {
 	AuthPrompts,
 	useAuth,
@@ -16,9 +10,8 @@ import {
 	useSignInEmail,
 } from "@better-auth-ui/react";
 import { useIsMutating } from "@tanstack/react-query";
-import { cn } from "#/lib/utils";
-import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { Eye, EyeOff } from "#/components/icons";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { Checkbox } from "#/components/ui/checkbox";
 import {
@@ -35,9 +28,8 @@ import {
 	InputGroupButton,
 	InputGroupInput,
 } from "#/components/ui/input-group";
-import { useSignInContinuation } from "#/lib/auth/use-sign-in-continuation";
+import { cn } from "#/lib/utils";
 import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form";
-import { LastUsedBadge } from "./last-login-method/last-used-badge";
 import { ProviderButtons, type SocialLayout } from "./provider-buttons";
 import { ReauthenticationNotice } from "./reauthentication";
 
@@ -66,6 +58,7 @@ export function SignIn({
 		emailAndPassword,
 		localization,
 		plugins,
+		redirectTo,
 		socialProviders,
 		viewPaths,
 		navigate,
@@ -73,7 +66,6 @@ export function SignIn({
 	} = useAuth();
 
 	const { fetchOptions, resetFetchOptions } = useFetchOptions();
-	const continueSignIn = useSignInContinuation();
 
 	const { mutateAsync: signInEmail, isPending: signInEmailPending } =
 		useSignInEmail(authClient, {
@@ -89,7 +81,7 @@ export function SignIn({
 
 				resetFetchOptions();
 			},
-			onSuccess: (data) => continueSignIn(data),
+			onSuccess: () => navigate({ to: redirectTo }),
 		});
 
 	const signInMutating = useIsMutating({
@@ -103,8 +95,6 @@ export function SignIn({
 	const Captcha = plugins.find(
 		(plugin) => plugin.captchaComponent,
 	)?.captchaComponent;
-
-	const passkeyAutoFill = isPasskeyAutoFillEnabled(plugins);
 
 	const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 	const form = useAuthForm({
@@ -177,10 +167,7 @@ export function SignIn({
 														id="email"
 														name={field.name}
 														type="email"
-														autoComplete={withPasskeyAutoFill(
-															"email",
-															passkeyAutoFill,
-														)}
+														autoComplete="email"
 														placeholder={localization.auth.emailPlaceholder}
 														required
 														disabled={isPending}
@@ -231,10 +218,7 @@ export function SignIn({
 															id="password"
 															name={field.name}
 															type={isPasswordVisible ? "text" : "password"}
-															autoComplete={withPasskeyAutoFill(
-																"current-password",
-																passkeyAutoFill,
-															)}
+															autoComplete="current-password"
 															value={field.state.value}
 															onBlur={field.handleBlur}
 															onChange={(event) =>
@@ -316,8 +300,6 @@ export function SignIn({
 											disabled={isPending}
 										>
 											{localization.auth.signIn}
-
-											<LastUsedBadge method="email" floating />
 										</form.AuthFormSubmitButton>
 
 										{plugins.flatMap((plugin) =>

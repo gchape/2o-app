@@ -2,8 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/figtree";
-
-@plugin "@tailwindcss/typography";
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource-variable/archivo/wdth-italic.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -97,6 +97,7 @@
 @theme inline {
 	--font-sans: "Figtree Variable", sans-serif;
 	--font-heading: var(--font-sans);
+	--font-display: "Archivo Variable", sans-serif;
 
 	/* Brand: bg-brand, text-brand-foreground, border-brand, bg-brand/90, ... */
 	--color-brand: var(--brand);
@@ -145,19 +146,22 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Animations
+ * Typography: Archivo's width axis gives the wide, heavy italic headlines
+ * (type-display) and the tabular numerals used for prices and stats (type-num).
  * ------------------------------------------------------------------------- */
-@theme {
-	--animate-marquee: marquee 30s linear infinite;
+@utility type-display {
+	font-family: var(--font-display);
+	font-style: italic;
+	font-weight: 900;
+	font-stretch: 118%;
+	letter-spacing: -0.02em;
+}
 
-	@keyframes marquee {
-		from {
-			transform: translateX(0);
-		}
-		to {
-			transform: translateX(-50%);
-		}
-	}
+@utility type-num {
+	font-family: var(--font-display);
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.01em;
 }
 
 /* ---------------------------------------------------------------------------

@@ -1,17 +1,10 @@
-import { env } from "#/lib/env.server";
-import "dotenv/config";
+import "dotenv/config"; // must run before ./src/db/connection reads process.env
 import { defineConfig } from "drizzle-kit";
+import { dbConnection } from "./src/db/connection";
 
 export default defineConfig({
 	out: "./drizzle",
 	schema: "./src/db/schema.ts",
 	dialect: "postgresql",
-	dbCredentials: {
-		host: env.DB_HOST,
-		port: env.DB_PORT,
-		user: env.DB_USER,
-		password: env.DB_PASSWORD,
-		database: env.DB_NAME,
-		ssl: false,
-	},
+	dbCredentials: { ...dbConnection, ssl: false },
 });

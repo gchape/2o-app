@@ -33,7 +33,8 @@
 		"source.organizeImports.biome": "explicit"
 	},
 	"json.schemaDownload.trustedDomains": {
-		"https://ui.shadcn.com": true
+		"https://ui.shadcn.com": true,
+		"https://unpkg.com/knip@6/schema.json": true
 	},
 	"css.lint.unknownAtRules": "ignore"
 }

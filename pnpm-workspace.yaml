@@ -1,7 +1,5 @@
 allowBuilds:
   esbuild: true
   lightningcss: true
-  '@prisma/engines': true
-  prisma: true
   workerd: false
   protobufjs: false

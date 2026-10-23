@@ -3,21 +3,17 @@ import {
 	InstagramIcon,
 	TiktokIcon,
 } from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 
-export const socials = [
-	{
-		label: "Instagram",
-		href: "https://www.instagram.com/your-handle",
-		icon: InstagramIcon,
-	},
-	{
-		label: "Facebook",
-		href: "https://www.facebook.com/your-page",
-		icon: Facebook01Icon,
-	},
-	{
-		label: "TikTok",
-		href: "https://www.tiktok.com/@your-handle",
-		icon: TiktokIcon,
-	},
+type Social = {
+	label: string;
+	/** Leave unset until the account exists; the footer hides entries without a link. */
+	href?: string;
+	icon: IconSvgElement;
+};
+
+export const socials: Social[] = [
+	{ label: "Instagram", href: undefined, icon: InstagramIcon },
+	{ label: "Facebook", href: undefined, icon: Facebook01Icon },
+	{ label: "TikTok", href: undefined, icon: TiktokIcon },
 ];

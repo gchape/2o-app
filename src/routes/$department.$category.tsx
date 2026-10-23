@@ -1,29 +1,36 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { capitalize } from "es-toolkit";
-import { ProductGrid } from "#/components/product/product-grid";
-import { getProductsFn } from "#/lib/product.functions";
-import { categorySchema } from "#/lib/product.schema";
+import { createFileRoute } from "@tanstack/react-router";
+import { categories, departments } from "#/data/catalog";
+import { ProductListing } from "#/features/catalog/components/product-listing";
+import { productsQuery } from "#/features/catalog/product.queries";
+import { categorySchema } from "#/features/catalog/product.schema";
+import { parseParam } from "#/lib/route-guards";
+import { pageTitle } from "#/lib/seo";
 
 export const Route = createFileRoute("/$department/$category")({
-	beforeLoad: ({ params }) => {
-		const { success, data: category } = categorySchema.safeParse(
-			params.category,
-		);
-		if (!success) throw notFound();
-		return { category };
-	},
-	loader: ({ context }) =>
-		getProductsFn({
-			data: { department: context.department, category: context.category },
-		}),
-	head: ({ params }) => ({
-		meta: [
-			{ title: `${capitalize(params.department)} ${params.category} | 2o` },
-		],
+	beforeLoad: ({ params }) => ({
+		category: parseParam(categorySchema, params.category),
 	}),
+	loader: ({ context }) =>
+		context.queryClient.infiniteQuery(
+			productsQuery(context.department, context.category),
+		),
+	head: ({ match }) => {
+		const { department, category } = match.context;
+		return {
+			meta: [
+				{
+					title: pageTitle(
+						`${departments[department].label} ${categories[category].label.toLowerCase()}`,
+					),
+				},
+			],
+		};
+	},
 	component: CategoryPage,
 });
 
 function CategoryPage() {
-	return <ProductGrid products={Route.useLoaderData()} />;
+	const { department, category } = Route.useRouteContext();
+
+	return <ProductListing department={department} category={category} />;
 }

@@ -8,15 +8,10 @@
 	"tailwind": true,
 	"projectPreset": "default",
 	"routerOnly": false,
-	"addOnOptions": {
-		"prisma": {
-			"database": "postgres"
-		}
-	},
 	"git": true,
 	"install": true,
 	"intent": true,
 	"version": 1,
 	"framework": "react",
-	"chosenAddOns": ["biome", "nitro", "prisma", "shadcn", "better-auth"]
+	"chosenAddOns": ["biome", "nitro", "shadcn", "better-auth"]
 }

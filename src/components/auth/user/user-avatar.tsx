@@ -1,13 +1,11 @@
-"use client";
-
 import type { UsernameAuthClient } from "@better-auth-ui/core/plugins/username";
 import { useAuth, useSession } from "@better-auth-ui/react";
 import type { User } from "better-auth";
-import { cn } from "#/lib/utils";
-import { User2 } from "lucide-react";
 import type { ReactNode } from "react";
+import { User2 } from "#/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { Skeleton } from "#/components/ui/skeleton";
+import { cn } from "#/lib/utils";
 
 export type UserAvatarProps = {
 	className?: string;

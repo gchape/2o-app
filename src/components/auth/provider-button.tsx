@@ -14,11 +14,10 @@ import {
 	useSignInSocial,
 } from "@better-auth-ui/react";
 import { useIsMutating } from "@tanstack/react-query";
-import { cn } from "#/lib/utils";
 import type { ComponentProps } from "react";
 import { Button } from "#/components/ui/button";
 import { Spinner } from "#/components/ui/spinner";
-import { LastUsedBadge } from "./last-login-method/last-used-badge";
+import { cn } from "#/lib/utils";
 
 export type ProviderButtonProps = {
 	provider: AuthSocialProvider;
@@ -109,8 +108,6 @@ export function ProviderButton({
 			{display === "icon" && (
 				<span className="sr-only">{getProviderName(provider)}</span>
 			)}
-
-			{view !== "signUp" && <LastUsedBadge method={providerId} floating />}
 		</Button>
 	);
 }

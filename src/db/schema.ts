@@ -1,4 +1,4 @@
-import { defineRelations } from "drizzle-orm";
+import { defineRelations, type SQL, sql } from "drizzle-orm";
 import {
 	boolean,
 	index,
@@ -11,8 +11,8 @@ import {
 	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
-import { categorySlugs } from "#/data/categories";
-import { departmentSlugs } from "#/data/departments";
+import { categorySlugs, departmentSlugs } from "#/data/catalog";
+import { site } from "#/data/site";
 import { account, user } from "#/db/auth-schema";
 
 export * from "./auth-schema";
@@ -56,7 +56,13 @@ export const product = pgTable(
 		description: text("description"),
 		department: departmentEnum("department").notNull(),
 		category: categoryEnum("category").notNull(),
-		currency: text("currency").notNull().default("GEL"),
+		warehouse: text("warehouse")
+			.generatedAlwaysAs(
+				(): SQL =>
+					sql`regexp_replace(split_part(${product.url}, '/', 3), '^www\\.', '')`,
+			)
+			.notNull(),
+		currency: text("currency").notNull().default(site.currency),
 		lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
 		...timestamps,
 	},
@@ -75,12 +81,24 @@ export const skus = pgTable(
 		imageUrl: text("image_url"),
 		price: integer("price").notNull(),
 		originalPrice: integer("original_price"),
+		discount: integer("discount")
+			.generatedAlwaysAs(
+				(): SQL => sql`
+					case when ${skus.originalPrice} > ${skus.price}
+					then round((${skus.originalPrice} - ${skus.price}) * 100.0 / ${skus.originalPrice})::int
+					else 0 end
+				`,
+			)
+			.notNull(),
 		inStock: boolean("in_stock").notNull().default(true),
 		...timestamps,
 	},
 	(t) => [
 		unique("skus_product_color_size_uq").on(t.productId, t.color, t.size),
 		index("skus_product_price_idx").on(t.productId, t.price),
+		index("skus_deals_idx")
+			.on(t.productId, t.discount.desc(), t.id)
+			.where(sql`${t.inStock} and ${t.discount} > 0`),
 	],
 );
 

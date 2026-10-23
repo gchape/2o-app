@@ -16,9 +16,8 @@ import {
 	useSignUpEmail,
 } from "@better-auth-ui/react";
 import { useIsMutating } from "@tanstack/react-query";
-import { cn } from "#/lib/utils";
-import { Eye, EyeOff } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Eye, EyeOff } from "#/components/icons";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import {
 	Field,
@@ -35,6 +34,7 @@ import {
 	InputGroupButton,
 	InputGroupInput,
 } from "#/components/ui/input-group";
+import { cn } from "#/lib/utils";
 import {
 	getAuthAdditionalFieldValidators,
 	isAuthFormFieldInvalid,

@@ -1,46 +1,37 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
+import {
+	createRootRouteWithContext,
+	HeadContent,
+	Scripts,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { CartDrawer } from "#/components/cart/cart-drawer";
-import { CartProvider } from "#/components/cart/cart-provider";
-import { AnnouncementBar } from "#/components/layout/announcement-bar";
-import { Footer } from "#/components/layout/footer";
-import { Header } from "#/components/layout/header";
+import { SiteLayout } from "#/components/layout/site-layout";
 import { Providers } from "#/components/providers";
+import { site } from "#/data/site";
+import { publicConfigQuery } from "#/features/config/config.queries";
+import { chatWidgetScript } from "#/lib/chat-widget";
 import appCss from "../styles.css?url";
 
-export const Route = createRootRoute({
-	head: () => ({
+export const Route = createRootRouteWithContext<{
+	queryClient: QueryClient;
+}>()({
+	loader: ({ context }) => context.queryClient.query(publicConfigQuery),
+	head: ({ loaderData }) => ({
 		meta: [
 			{ charSet: "utf-8" },
 			{ name: "viewport", content: "width=device-width, initial-scale=1" },
-			{ title: "2o | Big brands. Small prices." },
-			{
-				name: "description",
-				content:
-					"Daily deals on shoes and clothing for men, women and kids, checked across wholesale stores.",
-			},
+			{ title: `${site.name} | ${site.tagline}` },
+			{ name: "description", content: site.description },
 		],
 		links: [
 			{ rel: "icon", href: "/favicon.ico", sizes: "32x32" },
 			{ rel: "apple-touch-icon", href: "/apple-icon-180x180.png" },
 			{ rel: "stylesheet", href: appCss },
 		],
-		scripts: [
-			{
-				children: `
-				var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-				(function(){
-					var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-					s1.async=true;
-					s1.src='https://embed.tawk.to/6ad5e6b5611f3d34c113d575/1k59oqdbn';
-					s1.charset='UTF-8';
-					s1.setAttribute('crossorigin','*');
-					s0.parentNode.insertBefore(s1,s0);
-				})();
-			`,
-			},
-		],
+		scripts: loaderData?.chatEmbedUrl
+			? [chatWidgetScript(loaderData.chatEmbedUrl)]
+			: [],
 	}),
 	shellComponent: ({ children }) => (
 		<html lang="en" className="scrollbar-gutter-stable">
@@ -49,15 +40,7 @@ export const Route = createRootRoute({
 			</head>
 			<body>
 				<Providers>
-					<CartProvider>
-						<div className="flex min-h-dvh flex-col">
-							<AnnouncementBar />
-							<Header />
-							<main className="flex-1">{children}</main>
-							<Footer />
-						</div>
-						<CartDrawer />
-					</CartProvider>
+					<SiteLayout>{children}</SiteLayout>
 				</Providers>
 				<TanStackDevtools
 					config={{ position: "bottom-left" }}

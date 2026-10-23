@@ -1,14 +1,15 @@
-"use client";
-
 import {
 	type AuthResult,
 	getAuthResultMessage,
 	parseAuthResult,
 } from "@better-auth-ui/core";
 import { useAuth } from "@better-auth-ui/react";
-import { cn } from "#/lib/utils";
-import { CircleCheckIcon, CircleXIcon, TriangleAlertIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+	CircleCheckIcon,
+	CircleXIcon,
+	TriangleAlertIcon,
+} from "#/components/icons";
 import { Button } from "#/components/ui/button";
 import {
 	Card,
@@ -17,6 +18,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "#/components/ui/card";
+import { cn } from "#/lib/utils";
 
 type AuthResultProps = {
 	className?: string;

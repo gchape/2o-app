@@ -2,7 +2,8 @@ import { viewPaths } from "@better-auth-ui/core";
 import { useAuthenticate } from "@better-auth-ui/react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { Settings } from "#/components/auth/settings/settings";
-import { authClient } from "#/lib/auth-client";
+import { authClient } from "#/features/auth/auth.client";
+import { noIndexMeta, pageTitle } from "#/lib/seo";
 
 const validPaths = new Set<string>(Object.values(viewPaths.settings));
 
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/settings/$path")({
 		if (!validPaths.has(params.path)) throw notFound();
 	},
 	head: () => ({
-		meta: [{ title: "Settings | 2o" }, { name: "robots", content: "noindex" }],
+		meta: [{ title: pageTitle("Settings") }, noIndexMeta],
 	}),
 	component: () => {
 		const { path } = Route.useParams();

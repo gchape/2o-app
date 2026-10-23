@@ -1,17 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { capitalize } from "es-toolkit";
-import { ProductGrid } from "#/components/product/product-grid";
-import { getProductsFn } from "#/lib/product.functions";
+import { departments } from "#/data/catalog";
+import { ProductListing } from "#/features/catalog/components/product-listing";
+import { productsQuery } from "#/features/catalog/product.queries";
+import { pageTitle } from "#/lib/seo";
 
 export const Route = createFileRoute("/$department/")({
 	loader: ({ context }) =>
-		getProductsFn({ data: { department: context.department } }),
-	head: ({ params }) => ({
-		meta: [{ title: `${capitalize(params.department)} | 2o` }],
+		context.queryClient.infiniteQuery(productsQuery(context.department)),
+	head: ({ match }) => ({
+		meta: [{ title: pageTitle(departments[match.context.department].label) }],
 	}),
 	component: DepartmentPage,
 });
 
 function DepartmentPage() {
-	return <ProductGrid products={Route.useLoaderData()} />;
+	const { department } = Route.useRouteContext();
+
+	return <ProductListing department={department} />;
 }

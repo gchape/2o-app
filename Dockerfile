@@ -1,5 +1,6 @@
 FROM node:26.12.1-alpine AS base
-RUN npm install -g pnpm
+# Keep in step with "packageManager" in package.json.
+RUN npm install -g pnpm@12.14.0
 WORKDIR /app
 
 FROM base AS build

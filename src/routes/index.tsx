@@ -1,20 +1,38 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ClosingBanner } from "#/components/home/closing-banner";
+import { DealsSection } from "#/components/home/deals-section";
 import { DepartmentTiles } from "#/components/home/department-tiles";
 import { Hero } from "#/components/home/hero";
 import { HowItWorks } from "#/components/home/how-it-works";
-import { PromoCarousel } from "#/components/home/promo-carousel";
-import { TrustStrip } from "#/components/home/trust-strip";
+import { homeDealsQuery } from "#/features/catalog/product.queries";
+import { statsQuery } from "#/features/stats/stats.queries";
 
 export const Route = createFileRoute("/")({
-	component: () => (
-		<div>
-			<Hero />
-			<TrustStrip />
-			<PromoCarousel />
-			<DepartmentTiles />
-			<HowItWorks />
-			<ClosingBanner />
-		</div>
-	),
+	loader: async ({ context }) => {
+		await Promise.all([
+			context.queryClient.query(homeDealsQuery),
+			context.queryClient.query(statsQuery),
+		]);
+	},
+	component: HomePage,
 });
+
+function HomePage() {
+	const { data: deals } = useSuspenseQuery(homeDealsQuery);
+	const { data: stats } = useSuspenseQuery(statsQuery);
+
+	return (
+		<>
+			<Hero stats={stats} topDiscount={deals[0]?.discount} />
+			<DealsSection
+				deals={deals}
+				total={stats.deals}
+				checkedAt={stats.checkedAt}
+			/>
+			<DepartmentTiles />
+			<HowItWorks warehouses={stats.warehouses} />
+			<ClosingBanner total={stats.deals} />
+		</>
+	);
+}

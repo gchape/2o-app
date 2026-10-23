@@ -1,66 +1,30 @@
+import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
+import { Container } from "#/components/layout/container";
+import { DepartmentBreadcrumbs } from "#/features/catalog/components/department-breadcrumbs";
 import {
-	createFileRoute,
-	Link,
-	notFound,
-	Outlet,
-	useParams,
-} from "@tanstack/react-router";
-import {
-	Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbList,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
-} from "#/components/ui/breadcrumb";
-import { departmentSchema } from "#/lib/product.schema";
+	categorySchema,
+	departmentSchema,
+} from "#/features/catalog/product.schema";
+import { parseParam } from "#/lib/route-guards";
 
 export const Route = createFileRoute("/$department")({
-	beforeLoad: ({ params }) => {
-		const parsed = departmentSchema.safeParse(params.department);
-		if (!parsed.success) throw notFound();
-		return { department: parsed.data };
-	},
+	beforeLoad: ({ params }) => ({
+		department: parseParam(departmentSchema, params.department),
+	}),
 	component: DepartmentLayout,
 });
 
 function DepartmentLayout() {
-	const { department } = Route.useParams();
+	const { department } = Route.useRouteContext();
 	const { category } = useParams({ strict: false });
 
 	return (
-		<div className="mx-auto max-w-6xl px-4 py-6">
-			<Breadcrumb>
-				<BreadcrumbList className="capitalize">
-					<BreadcrumbItem>
-						<BreadcrumbLink render={<Link to="/">Home</Link>} />
-					</BreadcrumbItem>
-					<BreadcrumbSeparator />
-					<BreadcrumbItem>
-						{category ? (
-							<BreadcrumbLink
-								render={
-									<Link to="/$department" params={{ department }}>
-										{department}
-									</Link>
-								}
-							/>
-						) : (
-							<BreadcrumbPage>{department}</BreadcrumbPage>
-						)}
-					</BreadcrumbItem>
-					{category && (
-						<>
-							<BreadcrumbSeparator />
-							<BreadcrumbItem>
-								<BreadcrumbPage>{category}</BreadcrumbPage>
-							</BreadcrumbItem>
-						</>
-					)}
-				</BreadcrumbList>
-			</Breadcrumb>
-
+		<Container className="py-6">
+			<DepartmentBreadcrumbs
+				department={department}
+				category={categorySchema.safeParse(category).data}
+			/>
 			<Outlet />
-		</div>
+		</Container>
 	);
 }

@@ -1,15 +1,12 @@
-"use client";
-
 import { useAuth, useSession } from "@better-auth-ui/react";
-import { cn } from "#/lib/utils";
+import { isValidElement, type ReactElement, type ReactNode } from "react";
 import {
 	ChevronsUpDown,
 	LogIn,
 	LogOut,
 	Settings,
 	UserPlus2,
-} from "lucide-react";
-import { isValidElement, type ReactElement, type ReactNode } from "react";
+} from "#/components/icons";
 import { buttonVariants } from "#/components/ui/button";
 import {
 	DropdownMenu,
@@ -20,6 +17,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "#/components/ui/dropdown-menu";
+import { cn } from "#/lib/utils";
 import { UserAvatar } from "./user-avatar";
 import { UserView } from "./user-view";
 

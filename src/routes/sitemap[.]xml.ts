@@ -1,25 +1,48 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { desc } from "drizzle-orm";
 import { escape as escapeXml } from "es-toolkit";
-import { departmentSlugs } from "#/data/departments";
+import { categorySlugs, departmentSlugs } from "#/data/catalog";
 import { db } from "#/db";
 import { product } from "#/db/schema";
-import { env } from "#/lib/env.server";
+import { env } from "#/server/env.server";
+
+/** Per the sitemap protocol, one file lists at most 50,000 URLs. */
+const MAX_SITEMAP_URLS = 50_000;
+
+const staticPaths = [
+	"/",
+	"/deals",
+	...departmentSlugs.flatMap((department) => [
+		`/${department}`,
+		...categorySlugs.map((category) => `/${department}/${category}`),
+	]),
+];
+
+const urlEntry = (path: string, lastModified?: Date) =>
+	`  <url><loc>${escapeXml(env.SITE_URL + path)}</loc>${
+		lastModified ? `<lastmod>${lastModified.toISOString()}</lastmod>` : ""
+	}</url>`;
 
 export const Route = createFileRoute("/sitemap.xml")({
 	server: {
 		handlers: {
 			GET: async () => {
-				const rows = await db.select({ slug: product.slug }).from(product);
+				const products = await db
+					.select({ slug: product.slug, updatedAt: product.updatedAt })
+					.from(product)
+					.orderBy(desc(product.updatedAt))
+					.limit(MAX_SITEMAP_URLS - staticPaths.length);
 
-				const paths = [
-					"/",
-					...departmentSlugs.map((d) => `/${d}`),
-					...rows.map((r) => `/product/${encodeURIComponent(r.slug)}`),
+				const entries = [
+					...staticPaths.map((path) => urlEntry(path)),
+					...products.map((p) =>
+						urlEntry(`/product/${encodeURIComponent(p.slug)}`, p.updatedAt),
+					),
 				];
 
 				const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${paths.map((p) => `  <url><loc>${escapeXml(env.SITE_URL + p)}</loc></url>`).join("\n")}
+${entries.join("\n")}
 </urlset>`;
 
 				return new Response(xml, {

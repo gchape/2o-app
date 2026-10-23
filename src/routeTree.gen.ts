@@ -11,9 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DepartmentRouteImport } from './routes/$department'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as DealsRouteImport } from './routes/deals'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as DepartmentIndexRouteImport } from './routes/$department.index'
 import { Route as DepartmentCategoryRouteImport } from './routes/$department.$category'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthPathRouteImport } from './routes/auth/$path'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as SettingsPathRouteImport } from './routes/settings/$path'
@@ -27,6 +30,16 @@ const IndexRoute = IndexRouteImport.update({
 const DepartmentRoute = DepartmentRouteImport.update({
   id: '/$department',
   path: '/$department',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DealsRoute = DealsRouteImport.update({
+  id: '/deals',
+  path: '/deals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -43,6 +56,11 @@ const DepartmentCategoryRoute = DepartmentCategoryRouteImport.update({
   id: '/$category',
   path: '/$category',
   getParentRoute: () => DepartmentRoute,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthPathRoute = AuthPathRouteImport.update({
   id: '/auth/$path',
@@ -68,8 +86,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$department': typeof DepartmentRouteWithChildren
+  '/checkout': typeof CheckoutRoute
+  '/deals': typeof DealsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/$department/$category': typeof DepartmentCategoryRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/product/$slug': typeof ProductSlugRoute
   '/settings/$path': typeof SettingsPathRoute
@@ -78,8 +99,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/checkout': typeof CheckoutRoute
+  '/deals': typeof DealsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/$department/$category': typeof DepartmentCategoryRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/product/$slug': typeof ProductSlugRoute
   '/settings/$path': typeof SettingsPathRoute
@@ -90,8 +114,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$department': typeof DepartmentRouteWithChildren
+  '/checkout': typeof CheckoutRoute
+  '/deals': typeof DealsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/$department/$category': typeof DepartmentCategoryRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/product/$slug': typeof ProductSlugRoute
   '/settings/$path': typeof SettingsPathRoute
@@ -103,8 +130,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$department'
+    | '/checkout'
+    | '/deals'
     | '/sitemap.xml'
     | '/$department/$category'
+    | '/api/health'
     | '/auth/$path'
     | '/product/$slug'
     | '/settings/$path'
@@ -113,8 +143,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/checkout'
+    | '/deals'
     | '/sitemap.xml'
     | '/$department/$category'
+    | '/api/health'
     | '/auth/$path'
     | '/product/$slug'
     | '/settings/$path'
@@ -124,8 +157,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$department'
+    | '/checkout'
+    | '/deals'
     | '/sitemap.xml'
     | '/$department/$category'
+    | '/api/health'
     | '/auth/$path'
     | '/product/$slug'
     | '/settings/$path'
@@ -136,7 +172,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DepartmentRoute: typeof DepartmentRouteWithChildren
+  CheckoutRoute: typeof CheckoutRoute
+  DealsRoute: typeof DealsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   AuthPathRoute: typeof AuthPathRoute
   ProductSlugRoute: typeof ProductSlugRoute
   SettingsPathRoute: typeof SettingsPathRoute
@@ -159,6 +198,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DepartmentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deals': {
+      id: '/deals'
+      path: '/deals'
+      fullPath: '/deals'
+      preLoaderRoute: typeof DealsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -179,6 +232,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$department/$category'
       preLoaderRoute: typeof DepartmentCategoryRouteImport
       parentRoute: typeof DepartmentRoute
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/auth/$path': {
       id: '/auth/$path'
@@ -228,7 +288,10 @@ const DepartmentRouteWithChildren = DepartmentRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DepartmentRoute: DepartmentRouteWithChildren,
+  CheckoutRoute: CheckoutRoute,
+  DealsRoute: DealsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiHealthRoute: ApiHealthRoute,
   AuthPathRoute: AuthPathRoute,
   ProductSlugRoute: ProductSlugRoute,
   SettingsPathRoute: SettingsPathRoute,

@@ -17,13 +17,7 @@ const config = defineConfig({
 		external: ["@valkey/valkey-glide"],
 	},
 
-	plugins: [
-		devtools(),
-		nitro(),
-		tailwindcss(),
-		tanstackStart(),
-		viteReact(),
-	],
+	plugins: [devtools(), nitro(), tailwindcss(), tanstackStart(), viteReact()],
 });
 
 export default config;

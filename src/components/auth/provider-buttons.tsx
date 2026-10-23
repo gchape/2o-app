@@ -1,9 +1,7 @@
-"use client";
-
 import { type AuthView, getProviderId } from "@better-auth-ui/core";
 import { useAuth } from "@better-auth-ui/react";
-import { cn } from "#/lib/utils";
 import { useMemo } from "react";
+import { cn } from "#/lib/utils";
 import { ProviderButton } from "./provider-button";
 
 export type ProviderButtonsProps = {
