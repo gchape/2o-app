@@ -5,12 +5,6 @@ import type {
 	CatalogSort,
 } from "./catalog-filters";
 
-/**
- * Valkey Search 9.1 rejects a bare "*", so "everything" is a range that every
- * product satisfies (each indexed product has a price).
- */
-export const MATCH_ALL = "@price:[-inf +inf]";
-
 /** TAG values need punctuation and spaces escaped: "New Balance" becomes New\ Balance. */
 export const escapeTag = (value: string) =>
 	value.replace(/[^\p{L}\p{N}_]/gu, (char) => `\\${char}`);
@@ -50,7 +44,7 @@ export function buildQuery(scope: CatalogScope, filters: CatalogFilters) {
 		filters.sale || scope.mode === "deals" ? "@discount:[1 +inf]" : "",
 	].filter(Boolean);
 
-	return clauses.length > 0 ? clauses.join(" ") : MATCH_ALL;
+	return clauses.length > 0 ? clauses.join(" ") : "*";
 }
 
 const SORT_CLAUSES = {

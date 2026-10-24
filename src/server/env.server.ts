@@ -12,8 +12,8 @@ const envSchema = z
 	.object({
 		NODE_ENV: z.string().optional(),
 
-		VALKEY_HOST: z.string().min(1).default("localhost"),
-		VALKEY_PORT: z.coerce.number().int().positive().default(6379),
+		REDIS_HOST: z.string().min(1).default("localhost"),
+		REDIS_PORT: z.coerce.number().int().positive().default(6379),
 
 		BETTER_AUTH_URL: z.url().default("http://localhost:3000"),
 		BETTER_AUTH_SECRET: z.string().min(32),

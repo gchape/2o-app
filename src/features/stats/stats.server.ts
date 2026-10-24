@@ -33,7 +33,7 @@ const statsCache = createJsonCache({
 	compute: computeStats,
 });
 
-/** Cached stats, queried from Postgres if Valkey is empty or down. */
+/** Cached stats, queried from Postgres if Redis is empty or down. */
 export const getStats = (): Promise<Stats> => statsCache.get();
 
 /** @public Recomputes and overwrites the cache. For the importer to call after a run. */

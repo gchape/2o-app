@@ -1,11 +1,10 @@
 import { getCookie, setCookie } from "@tanstack/react-start/server";
-import { Batch } from "@valkey/valkey-glide";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { compact, invariant, keyBy } from "es-toolkit";
 import { z } from "zod";
 import { db } from "#/db";
 import { product, skus } from "#/db/schema";
-import { getValkey } from "#/server/valkey.server";
+import { getRedis } from "#/server/redis.server";
 import {
 	type CartItem,
 	hasCurrencyConflict,
@@ -48,16 +47,18 @@ const findAvailableSkus = (ids: string[]) =>
 
 async function getCart(): Promise<CartItem[]> {
 	const id = cookieId();
-	const entries = id ? await (await getValkey()).hgetall(keyFor(id)) : [];
+	const entries = id
+		? Object.entries(await (await getRedis()).hGetAll(keyFor(id)))
+		: [];
 	if (entries.length === 0) return [];
 
 	const available = keyBy(
-		await findAvailableSkus(entries.map(({ field }) => String(field))),
+		await findAvailableSkus(entries.map(([field]) => field)),
 		(sku) => sku.id,
 	);
 
 	return compact(
-		entries.map(({ field, value }) => {
+		entries.map(([field, value]) => {
 			const sku = available[String(field)];
 			return sku && { ...sku, quantity: Number(value) };
 		}),
@@ -75,21 +76,21 @@ export const cart = {
 			"A cart can only hold one currency",
 		);
 
-		const valkey = await getValkey();
+		const redis = await getRedis();
 		const key = cartKey();
 
-		if (!(await valkey.hexists(key, skuId))) {
-			invariant((await valkey.hlen(key)) < MAX_CART_LINES, "Cart is full");
+		if (!(await redis.hExists(key, skuId))) {
+			invariant((await redis.hLen(key)) < MAX_CART_LINES, "Cart is full");
 		}
 
-		const [quantity] =
-			(await valkey.exec(
-				new Batch(true).hincrBy(key, skuId, 1).expire(key, CART_TTL_SECONDS),
-				true,
-			)) ?? [];
+		const [quantity] = await redis
+			.multi()
+			.hIncrBy(key, skuId, 1)
+			.expire(key, CART_TTL_SECONDS)
+			.exec();
 
 		if (Number(quantity) > MAX_QUANTITY) {
-			await valkey.hincrBy(key, skuId, -1);
+			await redis.hIncrBy(key, skuId, -1);
 			throw new Error("Maximum quantity reached");
 		}
 	},
@@ -102,20 +103,20 @@ export const cart = {
 		const id = cookieId();
 		if (!id) return;
 
-		const valkey = await getValkey();
+		const redis = await getRedis();
 		const key = keyFor(id);
-		if (!(await valkey.hexists(key, skuId))) return;
+		if (!(await redis.hExists(key, skuId))) return;
 
-		const batch = new Batch(true);
-		if (quantity === 0) batch.hdel(key, [skuId]);
-		else batch.hset(key, [{ field: skuId, value: String(quantity) }]);
+		const batch = redis.multi();
+		if (quantity === 0) batch.hDel(key, skuId);
+		else batch.hSet(key, skuId, String(quantity));
 
-		await valkey.exec(batch.expire(key, CART_TTL_SECONDS), true);
+		await batch.expire(key, CART_TTL_SECONDS).exec();
 	},
 
 	/** Empties the cart (for checkout to call once an order is placed). */
 	async clear() {
 		const id = cookieId();
-		if (id) await (await getValkey()).del([keyFor(id)]);
+		if (id) await (await getRedis()).del([keyFor(id)]);
 	},
 };

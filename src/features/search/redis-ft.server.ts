@@ -1,9 +1,7 @@
-import { Decoder } from "@valkey/valkey-glide";
-import { getValkey } from "#/server/valkey.server";
+import { getRedis } from "#/server/redis.server";
 import { parseAggregateReply, parseSearchReply } from "./ft-reply";
 
-const run = async (args: string[]) =>
-	(await getValkey()).customCommand(args, { decoder: Decoder.String });
+const run = async (args: string[]) => (await getRedis()).sendCommand(args);
 
 type SearchOptions = {
 	/** Extra clauses such as `SORTBY field ASC`; empty means relevance order. */
@@ -13,12 +11,15 @@ type SearchOptions = {
 };
 
 /**
- * The few Valkey Search commands the storefront uses, as typed calls. GLIDE has
- * no typed API for sorting, so they go out as plain commands; this is the one
- * place that knows their syntax.
+ * The Redis Search commands used by the storefront, sent as raw commands so
+ * their RESP2 replies share the same parsers and query syntax in every caller.
  */
 export const ft = {
-	list: async () => ((await run(["FT._LIST"])) as unknown[]).map(String),
+	async list() {
+		const reply = await run(["FT._LIST"]);
+		if (!Array.isArray(reply)) throw new Error("Unexpected FT._LIST reply");
+		return reply.map(String);
+	},
 
 	create: (index: string, prefix: string, schema: string[]) =>
 		run([
@@ -49,6 +50,8 @@ export const ft = {
 				"LIMIT",
 				String(options.offset),
 				String(options.limit),
+				"DIALECT",
+				"2",
 			]),
 		);
 	},
@@ -56,7 +59,7 @@ export const ft = {
 	/** Rows produced by an aggregation pipeline, as `{ field: value }` records. */
 	async aggregate(index: string, query: string, pipeline: string[]) {
 		return parseAggregateReply(
-			await run(["FT.AGGREGATE", index, query, ...pipeline]),
+			await run(["FT.AGGREGATE", index, query, ...pipeline, "DIALECT", "2"]),
 		);
 	},
 };

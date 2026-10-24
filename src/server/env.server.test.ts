@@ -8,6 +8,17 @@ const { parseEnv } = await import("./env.server");
 const base = { BETTER_AUTH_SECRET: "x".repeat(32) };
 
 describe("parseEnv", () => {
+	it("defaults Redis locally and accepts an explicit host and port", () => {
+		expect(parseEnv(base)).toMatchObject({
+			REDIS_HOST: "localhost",
+			REDIS_PORT: 6379,
+		});
+		expect(
+			parseEnv({ ...base, REDIS_HOST: "redis", REDIS_PORT: "6380" }),
+		).toMatchObject({ REDIS_HOST: "redis", REDIS_PORT: 6380 });
+		expect(() => parseEnv({ ...base, REDIS_PORT: "invalid" })).toThrow();
+	});
+
 	it("needs only the auth secret in development", () => {
 		const env = parseEnv(base);
 		expect(env.GOOGLE_CLIENT_ID).toBeUndefined();

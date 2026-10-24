@@ -6,7 +6,6 @@ import {
 	escapeTag,
 	expandFacet,
 	facetPipeline,
-	MATCH_ALL,
 	sortClause,
 	textClause,
 } from "./catalog-query";
@@ -45,7 +44,7 @@ describe("textClause", () => {
 
 describe("buildQuery", () => {
 	it("matches everything when nothing narrows it", () => {
-		expect(buildQuery(listing, DEFAULT_FILTERS)).toBe(MATCH_ALL);
+		expect(buildQuery(listing, DEFAULT_FILTERS)).toBe("*");
 	});
 
 	it("scopes to a department and category", () => {

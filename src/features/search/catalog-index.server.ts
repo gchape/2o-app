@@ -1,11 +1,9 @@
 import { createHash } from "node:crypto";
-import { Batch } from "@valkey/valkey-glide";
 import { db } from "#/db";
-import { getValkey } from "#/server/valkey.server";
+import { getRedis } from "#/server/redis.server";
 import { buildCatalogDocs } from "./catalog-doc";
 import { schemaArgs } from "./catalog-fields";
-import { MATCH_ALL } from "./catalog-query";
-import { ft } from "./valkey-ft.server";
+import { ft } from "./redis-ft.server";
 
 const FAMILY = "catalog_";
 const KEY_PREFIX = "product:";
@@ -41,16 +39,16 @@ const ensureIndex = () => {
 
 /** Deletes indexed products that are no longer in the catalogue. */
 async function removeStaleKeys(live: ReadonlySet<string>) {
-	const valkey = await getValkey();
+	const redis = await getRedis();
 	let cursor = "0";
 	do {
-		const [next, keys] = await valkey.scan(cursor, {
-			match: `${KEY_PREFIX}*`,
-			count: 1_000,
+		const { cursor: next, keys } = await redis.scan(cursor, {
+			MATCH: `${KEY_PREFIX}*`,
+			COUNT: 1_000,
 		});
 		cursor = String(next);
 		const stale = keys.map(String).filter((key) => !live.has(key));
-		if (stale.length > 0) await valkey.del(stale);
+		if (stale.length > 0) await redis.del(stale);
 	} while (cursor !== "0");
 }
 
@@ -87,19 +85,19 @@ export async function syncCatalogIndex() {
 	});
 
 	const docs = buildCatalogDocs(rows);
-	const valkey = await getValkey();
+	const redis = await getRedis();
 
 	for (let i = 0; i < docs.length; i += 500) {
-		const batch = new Batch(false);
+		const batch = redis.multi();
 		for (const doc of docs.slice(i, i + 500)) {
-			batch.customCommand([
+			batch.addCommand([
 				"JSON.SET",
 				KEY_PREFIX + doc.id,
 				"$",
 				JSON.stringify(doc),
 			]);
 		}
-		await valkey.exec(batch, true);
+		await batch.execAsPipeline();
 	}
 
 	await removeStaleKeys(new Set(docs.map((doc) => KEY_PREFIX + doc.id)));
@@ -109,14 +107,14 @@ export async function syncCatalogIndex() {
 let catalogReady: Promise<void> | undefined;
 
 /**
- * Every search goes through here. It creates the index, and if Valkey came up
+ * Every search goes through here. It creates the index, and if Redis came up
  * empty (a fresh volume, a lost disk) it refills it from Postgres, so the
  * storefront heals itself instead of showing an empty catalogue.
  */
 export const ensureCatalogReady = () => {
 	catalogReady ??= (async () => {
 		await ensureIndex();
-		const { total } = await ft.search(INDEX, MATCH_ALL, {
+		const { total } = await ft.search(INDEX, "*", {
 			offset: 0,
 			limit: 0,
 		});

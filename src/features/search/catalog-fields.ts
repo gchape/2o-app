@@ -2,9 +2,8 @@
  * The search index, declared once. The FT.CREATE schema, the query builder and
  * `pnpm search:check` all read from here, so a field can't drift between them.
  *
- * `colors` and `sizes` are comma-separated strings in the document: Valkey
- * Search indexes a `$.sizes[*]` path as one joined value, but splits a plain
- * string on the TAG separator.
+ * `colors` and `sizes` are comma-separated strings indexed as TAG fields
+ * with an explicit separator, shared by the query and facet builders.
  */
 const FIELDS = {
 	q: { path: "$.searchText", type: "TEXT" },

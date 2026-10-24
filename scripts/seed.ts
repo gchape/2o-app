@@ -207,13 +207,13 @@ async function seed() {
 	});
 }
 
-/** The catalogue pages read from the Valkey search index, so rebuild it from what was just seeded. */
+/** The catalogue pages read from the Redis search index, so rebuild it from what was just seeded. */
 async function syncSearchIndex() {
 	try {
 		console.log(`Search index: ${await syncCatalogIndex()} products.`);
 	} catch (error) {
 		console.warn(
-			"Could not sync the search index (is Valkey running with the Search module?):",
+			"Could not sync the search index (is Redis running with the Search module?):",
 			error instanceof Error ? error.message.split("\n")[0] : error,
 		);
 	}
@@ -233,7 +233,7 @@ async function refreshStatsCache() {
 		);
 	} catch (error) {
 		console.warn(
-			"Could not refresh the stats cache (is Valkey running?):",
+			"Could not refresh the stats cache (is Redis running?):",
 			error instanceof Error ? error.message.split("\n")[0] : error,
 		);
 	}

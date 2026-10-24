@@ -1,9 +1,9 @@
 /**
- * Rebuilds the Valkey search index from Postgres.
+ * Rebuilds the Redis search index from Postgres.
  *
  *   pnpm search:sync
  *
- * Run it after the importer. The index also refills itself when Valkey comes
+ * Run it after the importer. The index also refills itself when Redis comes
  * up empty, so this is for picking up fresh prices, not for recovery.
  */
 import "dotenv/config"; // must run before #/db reads process.env

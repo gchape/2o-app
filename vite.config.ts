@@ -10,13 +10,6 @@ import { defineConfig } from "vite";
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
 
-	optimizeDeps: {
-		exclude: ["@valkey/valkey-glide"],
-	},
-	ssr: {
-		external: ["@valkey/valkey-glide"],
-	},
-
 	plugins: [devtools(), nitro(), tailwindcss(), tanstackStart(), viteReact()],
 });
 

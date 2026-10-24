@@ -1,14 +1,13 @@
 /**
- * Checks that your Valkey can do everything the storefront's search needs, by
+ * Checks that your Redis can do everything the storefront's search needs, by
  * building a throwaway index from the real schema and running the real query
  * builders against three fake products.
  *
  *   pnpm search:check
  *
- * Run it after changing the Valkey image or version. Each failure says what to fix.
+ * Run it after changing the Redis image or version. Each failure says what to fix.
  */
-import "dotenv/config"; // must run before the Valkey client reads process.env
-import { Batch, Decoder } from "@valkey/valkey-glide";
+import "dotenv/config"; // must run before the Redis client reads process.env
 import {
 	buildCatalogDocs,
 	type CatalogDoc,
@@ -25,11 +24,10 @@ import {
 	buildQuery,
 	expandFacet,
 	facetPipeline,
-	MATCH_ALL,
 	sortClause,
 } from "#/features/search/catalog-query";
-import { ft } from "#/features/search/valkey-ft.server";
-import { getValkey } from "#/server/valkey.server";
+import { ft } from "#/features/search/redis-ft.server";
+import { getRedis } from "#/server/redis.server";
 
 const run = Date.now().toString(36);
 const INDEX = `smoke_${run}`;
@@ -119,12 +117,10 @@ type Check = { name: string; hint: string; test: () => Promise<void> };
 const checks: Check[] = [
 	{
 		name: "Search and JSON modules are loaded",
-		hint: "Use the valkey/valkey-bundle image. If you keep a `command:` override in docker-compose.yaml, it may be skipping the module flags the image normally passes.",
+		hint: "Use the redis:8.10.2-alpine image. If you keep a `command:` override in docker-compose.yaml, it may be skipping the module flags the image normally passes.",
 		test: async () => {
 			const list = JSON.stringify(
-				await (await getValkey()).customCommand(["MODULE", "LIST"], {
-					decoder: Decoder.String,
-				}),
+				await (await getRedis()).sendCommand(["MODULE", "LIST"]),
 			);
 			if (!/search/i.test(list)) throw new Error("no search module");
 			if (!/json/i.test(list)) throw new Error("no json module");
@@ -132,7 +128,7 @@ const checks: Check[] = [
 	},
 	{
 		name: "Index builds from the production schema and fills from JSON documents",
-		hint: "FT.CREATE rejected a field, or the match-all query was refused. Compare FIELDS in catalog-fields.ts and MATCH_ALL in catalog-query.ts with your module version.",
+		hint: "FT.CREATE rejected a field, or the match-all query was refused. Compare FIELDS in catalog-fields.ts and buildQuery in catalog-query.ts with your module version.",
 		test: async () => {
 			const { total } = await search({ limit: 0 });
 			same(total, fixture.length);
@@ -181,7 +177,7 @@ const checks: Check[] = [
 	},
 	{
 		name: "SORTBY on FT.SEARCH, ascending and descending",
-		hint: "Your version can't sort inside FT.SEARCH. The fix is to run the same query through FT.AGGREGATE with LOAD and SORTBY; only ft.search in valkey-ft.server.ts changes.",
+		hint: "Your version can't sort inside FT.SEARCH. The fix is to run the same query through FT.AGGREGATE with LOAD and SORTBY; only ft.search in redis-ft.server.ts changes.",
 		test: async () => {
 			same(await ids({ sort: "price-asc" }), ["c", "a", "b"]);
 			same(await ids({ sort: "price-desc" }), ["b", "a", "c"]);
@@ -208,7 +204,7 @@ const checks: Check[] = [
 		name: "Facet counts per brand",
 		hint: "FT.AGGREGATE GROUPBY on a TAG field failed; the filter bar's brand list depends on it.",
 		test: async () => {
-			const rows = await ft.aggregate(INDEX, MATCH_ALL, facetPipeline("brand"));
+			const rows = await ft.aggregate(INDEX, "*", facetPipeline("brand"));
 			same(counts(rows, "brand"), { Adidas: 1, "New Balance": 1, Nike: 1 });
 		},
 	},
@@ -216,7 +212,7 @@ const checks: Check[] = [
 		name: "Facet counts split multi-value tags (sizes)",
 		hint: "GROUPBY on the multi-value sizes tag failed or returned values expandFacet can't split. If it keeps failing, derive size and color options from Postgres (a cached SELECT DISTINCT).",
 		test: async () => {
-			const rows = await ft.aggregate(INDEX, MATCH_ALL, facetPipeline("sizes"));
+			const rows = await ft.aggregate(INDEX, "*", facetPipeline("sizes"));
 			same(
 				expandFacet(rows, "sizes", true)
 					.map((o) => o.value)
@@ -250,27 +246,22 @@ async function waitForIndexing() {
 }
 
 async function main() {
-	const valkey = await getValkey();
+	const redis = await getRedis();
 	let failed = 0;
 
 	try {
 		await ft.create(INDEX, PREFIX, schemaArgs());
-		const batch = new Batch(false);
+		const batch = redis.multi();
 		for (const doc of buildCatalogDocs(fixture)) {
-			batch.customCommand([
-				"JSON.SET",
-				PREFIX + doc.id,
-				"$",
-				JSON.stringify(doc),
-			]);
+			batch.addCommand(["JSON.SET", PREFIX + doc.id, "$", JSON.stringify(doc)]);
 		}
-		await valkey.exec(batch, true);
+		await batch.execAsPipeline();
 	} catch (error) {
 		console.log(
 			`✗ Could not create the test index: ${error instanceof Error ? error.message : error}`,
 		);
 		console.log(
-			"  Is Valkey running with the Search and JSON modules? (docker compose up -d valkey)",
+			"  Is Redis running with the Search and JSON modules? (docker compose up -d redis)",
 		);
 		process.exit(1);
 	}
@@ -290,7 +281,7 @@ async function main() {
 	}
 
 	await ft.dropIndex(INDEX).catch(() => undefined);
-	await valkey.del(buildCatalogDocs(fixture).map((doc) => PREFIX + doc.id));
+	await redis.del(buildCatalogDocs(fixture).map((doc) => PREFIX + doc.id));
 
 	console.log(
 		failed === 0 ? "\nAll checks passed." : `\n${failed} check(s) failed.`,

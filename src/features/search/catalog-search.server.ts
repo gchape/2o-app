@@ -16,7 +16,7 @@ import {
 	facetPipeline,
 	sortClause,
 } from "./catalog-query";
-import { ft } from "./valkey-ft.server";
+import { ft } from "./redis-ft.server";
 
 /** Listings show the cheapest SKU; the deals scope shows the deepest-discounted one. */
 const toItem =
@@ -85,8 +85,8 @@ async function tagFacet(
 }
 
 /**
- * Cheapest and dearest price in the results. Valkey Search rejects a global
- * `GROUPBY 0`, so read both ends off the unique price sort key instead.
+ * Cheapest and dearest price in the results, read from both ends of the
+ * unique price sort key.
  */
 async function priceBounds(scope: CatalogScope, filters: CatalogFilters) {
 	const query = buildQuery(scope, {

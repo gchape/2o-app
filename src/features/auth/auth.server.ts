@@ -1,5 +1,4 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
-import { type GlideString, TimeUnit } from "@valkey/valkey-glide";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { site } from "#/data/site";
@@ -8,28 +7,21 @@ import * as schema from "#/db/auth-schema";
 import { emailTemplates, sendEmail } from "#/features/auth/email.server";
 import { socialProviders } from "#/features/auth/social-providers.server";
 import { env } from "#/server/env.server";
-import { getValkey } from "#/server/valkey.server";
-
-const asString = (value: GlideString | null) =>
-	value === null ? null : value.toString();
+import { getRedis } from "#/server/redis.server";
 
 const secondaryStorage: NonNullable<BetterAuthOptions["secondaryStorage"]> = {
-	get: async (key) => asString(await (await getValkey()).get(key)),
-	getAndDelete: async (key) => asString(await (await getValkey()).getdel(key)),
+	get: async (key) => (await getRedis()).get(key),
+	getAndDelete: async (key) => (await getRedis()).getDel(key),
 	set: async (key, value, ttl) => {
-		await (await getValkey()).set(
-			key,
-			value,
-			ttl ? { expiry: { type: TimeUnit.Seconds, count: ttl } } : undefined,
-		);
+		await (await getRedis()).set(key, value, ttl ? { EX: ttl } : undefined);
 	},
 	delete: async (key) => {
-		await (await getValkey()).del([key]);
+		await (await getRedis()).del([key]);
 	},
 	increment: async (key, ttl) => {
-		const valkey = await getValkey();
-		const count = await valkey.incr(key);
-		if (count === 1) await valkey.expire(key, ttl);
+		const redis = await getRedis();
+		const count = await redis.incr(key);
+		if (count === 1) await redis.expire(key, ttl);
 		return count;
 	},
 };

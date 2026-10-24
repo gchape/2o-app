@@ -1,18 +1,17 @@
-import { TimeUnit } from "@valkey/valkey-glide";
 import type { z } from "zod";
-import { getValkey } from "./valkey.server";
+import { getRedis } from "./redis.server";
 
 type JsonCacheOptions<S extends z.ZodType> = {
 	key: string;
 	ttlSeconds: number;
 	/** Validates cached payloads, so a changed shape reads as a miss. */
 	schema: S;
-	/** Source of truth, used on a miss or when Valkey is down. */
+	/** Source of truth, used on a miss or when Redis is down. */
 	compute: () => Promise<z.output<S>>;
 };
 
 /**
- * A Valkey-backed JSON cache with a Postgres (or any other) fallback. Reads
+ * A Redis-backed JSON cache with a Postgres (or any other) fallback. Reads
  * never throw: an empty, stale-shaped or unreachable cache falls through to
  * `compute`. Returns `get` (cache-aside) and `refresh` (recompute, overwrite).
  */
@@ -26,7 +25,7 @@ export function createJsonCache<S extends z.ZodType>({
 
 	async function read(): Promise<Value | null> {
 		try {
-			const hit = await (await getValkey()).get(key);
+			const hit = await (await getRedis()).get(key);
 			if (!hit) return null;
 
 			const { success, data } = schema.safeParse(JSON.parse(String(hit)));
@@ -38,8 +37,8 @@ export function createJsonCache<S extends z.ZodType>({
 	}
 
 	async function write(value: Value) {
-		await (await getValkey()).set(key, JSON.stringify(value), {
-			expiry: { type: TimeUnit.Seconds, count: ttlSeconds },
+		await (await getRedis()).set(key, JSON.stringify(value), {
+			EX: ttlSeconds,
 		});
 	}
 
