@@ -5,8 +5,8 @@ import {
 	buildQuery,
 	escapeTag,
 	expandFacet,
-	facetPipeline,
-	sortClause,
+	facetOptions,
+	sortOptions,
 	textClause,
 } from "./catalog-query";
 
@@ -89,14 +89,21 @@ describe("buildQuery", () => {
 	});
 });
 
-describe("sortClause / facetPipeline / schemaArgs", () => {
+describe("sortOptions / facetOptions / schemaArgs", () => {
 	it("sorts on the unique keys", () => {
-		expect(sortClause("price-desc")).toEqual(["SORTBY", "sortPrice", "DESC"]);
-		expect(sortClause("relevance")).toEqual([]);
+		expect(sortOptions("price-desc")).toEqual({
+			BY: "sortPrice",
+			DIRECTION: "DESC",
+		});
+		expect(sortOptions("relevance")).toBeUndefined();
 	});
 
 	it("groups a facet by its own field", () => {
-		expect(facetPipeline("sizes")).toContain("@sizes");
+		expect(facetOptions("sizes").STEPS[0]).toMatchObject({
+			type: "GROUPBY",
+			properties: "@sizes",
+			REDUCE: { type: "COUNT", AS: "count" },
+		});
 	});
 
 	it("declares path, alias and type for each field", () => {

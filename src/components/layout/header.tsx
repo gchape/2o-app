@@ -32,7 +32,10 @@ function DesktopNav() {
 						<NavigationMenuLink
 							className={navigationMenuTriggerStyle()}
 							render={
-								<Link to="/$department" params={{ department: slug }}>
+								<Link
+									to="/$department/{-$category}"
+									params={{ department: slug, category: undefined }}
+								>
 									{departments[slug].label}
 								</Link>
 							}
@@ -69,8 +72,8 @@ function MobileMenu() {
 					{departmentSlugs.map((slug) => (
 						<Link
 							key={slug}
-							to="/$department"
-							params={{ department: slug }}
+							to="/$department/{-$category}"
+							params={{ department: slug, category: undefined }}
 							onClick={() => setOpen(false)}
 							className="rounded-md px-3 py-2 text-base hover:bg-accent"
 						>

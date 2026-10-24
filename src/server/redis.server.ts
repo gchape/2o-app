@@ -3,15 +3,23 @@ import { env } from "./env.server";
 
 const createRedisClient = () =>
 	createClient({
-		RESP: 2, // The raw Search reply parsers expect RESP2 arrays.
+		RESP: 2,
 		name: "2o",
 		socket: {
 			host: env.REDIS_HOST,
 			port: env.REDIS_PORT,
 			connectTimeout: 1_000,
+			// Detect silent sockets, including commands already written to them.
+			socketTimeout: 10_000,
 			reconnectStrategy: (retries) =>
-				retries >= 5 ? false : Math.min(100 * 2 ** retries, 2_000),
+				retries >= 5
+					? false
+					: Math.min(100 * 2 ** retries, 2_000) +
+						Math.floor(Math.random() * 200),
 		},
+		// Heartbeats keep healthy idle sockets below socketTimeout.
+		pingInterval: 5_000,
+		// This deadline applies only while a command is waiting to be sent.
 		commandOptions: { timeout: 1_000 },
 		disableOfflineQueue: true,
 		commandsQueueMaxLength: 1_000,
@@ -21,14 +29,16 @@ let client: Promise<ReturnType<typeof createRedisClient>> | undefined;
 
 /** Shared lazy Redis connection; failed initialization is retried on the next call. */
 export const getRedis = () => {
-	client ??= (async () => {
+	if (client) return client;
+
+	const pending: Promise<ReturnType<typeof createRedisClient>> = (async () => {
 		const connection = createRedisClient();
 		connection.on("error", (error) =>
 			console.warn("Redis client error:", error),
 		);
 		// A terminal disconnect must not leave a closed client cached forever.
 		const reset = () => {
-			client = undefined;
+			if (client === pending) client = undefined;
 		};
 		connection.on("end", reset);
 		connection.on("terminated", reset);
@@ -40,8 +50,9 @@ export const getRedis = () => {
 			throw error;
 		}
 	})().catch((error: unknown) => {
-		client = undefined;
+		if (client === pending) client = undefined;
 		throw error;
 	});
-	return client;
+	client = pending;
+	return pending;
 };

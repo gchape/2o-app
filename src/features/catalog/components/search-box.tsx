@@ -29,10 +29,11 @@ export function SearchBox({ value, onCommit, className }: SearchBoxProps) {
 	// Follow changes made elsewhere (a removed chip, "Clear all") without ever fighting the typing.
 	useEffect(() => {
 		if (value !== committed.current) {
+			commit.cancel();
 			committed.current = value;
 			setDraft(value);
 		}
-	}, [value]);
+	}, [value, commit]);
 
 	const clear = () => {
 		commit.cancel();

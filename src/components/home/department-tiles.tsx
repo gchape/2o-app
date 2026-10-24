@@ -43,8 +43,8 @@ export function DepartmentTiles() {
 
 						<h3 className="type-display text-5xl md:text-6xl">
 							<Link
-								to="/$department"
-								params={{ department: slug }}
+								to="/$department/{-$category}"
+								params={{ department: slug, category: undefined }}
 								className="after:absolute after:inset-0"
 							>
 								{departments[slug].label}
@@ -56,7 +56,7 @@ export function DepartmentTiles() {
 								{categorySlugs.map((category) => (
 									<li key={category}>
 										<Link
-											to="/$department/$category"
+											to="/$department/{-$category}"
 											params={{ department: slug, category }}
 											className="relative z-10 block rounded-full bg-current/10 px-3 py-1 font-medium text-sm hover:bg-current/20"
 										>

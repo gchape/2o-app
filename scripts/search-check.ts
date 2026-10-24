@@ -23,8 +23,8 @@ import {
 import {
 	buildQuery,
 	expandFacet,
-	facetPipeline,
-	sortClause,
+	facetOptions,
+	sortOptions,
 } from "#/features/search/catalog-query";
 import { ft } from "#/features/search/redis-ft.server";
 import { getRedis } from "#/server/redis.server";
@@ -90,7 +90,7 @@ const search = (q: Query = {}) =>
 			...q.filters,
 		}),
 		{
-			sort: sortClause(q.sort ?? "relevance"),
+			sort: sortOptions(q.sort ?? "relevance"),
 			offset: q.offset ?? 0,
 			limit: q.limit ?? 10,
 		},
@@ -204,7 +204,7 @@ const checks: Check[] = [
 		name: "Facet counts per brand",
 		hint: "FT.AGGREGATE GROUPBY on a TAG field failed; the filter bar's brand list depends on it.",
 		test: async () => {
-			const rows = await ft.aggregate(INDEX, "*", facetPipeline("brand"));
+			const rows = await ft.aggregate(INDEX, "*", facetOptions("brand"));
 			same(counts(rows, "brand"), { Adidas: 1, "New Balance": 1, Nike: 1 });
 		},
 	},
@@ -212,7 +212,7 @@ const checks: Check[] = [
 		name: "Facet counts split multi-value tags (sizes)",
 		hint: "GROUPBY on the multi-value sizes tag failed or returned values expandFacet can't split. If it keeps failing, derive size and color options from Postgres (a cached SELECT DISTINCT).",
 		test: async () => {
-			const rows = await ft.aggregate(INDEX, "*", facetPipeline("sizes"));
+			const rows = await ft.aggregate(INDEX, "*", facetOptions("sizes"));
 			same(
 				expandFacet(rows, "sizes", true)
 					.map((o) => o.value)

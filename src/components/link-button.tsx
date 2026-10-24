@@ -27,6 +27,6 @@ function ButtonAnchor({
  * (`to`, `params`, `search`) and rendered as a real anchor.
  *
  * @example
- * <LinkButton to="/$department" params={{ department: "women" }} size="lg">Shop</LinkButton>
+ * <LinkButton to="/$department/{-$category}" params={{ department: "women", category: undefined }} size="lg">Shop</LinkButton>
  */
 export const LinkButton = createLink(ButtonAnchor);

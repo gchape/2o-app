@@ -1,28 +1,23 @@
+import type { createClient, FtSearchOptions } from "redis";
 import { getRedis } from "#/server/redis.server";
-import { parseAggregateReply, parseSearchReply } from "./ft-reply";
-
-const run = async (args: string[]) => (await getRedis()).sendCommand(args);
 
 type SearchOptions = {
-	/** Extra clauses such as `SORTBY field ASC`; empty means relevance order. */
-	sort?: string[];
+	sort?: FtSearchOptions["SORTBY"];
 	offset: number;
 	limit: number;
 };
 
-/**
- * The Redis Search commands used by the storefront, sent as raw commands so
- * their RESP2 replies share the same parsers and query syntax in every caller.
- */
-export const ft = {
-	async list() {
-		const reply = await run(["FT._LIST"]);
-		if (!Array.isArray(reply)) throw new Error("Unexpected FT._LIST reply");
-		return reply.map(String);
-	},
+type AggregateOptions = NonNullable<
+	Parameters<ReturnType<typeof createClient>["ft"]["aggregate"]>[2]
+>;
 
-	create: (index: string, prefix: string, schema: string[]) =>
-		run([
+/** Catalog Search operations; the Redis client owns command and reply encoding. */
+export const ft = {
+	list: async () => (await getRedis()).ft._list(),
+
+	// The same schema arguments also determine the index's version hash.
+	create: async (index: string, prefix: string, schema: string[]) =>
+		(await getRedis()).sendCommand([
 			"FT.CREATE",
 			index,
 			"ON",
@@ -34,32 +29,27 @@ export const ft = {
 			...schema,
 		]),
 
-	dropIndex: (index: string) => run(["FT.DROPINDEX", index]),
+	dropIndex: async (index: string) => (await getRedis()).ft.dropIndex(index),
 
-	/** One page of JSON documents plus the total number of matches. */
 	async search<T>(index: string, query: string, options: SearchOptions) {
-		return parseSearchReply<T>(
-			await run([
-				"FT.SEARCH",
-				index,
-				query,
-				"RETURN",
-				"1",
-				"$",
-				...(options.sort ?? []),
-				"LIMIT",
-				String(options.offset),
-				String(options.limit),
-				"DIALECT",
-				"2",
-			]),
+		const { total, documents } = await (await getRedis()).ft.search(
+			index,
+			query,
+			{
+				RETURN: "$",
+				SORTBY: options.sort,
+				LIMIT: { from: options.offset, size: options.limit },
+				DIALECT: 2,
+			},
 		);
+		return { total, docs: documents.map(({ value }) => value as T) };
 	},
 
-	/** Rows produced by an aggregation pipeline, as `{ field: value }` records. */
-	async aggregate(index: string, query: string, pipeline: string[]) {
-		return parseAggregateReply(
-			await run(["FT.AGGREGATE", index, query, ...pipeline, "DIALECT", "2"]),
-		);
+	async aggregate(index: string, query: string, options: AggregateOptions) {
+		const { results } = await (await getRedis()).ft.aggregate(index, query, {
+			...options,
+			DIALECT: 2,
+		});
+		return results;
 	},
 };

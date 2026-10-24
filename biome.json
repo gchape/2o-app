@@ -12,7 +12,8 @@
 			"!**/routeTree.gen.ts",
 			"!src/generated",
 			"!src/components/ui",
-			"!pnpm-lock.yaml"
+			"!pnpm-lock.yaml",
+			"!drizzle/**/snapshot.json"
 		]
 	},
 	"formatter": {
@@ -22,7 +23,34 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"preset": "recommended"
+			"preset": "recommended",
+			"style": {
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"patterns": [
+							{
+								"group": [
+									"lucide*",
+									"@lucide/**",
+									"react-icons",
+									"react-icons/**",
+									"@heroicons/**",
+									"@radix-ui/react-icons",
+									"@phosphor-icons/**",
+									"phosphor-react",
+									"@tabler/icons*",
+									"@fortawesome/**",
+									"@ant-design/icons*",
+									"@mui/icons-material",
+									"@mui/icons-material/**"
+								],
+								"message": "Use @hugeicons/core-free-icons with @hugeicons/react; Hugeicons is the project icon library."
+							}
+						]
+					}
+				}
+			}
 		}
 	},
 	"javascript": {

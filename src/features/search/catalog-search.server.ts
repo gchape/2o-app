@@ -13,8 +13,8 @@ import { ensureCatalogReady, INDEX } from "./catalog-index.server";
 import {
 	buildQuery,
 	expandFacet,
-	facetPipeline,
-	sortClause,
+	facetOptions,
+	sortOptions,
 } from "./catalog-query";
 import { ft } from "./redis-ft.server";
 
@@ -50,7 +50,7 @@ export async function searchCatalog(
 		INDEX,
 		buildQuery(scope, filters),
 		{
-			sort: sortClause(effectiveSort(filters, scope)),
+			sort: sortOptions(effectiveSort(filters, scope)),
 			offset,
 			limit: pageSize,
 		},
@@ -79,7 +79,7 @@ async function tagFacet(
 ): Promise<FacetOption[]> {
 	// Counts ignore their own filter, so picking one value doesn't hide the rest.
 	const query = buildQuery(scope, { ...filters, [FACET_FILTER[field]]: [] });
-	const rows = await ft.aggregate(INDEX, query, facetPipeline(field));
+	const rows = await ft.aggregate(INDEX, query, facetOptions(field));
 
 	return expandFacet(rows, field, field !== "brand");
 }
@@ -97,7 +97,7 @@ async function priceBounds(scope: CatalogScope, filters: CatalogFilters) {
 	const edge = async (direction: "ASC" | "DESC") =>
 		(
 			await ft.search<CatalogDoc>(INDEX, query, {
-				sort: ["SORTBY", "sortPrice", direction],
+				sort: { BY: "sortPrice", DIRECTION: direction },
 				offset: 0,
 				limit: 1,
 			})

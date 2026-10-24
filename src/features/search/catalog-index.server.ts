@@ -90,12 +90,7 @@ export async function syncCatalogIndex() {
 	for (let i = 0; i < docs.length; i += 500) {
 		const batch = redis.multi();
 		for (const doc of docs.slice(i, i + 500)) {
-			batch.addCommand([
-				"JSON.SET",
-				KEY_PREFIX + doc.id,
-				"$",
-				JSON.stringify(doc),
-			]);
+			batch.json.set(KEY_PREFIX + doc.id, "$", doc);
 		}
 		await batch.execAsPipeline();
 	}

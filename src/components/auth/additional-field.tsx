@@ -78,12 +78,6 @@ function toDate(value: unknown): Date | undefined {
 	return undefined;
 }
 
-/** Format a Date as `HH:mm:ss` for an `<input type="time">`. */
-function formatTime(date: Date) {
-	const pad = (n: number) => n.toString().padStart(2, "0");
-	return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-}
-
 /**
  * Icon-only copy button used as an `InputGroupAddon`. `getValue` is invoked
  * lazily on click so the button copies the input's *live* value rather than a
@@ -584,7 +578,7 @@ function DateInput({
 
 	const date = toDate(value);
 	const [time, setTime] = useState<string>(
-		isDateTime && date ? formatTime(date) : "",
+		isDateTime && date ? format(date, "HH:mm:ss") : "",
 	);
 	const [open, setOpen] = useState(false);
 

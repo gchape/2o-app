@@ -36,7 +36,10 @@ export function DepartmentBreadcrumbs({
 					{category ? (
 						<BreadcrumbLink
 							render={
-								<Link to="/$department" params={{ department }}>
+								<Link
+									to="/$department/{-$category}"
+									params={{ department, category: undefined }}
+								>
 									{departmentLabel}
 								</Link>
 							}

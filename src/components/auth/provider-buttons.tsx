@@ -1,6 +1,5 @@
 import { type AuthView, getProviderId } from "@better-auth-ui/core";
 import { useAuth } from "@better-auth-ui/react";
-import { useMemo } from "react";
 import { cn } from "#/lib/utils";
 import { ProviderButton } from "./provider-button";
 
@@ -23,17 +22,12 @@ export function ProviderButtons({
 }: ProviderButtonsProps) {
 	const { socialProviders } = useAuth();
 
-	const resolvedSocialLayout = useMemo(() => {
-		if (socialLayout === "auto") {
-			if (socialProviders?.length && socialProviders.length >= 4) {
-				return "horizontal";
-			}
-
-			return "vertical";
-		}
-
-		return socialLayout;
-	}, [socialLayout, socialProviders?.length]);
+	const resolvedSocialLayout =
+		socialLayout === "auto"
+			? (socialProviders?.length ?? 0) >= 4
+				? "horizontal"
+				: "vertical"
+			: socialLayout;
 
 	return (
 		<div

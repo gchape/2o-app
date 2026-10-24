@@ -17,6 +17,9 @@ describe("parseEnv", () => {
 			parseEnv({ ...base, REDIS_HOST: "redis", REDIS_PORT: "6380" }),
 		).toMatchObject({ REDIS_HOST: "redis", REDIS_PORT: 6380 });
 		expect(() => parseEnv({ ...base, REDIS_PORT: "invalid" })).toThrow();
+		for (const port of ["0", "-1", "65536", "6379.5"]) {
+			expect(() => parseEnv({ ...base, REDIS_PORT: port })).toThrow();
+		}
 	});
 
 	it("needs only the auth secret in development", () => {

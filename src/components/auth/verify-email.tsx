@@ -8,7 +8,7 @@ import { Spinner } from "#/components/ui/spinner";
 import { cn } from "#/lib/utils";
 import { OpenEmailButton } from "./open-email-button";
 import { VERIFY_EMAIL_STORAGE_KEY } from "./storage-keys";
-import { useIsHydrated } from "./use-is-hydrated";
+import { useStoredEmail } from "./use-stored-email";
 
 export type VerifyEmailProps = {
 	className?: string;
@@ -40,15 +40,8 @@ export function VerifyEmail({ className }: VerifyEmailProps) {
 		Link,
 	} = useAuth();
 
-	const isHydrated = useIsHydrated();
-	const [email, setEmail] = useState(
-		(isHydrated && sessionStorage.getItem(VERIFY_EMAIL_STORAGE_KEY)) || "",
-	);
+	const email = useStoredEmail(VERIFY_EMAIL_STORAGE_KEY);
 	const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
-
-	useEffect(() => {
-		setEmail(sessionStorage.getItem(VERIFY_EMAIL_STORAGE_KEY) ?? "");
-	}, []);
 
 	useEffect(() => {
 		if (cooldown <= 0 || !email) return;

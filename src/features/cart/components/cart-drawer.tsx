@@ -18,7 +18,8 @@ import { formatPrice } from "#/lib/price";
 
 export function CartDrawer() {
 	const open = useCartDrawerOpen();
-	const { items, subtotal, currency } = useCart();
+	const { items, subtotal, currency, isPending, isError, isFetching, refetch } =
+		useCart();
 
 	return (
 		<Sheet open={open} onOpenChange={cartDrawer.actions.set}>
@@ -30,7 +31,22 @@ export function CartDrawer() {
 					<SheetTitle>Your cart</SheetTitle>
 				</SheetHeader>
 
-				{items.length === 0 ? (
+				{isPending ? (
+					<p role="status" className="p-4 text-muted-foreground">
+						Loading your cart…
+					</p>
+				) : isError ? (
+					<div className="flex flex-col items-start gap-3 p-4">
+						<p role="alert">Couldn't load your cart.</p>
+						<Button
+							variant="outline"
+							disabled={isFetching}
+							onClick={() => refetch()}
+						>
+							{isFetching ? "Trying again…" : "Try again"}
+						</Button>
+					</div>
+				) : items.length === 0 ? (
 					<EmptyCart />
 				) : (
 					<>
@@ -43,7 +59,12 @@ export function CartDrawer() {
 							<p className="text-muted-foreground text-xs">
 								Shipping and taxes are calculated at checkout.
 							</p>
-							<LinkButton to="/checkout" size="lg" className="w-full">
+							<LinkButton
+								to="/checkout"
+								size="lg"
+								className="w-full"
+								onClick={cartDrawer.actions.close}
+							>
 								Checkout
 							</LinkButton>
 						</SheetFooter>
@@ -113,13 +134,15 @@ function CartLines({ items }: { items: CartItem[] }) {
 									+
 								</Button>
 							</div>
-							<button
+							<Button
+								variant="link"
+								size="sm"
 								type="button"
-								className="text-muted-foreground text-sm underline-offset-4 hover:text-foreground hover:underline"
+								className="h-auto p-0 text-muted-foreground hover:text-foreground"
 								onClick={() => removeItem(item.id)}
 							>
 								Remove
-							</button>
+							</Button>
 						</div>
 					</div>
 				</li>

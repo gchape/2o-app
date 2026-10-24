@@ -1,3 +1,5 @@
+import { Facebook01Icon, GoogleIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { ComponentProps, ReactNode } from "react";
@@ -10,6 +12,14 @@ const AuthLink: NonNullable<ComponentProps<typeof AuthProvider>["Link"]> = ({
 	href,
 	...props
 }) => <Link to={href} {...props} />;
+
+const socialProviderDisplay = {
+	google: { label: "Google", icon: <HugeiconsIcon icon={GoogleIcon} /> },
+	facebook: {
+		label: "Facebook",
+		icon: <HugeiconsIcon icon={Facebook01Icon} />,
+	},
+};
 
 export function Providers({ children }: { children: ReactNode }) {
 	const navigate = useNavigate();
@@ -24,7 +34,10 @@ export function Providers({ children }: { children: ReactNode }) {
 			}}
 			authClient={authClient}
 			redirectTo="/"
-			socialProviders={config.socialProviders}
+			socialProviders={config.socialProviders.map((id) => ({
+				id,
+				...socialProviderDisplay[id],
+			}))}
 			navigate={navigate}
 			Link={AuthLink}
 		>

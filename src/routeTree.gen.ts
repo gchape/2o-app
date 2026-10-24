@@ -10,12 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DepartmentRouteImport } from './routes/$department'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as DealsRouteImport } from './routes/deals'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as DepartmentIndexRouteImport } from './routes/$department.index'
-import { Route as DepartmentCategoryRouteImport } from './routes/$department.$category'
+import { Route as DepartmentChar123CategoryChar125RouteImport } from './routes/$department.{-$category}'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthPathRouteImport } from './routes/auth/$path'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
@@ -25,11 +23,6 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DepartmentRoute = DepartmentRouteImport.update({
-  id: '/$department',
-  path: '/$department',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -47,16 +40,12 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DepartmentIndexRoute = DepartmentIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DepartmentRoute,
-} as any)
-const DepartmentCategoryRoute = DepartmentCategoryRouteImport.update({
-  id: '/$category',
-  path: '/$category',
-  getParentRoute: () => DepartmentRoute,
-} as any)
+const DepartmentChar123CategoryChar125Route =
+  DepartmentChar123CategoryChar125RouteImport.update({
+    id: '/$department/{-$category}',
+    path: '/$department/{-$category}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
@@ -85,16 +74,14 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/$department': typeof DepartmentRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/deals': typeof DealsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/$department/$category': typeof DepartmentCategoryRoute
+  '/$department/{-$category}': typeof DepartmentChar123CategoryChar125Route
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/product/$slug': typeof ProductSlugRoute
   '/settings/$path': typeof SettingsPathRoute
-  '/$department/': typeof DepartmentIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -102,43 +89,38 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/deals': typeof DealsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/$department/$category': typeof DepartmentCategoryRoute
+  '/$department/{-$category}': typeof DepartmentChar123CategoryChar125Route
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/product/$slug': typeof ProductSlugRoute
   '/settings/$path': typeof SettingsPathRoute
-  '/$department': typeof DepartmentIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/$department': typeof DepartmentRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/deals': typeof DealsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/$department/$category': typeof DepartmentCategoryRoute
+  '/$department/{-$category}': typeof DepartmentChar123CategoryChar125Route
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/product/$slug': typeof ProductSlugRoute
   '/settings/$path': typeof SettingsPathRoute
-  '/$department/': typeof DepartmentIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/$department'
     | '/checkout'
     | '/deals'
     | '/sitemap.xml'
-    | '/$department/$category'
+    | '/$department/{-$category}'
     | '/api/health'
     | '/auth/$path'
     | '/product/$slug'
     | '/settings/$path'
-    | '/$department/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -146,35 +128,32 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/deals'
     | '/sitemap.xml'
-    | '/$department/$category'
+    | '/$department/{-$category}'
     | '/api/health'
     | '/auth/$path'
     | '/product/$slug'
     | '/settings/$path'
-    | '/$department'
     | '/api/auth/$'
   id:
     | '__root__'
     | '/'
-    | '/$department'
     | '/checkout'
     | '/deals'
     | '/sitemap.xml'
-    | '/$department/$category'
+    | '/$department/{-$category}'
     | '/api/health'
     | '/auth/$path'
     | '/product/$slug'
     | '/settings/$path'
-    | '/$department/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DepartmentRoute: typeof DepartmentRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   DealsRoute: typeof DealsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  DepartmentChar123CategoryChar125Route: typeof DepartmentChar123CategoryChar125Route
   ApiHealthRoute: typeof ApiHealthRoute
   AuthPathRoute: typeof AuthPathRoute
   ProductSlugRoute: typeof ProductSlugRoute
@@ -189,13 +168,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/$department': {
-      id: '/$department'
-      path: '/$department'
-      fullPath: '/$department'
-      preLoaderRoute: typeof DepartmentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -219,19 +191,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/$department/': {
-      id: '/$department/'
-      path: '/'
-      fullPath: '/$department/'
-      preLoaderRoute: typeof DepartmentIndexRouteImport
-      parentRoute: typeof DepartmentRoute
-    }
-    '/$department/$category': {
-      id: '/$department/$category'
-      path: '/$category'
-      fullPath: '/$department/$category'
-      preLoaderRoute: typeof DepartmentCategoryRouteImport
-      parentRoute: typeof DepartmentRoute
+    '/$department/{-$category}': {
+      id: '/$department/{-$category}'
+      path: '/$department/{-$category}'
+      fullPath: '/$department/{-$category}'
+      preLoaderRoute: typeof DepartmentChar123CategoryChar125RouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/health': {
       id: '/api/health'
@@ -271,26 +236,12 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface DepartmentRouteChildren {
-  DepartmentCategoryRoute: typeof DepartmentCategoryRoute
-  DepartmentIndexRoute: typeof DepartmentIndexRoute
-}
-
-const DepartmentRouteChildren: DepartmentRouteChildren = {
-  DepartmentCategoryRoute: DepartmentCategoryRoute,
-  DepartmentIndexRoute: DepartmentIndexRoute,
-}
-
-const DepartmentRouteWithChildren = DepartmentRoute._addFileChildren(
-  DepartmentRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DepartmentRoute: DepartmentRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   DealsRoute: DealsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  DepartmentChar123CategoryChar125Route: DepartmentChar123CategoryChar125Route,
   ApiHealthRoute: ApiHealthRoute,
   AuthPathRoute: AuthPathRoute,
   ProductSlugRoute: ProductSlugRoute,

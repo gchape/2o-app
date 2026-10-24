@@ -27,6 +27,7 @@ import {
 	FieldLabel,
 } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
+import { Skeleton } from "#/components/ui/skeleton";
 import { Spinner } from "#/components/ui/spinner";
 import { AdditionalField, type AdditionalFieldProps } from "./additional-field";
 
@@ -35,7 +36,7 @@ const { fieldContext, formContext, useFieldContext, useFormContext } =
 
 const DEFAULT_AUTH_FORM_SERVER_ERROR = "Unable to submit this form. Try again.";
 
-export function focusFirstInvalidAuthFormControl(form: HTMLFormElement) {
+function focusFirstInvalidAuthFormControl(form: HTMLFormElement) {
 	requestAnimationFrame(() => {
 		form
 			.querySelector<HTMLElement>(
@@ -73,7 +74,7 @@ function AuthFormServerError() {
 	);
 }
 
-export function setAuthFormServerError(
+function setAuthFormServerError(
 	form: AnyFormApi,
 	error: unknown,
 	fallbackMessage: string,
@@ -87,14 +88,11 @@ export function setAuthFormServerError(
 	});
 }
 
-export function clearAuthFormServerError(form: AnyFormApi) {
+function clearAuthFormServerError(form: AnyFormApi) {
 	form.setErrorMap({ onServer: { fields: {} } });
 }
 
-export function clearAuthFormFieldServerError(
-	form: AnyFormApi,
-	fieldName: string,
-) {
+function clearAuthFormFieldServerError(form: AnyFormApi, fieldName: string) {
 	form.setErrorMap({ onServer: undefined });
 	if (!fieldName) return;
 
@@ -108,24 +106,7 @@ export function clearAuthFormFieldServerError(
 	}));
 }
 
-export async function runAuthFormAction(
-	form: AnyFormApi,
-	action: () => Promise<unknown>,
-	serverErrorMessage = DEFAULT_AUTH_FORM_SERVER_ERROR,
-) {
-	clearAuthFormServerError(form);
-	try {
-		await action();
-		return true;
-	} catch (error) {
-		if (!form.state.errorMap.onServer) {
-			setAuthFormServerError(form, error, serverErrorMessage);
-		}
-		return false;
-	}
-}
-
-export async function submitAuthForm(
+async function submitAuthForm(
 	form: AnyFormApi,
 	serverErrorMessage = DEFAULT_AUTH_FORM_SERVER_ERROR,
 ) {
@@ -201,9 +182,11 @@ type AuthFormTextFieldProps = Omit<
 > & {
 	description?: ReactNode;
 	label: ReactNode;
+	isLoading?: boolean;
 };
 
 function AuthFormTextField({
+	isLoading = false,
 	description,
 	id,
 	label,
@@ -217,19 +200,23 @@ function AuthFormTextField({
 	return (
 		<Field data-invalid={isInvalid}>
 			<FieldLabel htmlFor={inputId}>{label}</FieldLabel>
-			<Input
-				{...props}
-				aria-busy={field.state.meta.isValidating || undefined}
-				aria-invalid={isInvalid}
-				id={inputId}
-				name={field.name}
-				onBlur={field.handleBlur}
-				onChange={(event) => {
-					clearAuthFormFieldServerError(form, field.name);
-					field.handleChange(event.target.value);
-				}}
-				value={field.state.value}
-			/>
+			{isLoading ? (
+				<Skeleton className="h-9 w-full" />
+			) : (
+				<Input
+					{...props}
+					aria-busy={field.state.meta.isValidating || undefined}
+					aria-invalid={isInvalid}
+					id={inputId}
+					name={field.name}
+					onBlur={field.handleBlur}
+					onChange={(event) => {
+						clearAuthFormFieldServerError(form, field.name);
+						field.handleChange(event.target.value);
+					}}
+					value={field.state.value}
+				/>
+			)}
 			{description ? <FieldDescription>{description}</FieldDescription> : null}
 			<AuthFormFieldError />
 		</Field>
@@ -296,11 +283,7 @@ function AuthFormAdditionalField(props: AuthFormAdditionalFieldProps) {
 	);
 }
 
-export const {
-	useAppForm: useAuthForm,
-	withFieldGroup: withAuthFieldGroup,
-	withForm: withAuthForm,
-} = createFormHook({
+export const { useAppForm: useAuthForm } = createFormHook({
 	fieldComponents: {
 		AuthFormAdditionalField,
 		AuthFormFieldError,

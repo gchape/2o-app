@@ -58,8 +58,8 @@ export function Footer() {
 						{departmentSlugs.map((slug) => (
 							<li key={slug}>
 								<Link
-									to="/$department"
-									params={{ department: slug }}
+									to="/$department/{-$category}"
+									params={{ department: slug, category: undefined }}
 									className="text-white/70 transition-colors hover:text-white"
 								>
 									{departments[slug].label}

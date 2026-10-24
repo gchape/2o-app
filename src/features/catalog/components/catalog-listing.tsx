@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { InfiniteScrollFooter } from "#/components/infinite-scroll-footer";
 import { Button } from "#/components/ui/button";
@@ -41,11 +41,11 @@ export function CatalogListing({
 		fetchNextPage,
 		isFetchingNextPage,
 		isFetchNextPageError,
-	} = useInfiniteQuery(catalogQuery(scope, filters));
+	} = useSuspenseInfiniteQuery(catalogQuery(scope, filters));
 	const { data: facets } = useQuery(catalogFacetsQuery(scope, filters));
 
-	const items = data?.pages.flatMap((page) => page.items) ?? [];
-	const total = data?.pages[0]?.total ?? 0;
+	const items = data.pages.flatMap((page) => page.items);
+	const total = data.pages[0]?.total ?? 0;
 	const filtered = hasActiveFilters(filters);
 
 	return (

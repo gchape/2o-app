@@ -28,15 +28,25 @@ export function InfiniteScrollFooter({
 		}
 	}, [inView, hasNextPage, isFetchingNextPage, isError, fetchNextPage]);
 
-	if (isError) {
-		return (
-			<div className="mt-10 flex justify-center">
-				<Button variant="outline" size="lg" onClick={() => fetchNextPage()}>
-					Couldn't load more. Try again
-				</Button>
-			</div>
-		);
-	}
+	if (!hasNextPage && !isError) return null;
 
-	return hasNextPage ? <div ref={ref} className="h-px" /> : null;
+	return (
+		<div ref={ref} className="mt-10 flex justify-center">
+			<Button
+				variant="outline"
+				size="lg"
+				disabled={isFetchingNextPage}
+				onClick={() => fetchNextPage()}
+			>
+				{isFetchingNextPage
+					? "Loading more…"
+					: isError
+						? "Couldn't load more. Try again"
+						: "Load more"}
+			</Button>
+			<span role="status" className="sr-only">
+				{isFetchingNextPage ? "Loading more results" : ""}
+			</span>
+		</div>
+	);
 }

@@ -10,15 +10,10 @@ import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 import { Card, CardContent, CardFooter } from "#/components/ui/card";
-import { Field, FieldLabel } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
 import { Skeleton } from "#/components/ui/skeleton";
 import { cn } from "#/lib/utils";
-import {
-	getAuthAdditionalFieldValidators,
-	isAuthFormFieldInvalid,
-	useAuthForm,
-} from "../../auth-form";
+import { getAuthAdditionalFieldValidators, useAuthForm } from "../../auth-form";
 import { ChangeAvatar } from "./change-avatar";
 
 export type UserProfileProps = {
@@ -100,39 +95,15 @@ export function UserProfile({ className }: UserProfileProps) {
 											}),
 									}}
 								>
-									{(field) => {
-										const isInvalid = isAuthFormFieldInvalid(field.state.meta);
-
-										return (
-											<Field data-invalid={isInvalid}>
-												<FieldLabel htmlFor="name">
-													{localization.auth.name}
-												</FieldLabel>
-
-												{session ? (
-													<Input
-														id="name"
-														name={field.name}
-														autoComplete="name"
-														placeholder={localization.auth.name}
-														disabled={isPending}
-														value={field.state.value}
-														onBlur={field.handleBlur}
-														onChange={(event) =>
-															field.handleChange(event.target.value)
-														}
-														aria-invalid={isInvalid}
-													/>
-												) : (
-													<Skeleton>
-														<Input className="invisible" />
-													</Skeleton>
-												)}
-
-												<field.AuthFormFieldError />
-											</Field>
-										);
-									}}
+									{(field) => (
+										<field.AuthFormTextField
+											label={localization.auth.name}
+											autoComplete="name"
+											placeholder={localization.auth.name}
+											disabled={isPending}
+											isLoading={!session}
+										/>
+									)}
 								</form.AppField>
 							)}
 
@@ -167,6 +138,7 @@ export function UserProfile({ className }: UserProfileProps) {
 									</form.AppField>
 								);
 							})}
+							<form.AuthFormServerError />
 						</CardContent>
 
 						{hasProfileFields && (

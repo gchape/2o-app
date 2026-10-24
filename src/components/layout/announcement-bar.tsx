@@ -6,6 +6,7 @@ import {
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
+import { Button } from "#/components/ui/button";
 import { site } from "#/data/site";
 import { publicConfigQuery } from "#/features/config/config.queries";
 import { openChat } from "#/lib/chat-widget";
@@ -47,13 +48,15 @@ export function AnnouncementBar() {
 				{config.chatEmbedUrl && (
 					<Item icon={Message01Icon} className="hidden sm:flex">
 						Questions about sizes?{" "}
-						<button
+						<Button
+							variant="link"
+							size="xs"
 							type="button"
 							onClick={openChat}
-							className="font-semibold text-white underline underline-offset-4"
+							className="h-auto p-0 font-semibold text-white underline"
 						>
 							Chat with us
-						</button>
+						</Button>
 					</Item>
 				)}
 

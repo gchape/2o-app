@@ -1,3 +1,4 @@
+import type { FtSearchOptions } from "redis";
 import type { TagField } from "./catalog-fields";
 import type {
 	CatalogFilters,
@@ -16,8 +17,7 @@ const tag = (field: TagField, values: readonly string[]) =>
  * Shopper text becomes prefix terms ("nik air" matches Nike Air). Input is
  * reduced to letters and digits first, so it can never inject query syntax.
  * One-letter terms are dropped: prefix queries need at least two characters.
- * Each term is its own `@q:term*` clause, because a parenthesised group is
- * rejected; adjacent clauses are ANDed.
+ * Each term is its own `@q:term*` clause; adjacent clauses are ANDed.
  */
 export function textClause(q: string | undefined) {
 	const terms = (q ?? "")
@@ -47,37 +47,32 @@ export function buildQuery(scope: CatalogScope, filters: CatalogFilters) {
 	return clauses.length > 0 ? clauses.join(" ") : "*";
 }
 
-const SORT_CLAUSES = {
-	relevance: [],
-	name: ["SORTBY", "sortName", "ASC"],
-	"price-asc": ["SORTBY", "sortPrice", "ASC"],
-	"price-desc": ["SORTBY", "sortPrice", "DESC"],
-	discount: ["SORTBY", "sortDiscount", "DESC"],
-} satisfies Record<CatalogSort, string[]>;
+const SORT_OPTIONS: Record<CatalogSort, FtSearchOptions["SORTBY"]> = {
+	relevance: undefined,
+	name: { BY: "sortName", DIRECTION: "ASC" },
+	"price-asc": { BY: "sortPrice", DIRECTION: "ASC" },
+	"price-desc": { BY: "sortPrice", DIRECTION: "DESC" },
+	discount: { BY: "sortDiscount", DIRECTION: "DESC" },
+};
 
-export const sortClause = (sort: CatalogSort): string[] => SORT_CLAUSES[sort];
+export const sortOptions = (sort: CatalogSort) => SORT_OPTIONS[sort];
 
-/** FT.AGGREGATE pipeline counting products per value of a TAG field. */
-export const facetPipeline = (field: TagField) => [
-	"LOAD",
-	"1",
-	`@${field}`,
-	"GROUPBY",
-	"1",
-	`@${field}`,
-	"REDUCE",
-	"COUNT",
-	"0",
-	"AS",
-	"count",
-	"SORTBY",
-	"2",
-	"@count",
-	"DESC",
-	"LIMIT",
-	"0",
-	"1000",
-];
+/** Count products per tag value using the Redis client's aggregation options. */
+export const facetOptions = (field: TagField) => ({
+	LOAD: `@${field}` as const,
+	STEPS: [
+		{
+			type: "GROUPBY" as const,
+			properties: `@${field}` as const,
+			REDUCE: { type: "COUNT" as const, AS: "count" },
+		},
+		{
+			type: "SORTBY" as const,
+			BY: { BY: "@count" as const, DIRECTION: "DESC" as const },
+		},
+		{ type: "LIMIT" as const, from: 0, size: 1000 },
+	],
+});
 
 /**
  * Turns facet rows into `{ value, count }` options. Multi-value TAG fields may

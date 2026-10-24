@@ -22,13 +22,10 @@ import { UserAvatar } from "./user-avatar";
 import { UserView } from "./user-view";
 
 /** Auth states a `UserButton` link can be visible in. */
-export type UserButtonLinkVisibility =
-	| "authenticated"
-	| "unauthenticated"
-	| "always";
+type UserButtonLinkVisibility = "authenticated" | "unauthenticated" | "always";
 
 /** A simple link entry rendered as a `DropdownMenuItem` in the `UserButton` menu. */
-export type UserButtonLink = {
+type UserButtonLink = {
 	/** Visible label. */
 	label: ReactNode;
 	/** Destination URL. */
@@ -44,7 +41,7 @@ export type UserButtonLink = {
 	visibility?: UserButtonLinkVisibility;
 };
 
-export type UserButtonProps = {
+type UserButtonProps = {
 	className?: string;
 	align?: "center" | "end" | "start" | undefined;
 	side?: "top" | "right" | "bottom" | "left";

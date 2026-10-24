@@ -1,15 +1,7 @@
-import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
-import { Button, buttonVariants } from "#/components/ui/button";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "#/components/ui/popover";
 import { Slider } from "#/components/ui/slider";
 import { formatPriceCompact } from "#/lib/price";
-import { cn } from "#/lib/utils";
+import { FilterPopover } from "./filter-popover";
 
 type PriceFilterProps = {
 	/** Cheapest and dearest price for the current results, in minor units. */
@@ -60,51 +52,34 @@ function PriceFilterInner({
 	const active = minPrice != null || maxPrice != null;
 
 	return (
-		<Popover>
-			<PopoverTrigger
-				className={cn(
-					buttonVariants({ variant: "outline", size: "sm" }),
-					active && "border-foreground/40",
-				)}
-			>
-				{active
+		<FilterPopover
+			label="Price"
+			trigger={
+				active
 					? `${formatPriceCompact(from * 100)} to ${formatPriceCompact(to * 100)}`
-					: "Price"}
-				<HugeiconsIcon icon={ArrowDown01Icon} size={14} />
-			</PopoverTrigger>
-
-			<PopoverContent align="start" className="w-72 gap-4">
-				<p className="type-num text-lg">
-					{formatPriceCompact(from * 100)} to {formatPriceCompact(to * 100)}
-				</p>
-				<Slider
-					min={lo}
-					max={hi}
-					step={1}
-					value={[from, to]}
-					aria-label="Price range"
-					onValueChange={(value) => setDraft(toRange(value))}
-					onValueCommitted={(value) => {
-						const [nextFrom, nextTo] = toRange(value);
-						onChange({
-							minPrice: nextFrom <= lo ? undefined : nextFrom * 100,
-							maxPrice: nextTo >= hi ? undefined : nextTo * 100,
-						});
-					}}
-				/>
-				{active && (
-					<Button
-						variant="ghost"
-						size="xs"
-						className="self-start"
-						onClick={() =>
-							onChange({ minPrice: undefined, maxPrice: undefined })
-						}
-					>
-						Clear price
-					</Button>
-				)}
-			</PopoverContent>
-		</Popover>
+					: "Price"
+			}
+			active={active}
+			onClear={() => onChange({ minPrice: undefined, maxPrice: undefined })}
+		>
+			<p className="type-num text-lg">
+				{formatPriceCompact(from * 100)} to {formatPriceCompact(to * 100)}
+			</p>
+			<Slider
+				min={lo}
+				max={hi}
+				step={1}
+				value={[from, to]}
+				aria-label="Price range"
+				onValueChange={(value) => setDraft(toRange(value))}
+				onValueCommitted={(value) => {
+					const [nextFrom, nextTo] = toRange(value);
+					onChange({
+						minPrice: nextFrom <= lo ? undefined : nextFrom * 100,
+						maxPrice: nextTo >= hi ? undefined : nextTo * 100,
+					});
+				}}
+			/>
+		</FilterPopover>
 	);
 }

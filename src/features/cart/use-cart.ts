@@ -12,9 +12,12 @@ import { cartDrawer } from "./cart-drawer.store";
 
 /** The cart's line items plus derived count, subtotal and currency. */
 export const useCart = () => {
-	const { data } = useQuery({ ...cartQuery, select: summarizeCart });
+	const { data, isPending, isError, isFetching, refetch } = useQuery({
+		...cartQuery,
+		select: summarizeCart,
+	});
 
-	return data ?? EMPTY_CART;
+	return { ...(data ?? EMPTY_CART), isPending, isError, isFetching, refetch };
 };
 
 const showCartError = () =>
