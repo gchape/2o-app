@@ -1,8 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 import { categories, departments } from "#/data/catalog";
-import { ProductListing } from "#/features/catalog/components/product-listing";
-import { productsQuery } from "#/features/catalog/product.queries";
+import { CatalogListing } from "#/features/catalog/components/catalog-listing";
 import { categorySchema } from "#/features/catalog/product.schema";
+import { loadCatalog } from "#/features/search/catalog.queries";
+import {
+	catalogFiltersSchema,
+	DEFAULT_FILTERS,
+} from "#/features/search/catalog-filters";
 import { parseParam } from "#/lib/route-guards";
 import { pageTitle } from "#/lib/seo";
 
@@ -10,9 +14,18 @@ export const Route = createFileRoute("/$department/$category")({
 	beforeLoad: ({ params }) => ({
 		category: parseParam(categorySchema, params.category),
 	}),
-	loader: ({ context }) =>
-		context.queryClient.infiniteQuery(
-			productsQuery(context.department, context.category),
+	validateSearch: catalogFiltersSchema,
+	search: { middlewares: [stripSearchParams(DEFAULT_FILTERS)] },
+	loaderDeps: ({ search }) => ({ search }),
+	loader: ({ context, deps }) =>
+		loadCatalog(
+			context.queryClient,
+			{
+				department: context.department,
+				category: context.category,
+				mode: "listing",
+			},
+			deps.search,
 		),
 	head: ({ match }) => {
 		const { department, category } = match.context;
@@ -31,6 +44,16 @@ export const Route = createFileRoute("/$department/$category")({
 
 function CategoryPage() {
 	const { department, category } = Route.useRouteContext();
+	const filters = Route.useSearch();
+	const navigate = Route.useNavigate();
 
-	return <ProductListing department={department} category={category} />;
+	return (
+		<CatalogListing
+			scope={{ department, category, mode: "listing" }}
+			filters={filters}
+			onFiltersChange={(search) =>
+				navigate({ search, replace: true, resetScroll: false })
+			}
+		/>
+	);
 }

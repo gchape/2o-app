@@ -16,3 +16,10 @@ export type Deal = ProductListItem & {
 	/** Percent off, rounded. */
 	discount: number;
 };
+
+/** A search hit: a listing item that also carries its product's best discount. */
+export type CatalogItem = ProductListItem & { discount: number };
+
+/** Narrows a hit to a real deal (the deals scope only ever returns these). */
+export const isDeal = (item: CatalogItem): item is Deal =>
+	item.originalPrice !== null && item.discount > 0;

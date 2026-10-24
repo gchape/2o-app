@@ -16,6 +16,7 @@ import {
 } from "#/data/catalog";
 import { db } from "#/db";
 import { product, skus } from "#/db/schema";
+import { syncCatalogIndex } from "#/features/search/catalog-index.server";
 import { refreshStats } from "#/features/stats/stats.server";
 
 if (process.env.NODE_ENV === "production") {
@@ -206,6 +207,18 @@ async function seed() {
 	});
 }
 
+/** The catalogue pages read from the Valkey search index, so rebuild it from what was just seeded. */
+async function syncSearchIndex() {
+	try {
+		console.log(`Search index: ${await syncCatalogIndex()} products.`);
+	} catch (error) {
+		console.warn(
+			"Could not sync the search index (is Valkey running with the Search module?):",
+			error instanceof Error ? error.message.split("\n")[0] : error,
+		);
+	}
+}
+
 /** The home page reads cached stats, so refresh them or it shows zeros for a day. */
 async function refreshStatsCache() {
 	try {
@@ -228,6 +241,7 @@ async function refreshStatsCache() {
 
 try {
 	await seed();
+	await syncSearchIndex();
 	await refreshStatsCache();
 	process.exit(0);
 } catch (error) {

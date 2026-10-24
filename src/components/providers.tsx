@@ -1,7 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { ComponentProps, ReactNode } from "react";
-import { authClient } from "#/features/auth/auth.client";
+import { authClient } from "#/features/auth/auth-client";
 import { publicConfigQuery } from "#/features/config/config.queries";
 import { AuthProvider } from "./auth/auth-provider";
 import { Toaster } from "./ui/sonner";

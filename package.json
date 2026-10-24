@@ -14,6 +14,8 @@
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
 		"db:seed": "tsx scripts/seed.ts",
+		"search:sync": "tsx scripts/search-sync.ts",
+		"search:check": "tsx scripts/search-check.ts",
 		"check": "biome check",
 		"fix": "biome check --write",
 		"knip": "knip",

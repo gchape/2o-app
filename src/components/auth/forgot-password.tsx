@@ -14,7 +14,7 @@ import {
 import { Input } from "#/components/ui/input";
 import { cn } from "#/lib/utils";
 import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form";
-import { RESET_LINK_SENT_STORAGE_KEY } from "./reset-link-sent";
+import { RESET_LINK_SENT_STORAGE_KEY } from "./storage-keys";
 
 export type ForgotPasswordProps = {
 	className?: string;

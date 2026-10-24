@@ -1,15 +1,20 @@
+# dependencies
 node_modules
-.DS_Store
+
+# build output
+.output
+.nitro
+.tanstack
 dist
-dist-ssr
-*.local
+
+# env files
 .env
 .env.*
 !.env.example
-.nitro
-.tanstack
-.wrangler
-.output
-.vinxi
-__unconfig*
-todos.json
+
+# logs and editor/OS files
+*.log
+.DS_Store
+
+# test coverage
+coverage

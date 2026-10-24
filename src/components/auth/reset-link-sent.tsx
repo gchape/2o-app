@@ -5,10 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { FieldDescription } from "#/components/ui/field";
 import { cn } from "#/lib/utils";
 import { OpenEmailButton } from "./open-email-button";
+import { RESET_LINK_SENT_STORAGE_KEY } from "./storage-keys";
 import { useIsHydrated } from "./use-is-hydrated";
-
-/** `sessionStorage` key the forgot-password form stores the submitted email under. */
-export const RESET_LINK_SENT_STORAGE_KEY = "better-auth-ui.reset-link-sent";
 
 export type ResetLinkSentProps = {
 	className?: string;

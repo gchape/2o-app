@@ -7,7 +7,6 @@ import {
 import { useAuth, useResetPassword } from "@better-auth-ui/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "#/components/icons";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import {
 	Field,
@@ -16,14 +15,9 @@ import {
 	FieldGroup,
 	FieldLabel,
 } from "#/components/ui/field";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupButton,
-	InputGroupInput,
-} from "#/components/ui/input-group";
 import { cn } from "#/lib/utils";
 import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form";
+import { PasswordInput } from "./password-input";
 import { PasswordStrengthMeter } from "./password-strength-meter";
 
 export type ResetPasswordProps = {
@@ -69,10 +63,6 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 			},
 		},
 	);
-
-	const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-	const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-		useState(false);
 	const [isCompromised, setIsCompromised] = useState(false);
 
 	useEffect(() => {
@@ -146,47 +136,23 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 												{localization.auth.password}
 											</FieldLabel>
 
-											<InputGroup>
-												<InputGroupInput
-													id="password"
-													type={isPasswordVisible ? "text" : "password"}
-													autoComplete="new-password"
-													placeholder={localization.auth.newPasswordPlaceholder}
-													required
-													minLength={emailAndPassword?.minPasswordLength}
-													maxLength={emailAndPassword?.maxPasswordLength}
-													disabled={isPending}
-													name={field.name}
-													onBlur={field.handleBlur}
-													onChange={(e) => {
-														field.handleChange(e.target.value);
-														setIsCompromised(false);
-													}}
-													aria-invalid={isInvalid}
-													value={field.state.value}
-												/>
-
-												<InputGroupAddon align="inline-end">
-													<InputGroupButton
-														size="icon-xs"
-														aria-label={
-															isPasswordVisible
-																? localization.auth.hidePassword
-																: localization.auth.showPassword
-														}
-														title={
-															isPasswordVisible
-																? localization.auth.hidePassword
-																: localization.auth.showPassword
-														}
-														onClick={() => {
-															setIsPasswordVisible((visible) => !visible);
-														}}
-													>
-														{isPasswordVisible ? <EyeOff /> : <Eye />}
-													</InputGroupButton>
-												</InputGroupAddon>
-											</InputGroup>
+											<PasswordInput
+												id="password"
+												autoComplete="new-password"
+												placeholder={localization.auth.newPasswordPlaceholder}
+												required
+												minLength={emailAndPassword?.minPasswordLength}
+												maxLength={emailAndPassword?.maxPasswordLength}
+												disabled={isPending}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => {
+													field.handleChange(e.target.value);
+													setIsCompromised(false);
+												}}
+												aria-invalid={isInvalid}
+												value={field.state.value}
+											/>
 
 											{isCompromised ? (
 												<FieldError>
@@ -237,52 +203,24 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 													{localization.auth.confirmPassword}
 												</FieldLabel>
 
-												<InputGroup>
-													<InputGroupInput
-														id="confirmPassword"
-														name={field.name}
-														type={
-															isConfirmPasswordVisible ? "text" : "password"
-														}
-														autoComplete="new-password"
-														placeholder={
-															localization.auth.confirmPasswordPlaceholder
-														}
-														required
-														minLength={emailAndPassword?.minPasswordLength}
-														maxLength={emailAndPassword?.maxPasswordLength}
-														disabled={isPending}
-														onBlur={field.handleBlur}
-														onChange={(event) =>
-															field.handleChange(event.target.value)
-														}
-														aria-invalid={isInvalid}
-														value={field.state.value}
-													/>
-
-													<InputGroupAddon align="inline-end">
-														<InputGroupButton
-															size="icon-xs"
-															aria-label={
-																isConfirmPasswordVisible
-																	? localization.auth.hidePassword
-																	: localization.auth.showPassword
-															}
-															title={
-																isConfirmPasswordVisible
-																	? localization.auth.hidePassword
-																	: localization.auth.showPassword
-															}
-															onClick={() => {
-																setIsConfirmPasswordVisible(
-																	(visible) => !visible,
-																);
-															}}
-														>
-															{isConfirmPasswordVisible ? <EyeOff /> : <Eye />}
-														</InputGroupButton>
-													</InputGroupAddon>
-												</InputGroup>
+												<PasswordInput
+													id="confirmPassword"
+													name={field.name}
+													autoComplete="new-password"
+													placeholder={
+														localization.auth.confirmPasswordPlaceholder
+													}
+													required
+													minLength={emailAndPassword?.minPasswordLength}
+													maxLength={emailAndPassword?.maxPasswordLength}
+													disabled={isPending}
+													onBlur={field.handleBlur}
+													onChange={(event) =>
+														field.handleChange(event.target.value)
+													}
+													aria-invalid={isInvalid}
+													value={field.state.value}
+												/>
 
 												<field.AuthFormFieldError />
 											</Field>

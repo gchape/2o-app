@@ -10,8 +10,6 @@ import {
 	useSignInEmail,
 } from "@better-auth-ui/react";
 import { useIsMutating } from "@tanstack/react-query";
-import { useState } from "react";
-import { Eye, EyeOff } from "#/components/icons";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { Checkbox } from "#/components/ui/checkbox";
 import {
@@ -22,16 +20,12 @@ import {
 	FieldSeparator,
 } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupButton,
-	InputGroupInput,
-} from "#/components/ui/input-group";
 import { cn } from "#/lib/utils";
 import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form";
+import { PasswordInput } from "./password-input";
 import { ProviderButtons, type SocialLayout } from "./provider-buttons";
 import { ReauthenticationNotice } from "./reauthentication";
+import { VERIFY_EMAIL_STORAGE_KEY } from "./storage-keys";
 
 export type SignInProps = {
 	className?: string;
@@ -73,7 +67,7 @@ export function SignIn({
 				form.setFieldValue("password", "");
 
 				if (error.error?.code === "EMAIL_NOT_VERIFIED") {
-					sessionStorage.setItem("better-auth-ui.verify-email", email);
+					sessionStorage.setItem(VERIFY_EMAIL_STORAGE_KEY, email);
 					navigate({
 						to: `${basePaths.auth}/${viewPaths.auth.verifyEmail}`,
 					});
@@ -95,8 +89,6 @@ export function SignIn({
 	const Captcha = plugins.find(
 		(plugin) => plugin.captchaComponent,
 	)?.captchaComponent;
-
-	const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 	const form = useAuthForm({
 		defaultValues: { email: "", password: "", rememberMe: false },
 		onSubmit: async ({ value }) =>
@@ -213,48 +205,22 @@ export function SignIn({
 														{localization.auth.password}
 													</FieldLabel>
 
-													<InputGroup>
-														<InputGroupInput
-															id="password"
-															name={field.name}
-															type={isPasswordVisible ? "text" : "password"}
-															autoComplete="current-password"
-															value={field.state.value}
-															onBlur={field.handleBlur}
-															onChange={(event) =>
-																field.handleChange(event.target.value)
-															}
-															placeholder={
-																localization.auth.passwordPlaceholder
-															}
-															required
-															minLength={emailAndPassword?.minPasswordLength}
-															maxLength={emailAndPassword?.maxPasswordLength}
-															disabled={isPending}
-															aria-invalid={isInvalid}
-														/>
-
-														<InputGroupAddon align="inline-end">
-															<InputGroupButton
-																size="icon-xs"
-																aria-label={
-																	isPasswordVisible
-																		? localization.auth.hidePassword
-																		: localization.auth.showPassword
-																}
-																title={
-																	isPasswordVisible
-																		? localization.auth.hidePassword
-																		: localization.auth.showPassword
-																}
-																onClick={() => {
-																	setIsPasswordVisible((visible) => !visible);
-																}}
-															>
-																{isPasswordVisible ? <EyeOff /> : <Eye />}
-															</InputGroupButton>
-														</InputGroupAddon>
-													</InputGroup>
+													<PasswordInput
+														id="password"
+														name={field.name}
+														autoComplete="current-password"
+														value={field.state.value}
+														onBlur={field.handleBlur}
+														onChange={(event) =>
+															field.handleChange(event.target.value)
+														}
+														placeholder={localization.auth.passwordPlaceholder}
+														required
+														minLength={emailAndPassword?.minPasswordLength}
+														maxLength={emailAndPassword?.maxPasswordLength}
+														disabled={isPending}
+														aria-invalid={isInvalid}
+													/>
 
 													<field.AuthFormFieldError />
 												</Field>

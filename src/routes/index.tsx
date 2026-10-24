@@ -5,7 +5,7 @@ import { DealsSection } from "#/components/home/deals-section";
 import { DepartmentTiles } from "#/components/home/department-tiles";
 import { Hero } from "#/components/home/hero";
 import { HowItWorks } from "#/components/home/how-it-works";
-import { homeDealsQuery } from "#/features/catalog/product.queries";
+import { homeDealsQuery } from "#/features/search/catalog.queries";
 import { statsQuery } from "#/features/stats/stats.queries";
 
 export const Route = createFileRoute("/")({

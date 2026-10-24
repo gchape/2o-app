@@ -1,21 +1,27 @@
-import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { InfiniteScrollFooter } from "#/components/infinite-scroll-footer";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 import { Container } from "#/components/layout/container";
 import { site } from "#/data/site";
+import { CatalogListing } from "#/features/catalog/components/catalog-listing";
+import { loadCatalog } from "#/features/search/catalog.queries";
 import {
-	DealCard,
-	dealImageLoading,
-} from "#/features/catalog/components/deal-card";
-import { dealsQuery } from "#/features/catalog/product.queries";
+	type CatalogScope,
+	catalogFiltersSchema,
+	DEFAULT_FILTERS,
+} from "#/features/search/catalog-filters";
 import { priceCheckNote } from "#/features/stats/format-checked-at";
 import { statsQuery } from "#/features/stats/stats.queries";
 import { pageTitle } from "#/lib/seo";
 
+const scope: CatalogScope = { mode: "deals" };
+
 export const Route = createFileRoute("/deals")({
-	loader: async ({ context }) => {
+	validateSearch: catalogFiltersSchema,
+	search: { middlewares: [stripSearchParams(DEFAULT_FILTERS)] },
+	loaderDeps: ({ search }) => ({ search }),
+	loader: async ({ context, deps }) => {
 		await Promise.all([
-			context.queryClient.infiniteQuery(dealsQuery),
+			loadCatalog(context.queryClient, scope, deps.search),
 			context.queryClient.query(statsQuery),
 		]);
 	},
@@ -24,45 +30,29 @@ export const Route = createFileRoute("/deals")({
 });
 
 function DealsPage() {
-	const {
-		data,
-		hasNextPage,
-		fetchNextPage,
-		isFetchingNextPage,
-		isFetchNextPageError,
-	} = useInfiniteQuery(dealsQuery);
+	const filters = Route.useSearch();
+	const navigate = Route.useNavigate();
 	const { data: stats } = useSuspenseQuery(statsQuery);
-
-	const deals = data?.pages.flatMap((page) => page.deals) ?? [];
 
 	return (
 		<Container className="py-8">
 			<h1 className="type-display text-3xl md:text-4xl">All deals</h1>
 			<p className="mt-2 text-muted-foreground">
-				Products on sale, biggest discount first.{" "}
-				{priceCheckNote(stats.checkedAt)}
+				Everything on sale right now. {priceCheckNote(stats.checkedAt)}
 			</p>
 
-			{deals.length === 0 ? (
-				<p className="py-10 text-muted-foreground">
-					No deals right now. New prices land every morning at{" "}
-					{site.priceCheckTime}.
-				</p>
-			) : (
-				<ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
-					{deals.map((deal, i) => (
-						<li key={deal.id}>
-							<DealCard deal={deal} loading={dealImageLoading(i)} />
-						</li>
-					))}
-				</ul>
-			)}
-
-			<InfiniteScrollFooter
-				hasNextPage={hasNextPage}
-				isFetchingNextPage={isFetchingNextPage}
-				isError={isFetchNextPageError}
-				fetchNextPage={fetchNextPage}
+			<CatalogListing
+				scope={scope}
+				filters={filters}
+				onFiltersChange={(search) =>
+					navigate({ search, replace: true, resetScroll: false })
+				}
+				empty={
+					<p className="py-10 text-muted-foreground">
+						No deals right now. New prices land every morning at{" "}
+						{site.priceCheckTime}.
+					</p>
+				}
 			/>
 		</Container>
 	);

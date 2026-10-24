@@ -36,8 +36,10 @@ export function ActiveSessions({ className }: ActiveSessionsProps) {
 	});
 	const { data: sessions, error, isPending } = sessionsQuery;
 
-	const activeSessions = [...(sessions ?? [])].sort((activeSession) =>
-		activeSession.id === session?.session.id ? -1 : 1,
+	const activeSessions = [...(sessions ?? [])].sort(
+		(a, b) =>
+			Number(b.id === session?.session.id) -
+			Number(a.id === session?.session.id),
 	);
 
 	return (

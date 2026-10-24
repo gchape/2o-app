@@ -21,16 +21,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql
     healthcheck:
-      test:
-        ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      test: ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
       interval: 5s
       timeout: 3s
       retries: 10
 
   valkey:
-    image: valkey/valkey:9.1.2-alpine
+    image: valkey/valkey-bundle:latest
     restart: unless-stopped
-    command: ["valkey-server", "--appendonly", "yes"]
     volumes:
       - valkeydata:/data
     healthcheck:
@@ -63,12 +61,9 @@ services:
       valkey:
         condition: service_healthy
     healthcheck:
-      # Alpine ships busybox wget; /api/health touches no database.
       test:
-        [
-          "CMD-SHELL",
-          "wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1",
-        ]
+        - CMD-SHELL
+        - wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1
       interval: 10s
       timeout: 3s
       retries: 5

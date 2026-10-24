@@ -1,33 +1,9 @@
-import { TimeUnit } from "@valkey/valkey-glide";
 import { countDistinct, max } from "drizzle-orm";
 import { db } from "#/db";
+import { onSale } from "#/db/predicates";
 import { product, skus } from "#/db/schema";
-import { onSale } from "#/features/catalog/product.server";
-import { getValkey } from "#/server/valkey.server";
+import { createJsonCache } from "#/server/json-cache.server";
 import { type Stats, statsSchema } from "./stats.schema";
-
-const KEY = "stats";
-const TTL_SECONDS = 60 * 60 * 24;
-
-/** The cached stats, or `null` if the cache is empty, stale-shaped or down. */
-async function readCache(): Promise<Stats | null> {
-	try {
-		const hit = await (await getValkey()).get(KEY);
-		if (!hit) return null;
-
-		const parsed = statsSchema.safeParse(JSON.parse(String(hit)));
-		return parsed.success ? parsed.data : null;
-	} catch (error) {
-		console.warn("Stats cache read failed:", error);
-		return null;
-	}
-}
-
-async function writeCache(stats: Stats) {
-	await (await getValkey()).set(KEY, JSON.stringify(stats), {
-		expiry: { type: TimeUnit.Seconds, count: TTL_SECONDS },
-	});
-}
 
 async function computeStats(): Promise<Stats> {
 	const [[dealRow], [statRow]] = await Promise.all([
@@ -50,21 +26,15 @@ async function computeStats(): Promise<Stats> {
 	};
 }
 
-/** Cached stats, queried from Postgres if Valkey is empty or down. */
-export async function getStats(): Promise<Stats> {
-	const cached = await readCache();
-	if (cached) return cached;
+const statsCache = createJsonCache({
+	key: "stats",
+	ttlSeconds: 60 * 60 * 24,
+	schema: statsSchema,
+	compute: computeStats,
+});
 
-	const stats = await computeStats();
-	writeCache(stats).catch((error) =>
-		console.warn("Stats cache write failed:", error),
-	);
-	return stats;
-}
+/** Cached stats, queried from Postgres if Valkey is empty or down. */
+export const getStats = (): Promise<Stats> => statsCache.get();
 
 /** @public Recomputes and overwrites the cache. For the importer to call after a run. */
-export async function refreshStats(): Promise<Stats> {
-	const stats = await computeStats();
-	await writeCache(stats);
-	return stats;
-}
+export const refreshStats = (): Promise<Stats> => statsCache.refresh();

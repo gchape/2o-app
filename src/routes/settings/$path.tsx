@@ -2,7 +2,7 @@ import { viewPaths } from "@better-auth-ui/core";
 import { useAuthenticate } from "@better-auth-ui/react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { Settings } from "#/components/auth/settings/settings";
-import { authClient } from "#/features/auth/auth.client";
+import { authClient } from "#/features/auth/auth-client";
 import { noIndexMeta, pageTitle } from "#/lib/seo";
 
 const validPaths = new Set<string>(Object.values(viewPaths.settings));
