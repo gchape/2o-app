@@ -21,10 +21,18 @@ export function Container({ className, ...props }: ComponentProps<"div">) {
 export function Section({
 	className,
 	children,
+	spacing = "standard",
 	...props
-}: ComponentProps<"section">) {
+}: ComponentProps<"section"> & { spacing?: "standard" | "compact" | "none" }) {
 	return (
-		<section className={className} {...props}>
+		<section
+			className={cn(
+				spacing === "standard" && "py-16 md:py-24",
+				spacing === "compact" && "py-12 md:py-16",
+				className,
+			)}
+			{...props}
+		>
 			<Container>{children}</Container>
 		</section>
 	);

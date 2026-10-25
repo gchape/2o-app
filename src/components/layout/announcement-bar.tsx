@@ -9,8 +9,9 @@ import type { ReactNode } from "react";
 import { Button } from "#/components/ui/button";
 import { site } from "#/data/site";
 import { publicConfigQuery } from "#/features/config/config.queries";
+import { useTranslation } from "#/i18n/translate";
 import { openChat } from "#/lib/chat-widget";
-import { formatPriceCompact } from "#/lib/price";
+import { usePriceFormatter } from "#/lib/price";
 import { cn } from "#/lib/utils";
 import { Container } from "./container";
 
@@ -33,36 +34,41 @@ function Item({
 
 /** Three facts that answer a shopper's first questions: freshness, help, delivery. */
 export function AnnouncementBar() {
+	const { formatPriceCompact } = usePriceFormatter();
+	const t = useTranslation();
 	const { data: config } = useSuspenseQuery(publicConfigQuery);
 
 	return (
 		<section
-			aria-label="Announcements"
-			className="bg-neutral-900 text-white/80 text-xs tracking-wide"
+			aria-label={t("Announcements")}
+			className="border-b bg-neutral-100 text-neutral-600 type-caption"
 		>
-			<Container className="flex min-h-9 items-center py-2 justify-center gap-6 md:justify-between">
+			<Container className="flex min-h-8 items-center justify-center gap-6 py-1 md:justify-between">
 				<Item icon={Clock01Icon}>
-					Prices refreshed every morning at {site.priceCheckTime}
+					{t("Prices refreshed every morning at {{time}}", {
+						time: site.priceCheckTime,
+					})}
 				</Item>
 
 				{config.chatEmbedUrl && (
 					<Item icon={Message01Icon} className="hidden sm:flex">
-						Questions about sizes?{" "}
+						{t("Questions about sizes?")}{" "}
 						<Button
 							variant="link"
 							size="xs"
 							type="button"
 							onClick={openChat}
-							className="h-auto p-0 font-semibold text-white underline"
+							className="h-auto p-0 font-semibold text-neutral-800 underline"
 						>
-							Chat with us
+							{t("Chat with us")}
 						</Button>
 					</Item>
 				)}
 
 				<Item icon={DeliveryTruck01Icon} className="hidden md:flex">
-					Free delivery in {site.delivery.region} over{" "}
-					{formatPriceCompact(site.delivery.freeFrom)}
+					{t("Free delivery in Georgia over {{price}}", {
+						price: formatPriceCompact(site.delivery.freeFrom),
+					})}
 				</Item>
 			</Container>
 		</section>

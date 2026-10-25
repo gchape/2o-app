@@ -3,11 +3,12 @@ import { Link } from "@tanstack/react-router";
 import { departmentSlugs, departments } from "#/data/catalog";
 import { site } from "#/data/site";
 import { socials } from "#/data/socials";
+import { useTranslation } from "#/i18n/translate";
 import { Container } from "./container";
 import { Logo } from "./logo";
 
 const info = [
-	"Prices checked every day",
+	"Price-check times shown",
 	"Deals on shoes and clothing",
 	"Men, women and kids",
 ];
@@ -21,18 +22,19 @@ function FooterHeading({ children }: { children: string }) {
 }
 
 export function Footer() {
+	const t = useTranslation();
 	// Accounts without a link yet stay out of the footer.
 	const links = socials.flatMap((s) =>
 		s.href ? [{ ...s, href: s.href }] : [],
 	);
 
 	return (
-		<footer className="bg-neutral-950 text-white">
+		<footer className="brand-surface footer-scene text-white">
 			<Container className="grid grid-cols-2 gap-x-8 gap-y-10 py-14 md:grid-cols-4 md:gap-12 md:py-18">
 				<div className="col-span-2">
 					<Logo className="h-10" />
 					<p className="mt-5 max-w-sm text-sm leading-7 text-white/60">
-						{site.pitch}
+						{t(site.pitch)}
 					</p>
 
 					{links.length > 0 && (
@@ -55,7 +57,7 @@ export function Footer() {
 				</div>
 
 				<div>
-					<FooterHeading>Shop</FooterHeading>
+					<FooterHeading>{t("Shop")}</FooterHeading>
 					<ul className="mt-5 space-y-3 text-sm">
 						{departmentSlugs.map((slug) => (
 							<li key={slug}>
@@ -64,7 +66,7 @@ export function Footer() {
 									params={{ department: slug, category: undefined }}
 									className="text-white/70 transition-colors hover:text-white"
 								>
-									{departments[slug].label}
+									{t(departments[slug].label)}
 								</Link>
 							</li>
 						))}
@@ -72,10 +74,10 @@ export function Footer() {
 				</div>
 
 				<div>
-					<FooterHeading>Good to know</FooterHeading>
+					<FooterHeading>{t("Good to know")}</FooterHeading>
 					<ul className="mt-5 space-y-3 text-sm text-white/70">
 						{info.map((item) => (
-							<li key={item}>{item}</li>
+							<li key={item}>{t(item)}</li>
 						))}
 					</ul>
 				</div>
@@ -84,11 +86,14 @@ export function Footer() {
 			<div className="border-white/10 border-t">
 				<Container className="flex flex-col gap-3 py-6 text-white/50 text-xs leading-relaxed md:flex-row md:justify-between md:gap-10">
 					<p>
-						© {new Date().getFullYear()} {site.name}. All rights reserved.
+						© {new Date().getFullYear()} {site.name}.{" "}
+						{t("All rights reserved.")}
 					</p>
 					<p>
-						Prices and availability can change. Brand names belong to their
-						owners, and {site.name} is not affiliated with them.
+						{t(
+							"Prices and availability can change. Brand names belong to their owners, and {{brand}} is not affiliated with them.",
+							{ brand: site.name },
+						)}
 					</p>
 				</Container>
 			</div>

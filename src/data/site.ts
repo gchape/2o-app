@@ -21,7 +21,7 @@ export const site = {
 	description:
 		"Daily deals on shoes and clothing for men, women and kids, checked across wholesale stores.",
 	pitch:
-		"We check wholesale stores every day and show you the cheapest deals on shoes and clothing for the whole family.",
+		"Discover shoes and clothing from wholesale stores, compare listed prices, and find something for the whole family.",
 	heroPitch:
-		"Shoes and clothing for the whole family, at the lowest price we found this morning.",
+		"Discover shoes and clothing for the whole family. Compare the deals, find your fit, and spend less time searching.",
 };

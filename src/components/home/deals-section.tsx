@@ -3,14 +3,17 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { Section } from "#/components/layout/container";
+import { SectionHeader } from "#/components/layout/section-header";
 import { Button } from "#/components/ui/button";
+import type { Deal } from "#/data/catalog.types";
 import {
 	DealCard,
 	dealImageLoading,
 } from "#/features/catalog/components/deal-card";
-import type { Deal } from "#/features/catalog/product.types";
 import { priceCheckNote } from "#/features/stats/format-checked-at";
 import { useScrollEdges } from "#/hooks/use-scroll-edges";
+import { languageTags, useLocale } from "#/i18n/locale";
+import { useTranslation } from "#/i18n/translate";
 
 type DealsSectionProps = {
 	deals: Deal[];
@@ -21,6 +24,8 @@ type DealsSectionProps = {
 };
 
 export function DealsSection({ deals, total, checkedAt }: DealsSectionProps) {
+	const t = useTranslation();
+	const locale = useLocale();
 	const scroller = useRef<HTMLUListElement>(null);
 	const { atStart, atEnd } = useScrollEdges(scroller);
 
@@ -39,54 +44,56 @@ export function DealsSection({ deals, total, checkedAt }: DealsSectionProps) {
 	};
 
 	return (
-		<Section id="deals" className="scroll-mt-8 py-16 md:py-24">
-			<div className="flex flex-wrap items-end justify-between gap-4">
-				<div>
-					<h2 className="type-title text-3xl md:text-4xl">
-						Today's biggest drops
-					</h2>
-					<p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
-						Sorted by discount. {priceCheckNote(checkedAt)}
-					</p>
-				</div>
-
-				<div className="flex items-center gap-4">
-					<Link
-						to="/deals"
-						className="py-2 font-semibold text-sm underline decoration-1 underline-offset-8"
-					>
-						See all {total.toLocaleString("en-US")} deals
-					</Link>
-					<div className="flex gap-2">
-						<Button
-							type="button"
-							variant="outline"
-							size="icon-lg"
-							className="rounded-full"
-							aria-label="Previous deals"
-							disabled={atStart}
-							onClick={() => scrollByPage(-1)}
+		<Section id="deals" className="scroll-mt-8">
+			<SectionHeader
+				title={t("Today's biggest drops")}
+				description={
+					<>
+						{t("Sorted by discount.")}{" "}
+						{priceCheckNote(checkedAt, undefined, locale)}
+					</>
+				}
+				action={
+					<div className="flex items-center gap-4">
+						<Link
+							to="/deals"
+							className="py-2 font-semibold text-sm underline decoration-1 underline-offset-8"
 						>
-							<HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
-						</Button>
-						<Button
-							type="button"
-							variant="outline"
-							size="icon-lg"
-							className="rounded-full"
-							aria-label="Next deals"
-							disabled={atEnd}
-							onClick={() => scrollByPage(1)}
-						>
-							<HugeiconsIcon icon={ArrowRight01Icon} size={18} />
-						</Button>
+							{t("See all {{count}} deals", {
+								count: total.toLocaleString(languageTags[locale]),
+							})}
+						</Link>
+						<div className="flex gap-2">
+							<Button
+								type="button"
+								variant="outline"
+								size="icon-lg"
+								className="rounded-full"
+								aria-label={t("Previous deals")}
+								disabled={atStart}
+								onClick={() => scrollByPage(-1)}
+							>
+								<HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
+							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								size="icon-lg"
+								className="rounded-full"
+								aria-label={t("Next deals")}
+								disabled={atEnd}
+								onClick={() => scrollByPage(1)}
+							>
+								<HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+							</Button>
+						</div>
 					</div>
-				</div>
-			</div>
+				}
+			/>
 
 			<ul
 				ref={scroller}
-				className="mt-9 flex snap-x snap-mandatory gap-5 md:mt-10 md:gap-6 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+				className="mt-8 flex snap-x snap-mandatory gap-5 md:mt-10 md:gap-6 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
 			>
 				{deals.map((deal, i) => (
 					<li

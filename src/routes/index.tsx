@@ -31,7 +31,7 @@ function HomePage() {
 				checkedAt={stats.checkedAt}
 			/>
 			<DepartmentTiles />
-			<HowItWorks warehouses={stats.warehouses} />
+			<HowItWorks warehouses={stats.warehouses} checkedAt={stats.checkedAt} />
 			<ClosingBanner total={stats.deals} />
 		</>
 	);

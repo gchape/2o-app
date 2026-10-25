@@ -2,21 +2,33 @@ import { Section } from "#/components/layout/container";
 import { LinkButton } from "#/components/link-button";
 import { site } from "#/data/site";
 import { SkewTag } from "#/features/catalog/components/skew-tag";
+import { languageTags, useLocale } from "#/i18n/locale";
+import { useTranslation } from "#/i18n/translate";
 
 /** Last call at the bottom of the page: one button to everything that is on sale. */
 export function ClosingBanner({ total }: { total: number }) {
+	const t = useTranslation();
+	const locale = useLocale();
 	if (total === 0) return null;
 
 	return (
-		<Section className="bg-neutral-950 py-16 text-white md:py-22">
+		<Section
+			className="brand-surface closing-scene text-white"
+			spacing="compact"
+		>
 			<div className="flex flex-wrap items-center justify-between gap-8">
 				<div>
-					<SkewTag className="text-sm">New prices every morning</SkewTag>
+					<SkewTag className="text-sm">
+						{t("Your next find starts here")}
+					</SkewTag>
 					<h2 className="type-display mt-5 text-3xl leading-tight md:text-5xl">
-						Find your next pair.
+						{t("Find your next pair.")}
 					</h2>
-					<p className="mt-4 max-w-md text-base leading-relaxed text-white/70">
-						{site.name} checks the wholesale stores so you don't have to.
+					<p className="type-body mt-4 max-w-md text-base text-white/70">
+						{t(
+							"{{brand}} brings the deals together. Find a style, a size, and a price that work for you.",
+							{ brand: site.name },
+						)}
 					</p>
 				</div>
 
@@ -25,7 +37,9 @@ export function ClosingBanner({ total }: { total: number }) {
 					size="lg"
 					className="h-13 rounded-lg px-8 font-semibold"
 				>
-					See all {total.toLocaleString("en-US")} deals
+					{t("See all {{count}} deals", {
+						count: total.toLocaleString(languageTags[locale]),
+					})}
 				</LinkButton>
 			</div>
 		</Section>
