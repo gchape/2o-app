@@ -2,10 +2,9 @@ import { getViewURL, validateEmailAddress } from "@better-auth-ui/core";
 import { useAuth, useChangeEmail, useSession } from "@better-auth-ui/react";
 import { useEffect } from "react";
 import { toast } from "sonner";
-
+import { useAppForm } from "#/components/form/app-form";
 import { Card, CardContent, CardFooter } from "#/components/ui/card";
 import { cn } from "#/lib/utils";
-import { useAuthForm } from "../../auth-form";
 
 export type ChangeEmailProps = {
 	className?: string;
@@ -28,7 +27,7 @@ export function ChangeEmail({ className }: ChangeEmailProps) {
 		onSuccess: () => toast.success(localization.settings.changeEmailSuccess),
 	});
 
-	const form = useAuthForm({
+	const form = useAppForm({
 		defaultValues: { email: "" },
 		onSubmit: async ({ value }) =>
 			await changeEmail({
@@ -52,7 +51,7 @@ export function ChangeEmail({ className }: ChangeEmailProps) {
 			</h2>
 
 			<form.AppForm>
-				<form.AuthFormRoot>
+				<form.FormRoot>
 					<Card className={cn(className)}>
 						<CardContent className="flex flex-col gap-6">
 							<form.AppField
@@ -66,7 +65,7 @@ export function ChangeEmail({ className }: ChangeEmailProps) {
 								}}
 							>
 								{(field) => (
-									<field.AuthFormTextField
+									<field.FormTextField
 										label={localization.auth.email}
 										autoComplete="email"
 										placeholder={localization.auth.emailPlaceholder}
@@ -77,20 +76,20 @@ export function ChangeEmail({ className }: ChangeEmailProps) {
 									/>
 								)}
 							</form.AppField>
-							<form.AuthFormServerError />
+							<form.FormServerError />
 						</CardContent>
 
 						<CardFooter>
-							<form.AuthFormSubmitButton
+							<form.FormSubmitButton
 								isPending={isPending}
 								size="sm"
 								disabled={isPending || !session}
 							>
 								{localization.settings.updateEmail}
-							</form.AuthFormSubmitButton>
+							</form.FormSubmitButton>
 						</CardFooter>
 					</Card>
-				</form.AuthFormRoot>
+				</form.FormRoot>
 			</form.AppForm>
 		</div>
 	);

@@ -2,11 +2,12 @@ import { useAuth } from "@better-auth-ui/react";
 import { useVerifyEmailOtp } from "@better-auth-ui/react/plugins/email-otp";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useAppForm } from "#/components/form/app-form";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { FieldDescription, FieldGroup } from "#/components/ui/field";
 import { authClient } from "#/features/auth/auth-client";
+import { fill, useMessages } from "#/i18n/messages";
 import { cn } from "#/lib/utils";
-import { useAuthForm } from "./auth-form";
 import { ResendCodeButton } from "./resend-code-button";
 import { VERIFY_EMAIL_STORAGE_KEY } from "./storage-keys";
 import { useStoredEmail } from "./use-stored-email";
@@ -15,15 +16,16 @@ export type VerifyEmailProps = { className?: string };
 
 export function VerifyEmail({ className }: VerifyEmailProps) {
 	const { basePaths, viewPaths, navigate, Link } = useAuth();
+	const messages = useMessages();
 	const email = useStoredEmail(VERIFY_EMAIL_STORAGE_KEY);
 	const verify = useVerifyEmailOtp(authClient, {
 		onSuccess: () => {
 			sessionStorage.removeItem(VERIFY_EMAIL_STORAGE_KEY);
-			toast.success("Email verified. You can now sign in.");
+			toast.success(messages.verifyEmail.success);
 			navigate({ to: `${basePaths.auth}/${viewPaths.auth.signIn}` });
 		},
 	});
-	const form = useAuthForm({
+	const form = useAppForm({
 		defaultValues: { otp: "" },
 		onSubmit: async ({ value }) => {
 			await verify.mutateAsync({ email, otp: value.otp });
@@ -34,29 +36,28 @@ export function VerifyEmail({ className }: VerifyEmailProps) {
 		<Card className={cn("w-full max-w-sm", className)}>
 			<CardHeader>
 				<CardTitle className="text-xl font-semibold">
-					Verify your email
+					{messages.verifyEmail.title}
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
 				{email ? (
 					<form.AppForm>
-						<form.AuthFormRoot>
+						<form.FormRoot>
 							<FieldGroup>
 								<FieldDescription>
-									Enter the six-digit code sent to {email}. It expires in 5
-									minutes.
+									{fill(messages.verifyEmail.instructions, { email })}
 								</FieldDescription>
 								<form.AppField
 									name="otp"
 									validators={{
 										onChange: z
 											.string()
-											.regex(/^\d{6}$/, "Enter the six-digit code"),
+											.regex(/^\d{6}$/, messages.otp.invalidCode),
 									}}
 								>
 									{(field) => (
-										<field.AuthFormTextField
-											label="Verification code"
+										<field.FormTextField
+											label={messages.verifyEmail.codeLabel}
 											inputMode="numeric"
 											autoComplete="one-time-code"
 											maxLength={6}
@@ -65,10 +66,10 @@ export function VerifyEmail({ className }: VerifyEmailProps) {
 										/>
 									)}
 								</form.AppField>
-								<form.AuthFormServerError />
-								<form.AuthFormSubmitButton isPending={verify.isPending}>
-									Verify email
-								</form.AuthFormSubmitButton>
+								<form.FormServerError />
+								<form.FormSubmitButton isPending={verify.isPending}>
+									{messages.verifyEmail.submit}
+								</form.FormSubmitButton>
 								<ResendCodeButton
 									disabled={verify.isPending}
 									onResend={async () => {
@@ -81,19 +82,17 @@ export function VerifyEmail({ className }: VerifyEmailProps) {
 									}}
 								/>
 							</FieldGroup>
-						</form.AuthFormRoot>
+						</form.FormRoot>
 					</form.AppForm>
 				) : (
-					<FieldDescription>
-						Sign in or create an account to request a verification code.
-					</FieldDescription>
+					<FieldDescription>{messages.verifyEmail.noEmail}</FieldDescription>
 				)}
 				<FieldDescription className="mt-4 text-center">
 					<Link
 						href={`${basePaths.auth}/${viewPaths.auth.signIn}`}
 						className="underline underline-offset-4"
 					>
-						Back to sign in
+						{messages.verifyEmail.backToSignIn}
 					</Link>
 				</FieldDescription>
 			</CardContent>

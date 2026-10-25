@@ -68,8 +68,7 @@ export const auth = betterAuth({
 		customRules: {
 			"/sign-in/email": { window: 60, max: 5 },
 			"/sign-up/email": perHour(5),
-			"/request-password-reset": perHour(3),
-			"/forget-password": perHour(3),
+			// email-otp limits its send, verify and reset endpoints to 3/minute.
 			"/change-email": perHour(3),
 		},
 	},

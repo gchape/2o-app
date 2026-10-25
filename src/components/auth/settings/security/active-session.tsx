@@ -4,7 +4,6 @@ import Bowser from "bowser";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { LogOut, Monitor, Smartphone, X } from "#/components/icons";
-
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -16,6 +15,8 @@ import {
 	ItemTitle,
 } from "#/components/ui/item";
 import { Spinner } from "#/components/ui/spinner";
+import { dateLocales, useLocale } from "#/i18n/locale";
+import { useMessages } from "#/i18n/messages";
 
 export type ActiveSessionProps = {
 	activeSession: Session;
@@ -31,6 +32,8 @@ export type ActiveSessionProps = {
  * @returns A JSX element containing the active session row
  */
 export function ActiveSession({ activeSession }: ActiveSessionProps) {
+	const messages = useMessages();
+	const locale = useLocale();
 	const { authClient, basePaths, localization, viewPaths, navigate } =
 		useAuth();
 	const { data: session } = useSession(authClient, { refetchOnMount: false });
@@ -57,7 +60,7 @@ export function ActiveSession({ activeSession }: ActiveSessionProps) {
 			</ItemMedia>
 			<ItemContent>
 				<ItemTitle>
-					{ua?.browser.name || "Unknown Browser"}
+					{ua?.browser.name || messages.session.unknownBrowser}
 					{ua?.os.name ? `, ${ua.os.name}` : ""}
 				</ItemTitle>
 				{isCurrentSession ? (
@@ -69,6 +72,7 @@ export function ActiveSession({ activeSession }: ActiveSessionProps) {
 						<ItemDescription className="capitalize">
 							{formatDistanceToNow(activeSession.createdAt, {
 								addSuffix: true,
+								locale: dateLocales[locale],
 							})}
 						</ItemDescription>
 					)

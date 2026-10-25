@@ -1,6 +1,5 @@
 import {
 	isPasswordCompromisedError,
-	validateMatchingValue,
 	validateStringLength,
 } from "@better-auth-ui/core";
 import {
@@ -13,12 +12,14 @@ import {
 import { useRequestPasswordResetOtp } from "@better-auth-ui/react/plugins/email-otp";
 import { useState } from "react";
 import { toast } from "sonner";
+import { usePasswordValidation } from "#/components/auth/use-password-validation";
+import { useAppForm } from "#/components/form/app-form";
 import { Button } from "#/components/ui/button";
 import { Card, CardContent, CardFooter } from "#/components/ui/card";
 import { Spinner } from "#/components/ui/spinner";
 import { authClient as otpAuthClient } from "#/features/auth/auth-client";
+import { useMessages } from "#/i18n/messages";
 import { cn } from "#/lib/utils";
-import { useAuthForm } from "../../auth-form";
 import { PasswordStrengthMeter } from "../../password-strength-meter";
 import { RESET_PASSWORD_EMAIL_STORAGE_KEY } from "../../storage-keys";
 
@@ -60,6 +61,7 @@ export function ChangePassword({ className }: ChangePasswordProps) {
 }
 
 function SetPassword({ className }: { className?: string }) {
+	const messages = useMessages();
 	const { authClient, basePaths, navigate, localization, plugins, viewPaths } =
 		useAuth();
 	const { data: session } = useSession(authClient);
@@ -116,7 +118,7 @@ function SetPassword({ className }: { className?: string }) {
 							onClick={handleSetPassword}
 						>
 							{isPending && <Spinner />}
-							Send reset code
+							{messages.forgotPassword.sendCode}
 						</Button>
 					</div>
 				</CardContent>
@@ -154,7 +156,8 @@ function ChangePasswordForm({
 
 	const [isCompromised, setIsCompromised] = useState(false);
 
-	const form = useAuthForm({
+	const { validatePassword, validateConfirmation } = usePasswordValidation();
+	const form = useAppForm({
 		defaultValues: {
 			confirmPassword: "",
 			currentPassword: "",
@@ -180,7 +183,7 @@ function ChangePasswordForm({
 			</h2>
 
 			<form.AppForm>
-				<form.AuthFormRoot>
+				<form.FormRoot>
 					<Card className={cn(className)}>
 						<CardContent className="flex flex-col gap-6">
 							<form.AppField
@@ -193,7 +196,7 @@ function ChangePasswordForm({
 								}}
 							>
 								{(field) => (
-									<field.AuthFormTextField
+									<field.FormTextField
 										label={localization.settings.currentPassword}
 										type="password"
 										autoComplete="current-password"
@@ -210,24 +213,11 @@ function ChangePasswordForm({
 							<form.AppField
 								name="newPassword"
 								validators={{
-									onChange: ({ value }) =>
-										validateStringLength(value, {
-											maxLength: emailAndPassword.maxPasswordLength,
-											maxLengthMessage: localization.auth.tooLong.replace(
-												"{{max}}",
-												String(emailAndPassword.maxPasswordLength),
-											),
-											minLength: emailAndPassword.minPasswordLength,
-											minLengthMessage: localization.auth.tooShort.replace(
-												"{{min}}",
-												String(emailAndPassword.minPasswordLength),
-											),
-											requiredMessage: localization.auth.fieldRequired,
-										}),
+									onChange: ({ value }) => validatePassword(value),
 								}}
 							>
 								{(field) => (
-									<field.AuthFormTextField
+									<field.FormTextField
 										label={localization.auth.newPassword}
 										type="password"
 										autoComplete="new-password"
@@ -243,7 +233,7 @@ function ChangePasswordForm({
 										onValueChange={() => setIsCompromised(false)}
 									>
 										<PasswordStrengthMeter password={field.state.value} />
-									</field.AuthFormTextField>
+									</field.FormTextField>
 								)}
 							</form.AppField>
 
@@ -253,28 +243,14 @@ function ChangePasswordForm({
 									validators={{
 										onChangeListenTo: ["newPassword"],
 										onChange: ({ fieldApi, value }) =>
-											validateStringLength(value, {
-												maxLength: emailAndPassword.maxPasswordLength,
-												maxLengthMessage: localization.auth.tooLong.replace(
-													"{{max}}",
-													String(emailAndPassword.maxPasswordLength),
-												),
-												minLength: emailAndPassword.minPasswordLength,
-												minLengthMessage: localization.auth.tooShort.replace(
-													"{{min}}",
-													String(emailAndPassword.minPasswordLength),
-												),
-												requiredMessage: localization.auth.fieldRequired,
-											}) ??
-											validateMatchingValue(
+											validateConfirmation(
 												value,
 												fieldApi.form.getFieldValue("newPassword"),
-												localization.auth.passwordsDoNotMatch,
 											),
 									}}
 								>
 									{(field) => (
-										<field.AuthFormTextField
+										<field.FormTextField
 											label={localization.auth.confirmPassword}
 											type="password"
 											autoComplete="new-password"
@@ -291,15 +267,12 @@ function ChangePasswordForm({
 						</CardContent>
 
 						<CardFooter>
-							<form.AuthFormSubmitButton
-								disabled={isPending || !session}
-								size="sm"
-							>
+							<form.FormSubmitButton disabled={isPending || !session} size="sm">
 								{localization.settings.updatePassword}
-							</form.AuthFormSubmitButton>
+							</form.FormSubmitButton>
 						</CardFooter>
 					</Card>
-				</form.AuthFormRoot>
+				</form.FormRoot>
 			</form.AppForm>
 		</div>
 	);

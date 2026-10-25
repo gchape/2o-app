@@ -1,22 +1,22 @@
 import {
 	getAuthLinkURL,
 	isPasswordCompromisedError,
-	validateMatchingValue,
-	validateStringLength,
 } from "@better-auth-ui/core";
 import { useAuth } from "@better-auth-ui/react";
 import { useResetPasswordOtp } from "@better-auth-ui/react/plugins/email-otp";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useAppForm } from "#/components/form/app-form";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { FieldDescription, FieldGroup } from "#/components/ui/field";
 import { authClient } from "#/features/auth/auth-client";
+import { fill, useMessages } from "#/i18n/messages";
 import { cn } from "#/lib/utils";
-import { useAuthForm } from "./auth-form";
 import { PasswordStrengthMeter } from "./password-strength-meter";
 import { ResendCodeButton } from "./resend-code-button";
 import { RESET_PASSWORD_EMAIL_STORAGE_KEY } from "./storage-keys";
+import { usePasswordValidation } from "./use-password-validation";
 import { useStoredEmail } from "./use-stored-email";
 
 export type ResetPasswordProps = {
@@ -34,6 +34,8 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 		viewPaths,
 		Link,
 	} = useAuth();
+	const messages = useMessages();
+	const { validatePassword, validateConfirmation } = usePasswordValidation();
 	const signInURL = getAuthLinkURL(
 		`${basePaths.auth}/${viewPaths.auth.signIn}`,
 		redirectTo,
@@ -60,7 +62,7 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 
 	const email = useStoredEmail(RESET_PASSWORD_EMAIL_STORAGE_KEY);
 
-	const form = useAuthForm({
+	const form = useAppForm({
 		defaultValues: { otp: "", confirmPassword: "", password: "" },
 		onSubmit: async ({ value }) => {
 			try {
@@ -85,24 +87,24 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 
 			<CardContent>
 				<form.AppForm>
-					<form.AuthFormRoot>
+					<form.FormRoot>
 						<FieldGroup>
 							<FieldDescription>
 								{email
-									? `Enter the code sent to ${email} and choose a new password.`
-									: "Request a reset code first using Forgot password."}
+									? fill(messages.resetPassword.instructions, { email })
+									: messages.resetPassword.noEmail}
 							</FieldDescription>
 							<form.AppField
 								name="otp"
 								validators={{
 									onChange: z
 										.string()
-										.regex(/^\d{6}$/, "Enter the six-digit code"),
+										.regex(/^\d{6}$/, messages.otp.invalidCode),
 								}}
 							>
 								{(field) => (
-									<field.AuthFormTextField
-										label="Reset code"
+									<field.FormTextField
+										label={messages.resetPassword.codeLabel}
 										inputMode="numeric"
 										autoComplete="one-time-code"
 										maxLength={6}
@@ -114,24 +116,11 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 							<form.AppField
 								name="password"
 								validators={{
-									onChange: ({ value }) =>
-										validateStringLength(value, {
-											maxLength: emailAndPassword?.maxPasswordLength,
-											maxLengthMessage: localization.auth.tooLong.replace(
-												"{{max}}",
-												String(emailAndPassword?.maxPasswordLength),
-											),
-											minLength: emailAndPassword?.minPasswordLength,
-											minLengthMessage: localization.auth.tooShort.replace(
-												"{{min}}",
-												String(emailAndPassword?.minPasswordLength),
-											),
-											requiredMessage: localization.auth.fieldRequired,
-										}),
+									onChange: ({ value }) => validatePassword(value),
 								}}
 							>
 								{(field) => (
-									<field.AuthFormTextField
+									<field.FormTextField
 										label={localization.auth.password}
 										type="password"
 										autoComplete="new-password"
@@ -146,7 +135,7 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 										onValueChange={() => setIsCompromised(false)}
 									>
 										<PasswordStrengthMeter password={field.state.value} />
-									</field.AuthFormTextField>
+									</field.FormTextField>
 								)}
 							</form.AppField>
 
@@ -156,28 +145,14 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 									validators={{
 										onChangeListenTo: ["password"],
 										onChange: ({ fieldApi, value }) =>
-											validateStringLength(value, {
-												maxLength: emailAndPassword?.maxPasswordLength,
-												maxLengthMessage: localization.auth.tooLong.replace(
-													"{{max}}",
-													String(emailAndPassword?.maxPasswordLength),
-												),
-												minLength: emailAndPassword?.minPasswordLength,
-												minLengthMessage: localization.auth.tooShort.replace(
-													"{{min}}",
-													String(emailAndPassword?.minPasswordLength),
-												),
-												requiredMessage: localization.auth.fieldRequired,
-											}) ??
-											validateMatchingValue(
+											validateConfirmation(
 												value,
 												fieldApi.form.getFieldValue("password"),
-												localization.auth.passwordsDoNotMatch,
 											),
 									}}
 								>
 									{(field) => (
-										<field.AuthFormTextField
+										<field.FormTextField
 											label={localization.auth.confirmPassword}
 											type="password"
 											autoComplete="new-password"
@@ -192,10 +167,10 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 							)}
 
 							<div className="flex flex-col gap-3">
-								<form.AuthFormServerError />
-								<form.AuthFormSubmitButton disabled={isPending || !email}>
+								<form.FormServerError />
+								<form.FormSubmitButton disabled={isPending || !email}>
 									{localization.auth.resetPassword}
-								</form.AuthFormSubmitButton>
+								</form.FormSubmitButton>
 							</div>
 							{email && (
 								<ResendCodeButton
@@ -211,10 +186,10 @@ export function ResetPassword({ className }: ResetPasswordProps) {
 								href={`${basePaths.auth}/${viewPaths.auth.forgotPassword}`}
 								className="text-sm underline underline-offset-4"
 							>
-								Request a code for another email
+								{messages.resetPassword.useAnotherEmail}
 							</Link>
 						</FieldGroup>
-					</form.AuthFormRoot>
+					</form.FormRoot>
 				</form.AppForm>
 
 				<div className="flex flex-col gap-3 items-center w-full mt-4">

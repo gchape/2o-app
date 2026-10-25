@@ -1,5 +1,6 @@
 import { escape as escapeHtml } from "es-toolkit";
 import { Resend } from "resend";
+import { translate as t } from "#/i18n/translate";
 import { env } from "#/server/env.server";
 
 const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
@@ -22,7 +23,7 @@ export async function sendEmail({ to, subject, html }: Email & { to: string }) {
 
 	if (error) {
 		console.error("Failed to send email:", error);
-		throw new Error("Unable to send email. Please try again.");
+		throw new Error(t("Unable to send email. Please try again."));
 	}
 }
 
@@ -31,13 +32,13 @@ export const emailTemplates = {
 	code: (otp: string, type: string): Email => ({
 		subject:
 			type === "forget-password"
-				? "Your password reset code"
-				: "Your email verification code",
-		html: `<p>Your confirmation code is <strong>${escapeHtml(otp)}</strong>.</p><p>It expires in 5 minutes. If you didn't request this, ignore this email.</p>`,
+				? t("Your password reset code")
+				: t("Your email verification code"),
+		html: `<div lang="ka"><p>${t("Your confirmation code is")} <strong>${escapeHtml(otp)}</strong>.</p><p>${t("It expires in 5 minutes. If you didn't request this, ignore this email.")}</p></div>`,
 	}),
 
 	approveEmailChange: (newEmail: string, url: string): Email => ({
-		subject: "Approve your email change",
-		html: `<p>You asked to change your email to ${escapeHtml(newEmail)}. <a href="${escapeHtml(url)}">Approve the change</a>. If this wasn't you, ignore this email.</p>`,
+		subject: t("Approve your email change"),
+		html: `<div lang="ka"><p>${t("You asked to change your email to {{email}}.", { email: escapeHtml(newEmail) })} <a href="${escapeHtml(url)}">${t("Approve the change")}</a>. ${t("If this wasn't you, ignore this email.")}</p></div>`,
 	}),
 };

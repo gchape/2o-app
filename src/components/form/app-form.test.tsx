@@ -1,22 +1,15 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
-import { useAuthForm } from "./auth-form";
-
-vi.mock("@better-auth-ui/react", () => ({
-	useAuth: () => ({
-		localization: {
-			auth: { showPassword: "Show password", hidePassword: "Hide password" },
-		},
-	}),
-}));
+import { describe, expect, it } from "vitest";
+import { useAppForm } from "#/components/form/app-form";
+import { en, MessagesProvider } from "#/i18n/messages";
 
 function ExampleForm({ error }: { error?: string }) {
-	const form = useAuthForm({ defaultValues: { password: "secret" } });
+	const form = useAppForm({ defaultValues: { password: "secret" } });
 	return (
 		<form.AppForm>
 			<form.AppField name="password">
 				{(field) => (
-					<field.AuthFormTextField
+					<field.FormTextField
 						type="password"
 						label="Password"
 						description="At least 8 characters"
@@ -29,12 +22,26 @@ function ExampleForm({ error }: { error?: string }) {
 }
 
 describe("composed form fields", () => {
+	it("uses translated password controls without an auth provider", () => {
+		const html = renderToStaticMarkup(
+			<MessagesProvider
+				value={{
+					...en,
+					form: { ...en.form, showPassword: "Afficher le mot de passe" },
+				}}
+			>
+				<ExampleForm />
+			</MessagesProvider>,
+		);
+		expect(html).toContain('aria-label="Afficher le mot de passe"');
+	});
+
 	it("preserves the password input and visibility control", () => {
 		const html = renderToStaticMarkup(<ExampleForm />);
 		expect(html).toContain('type="password"');
 		expect(html).toContain('name="password"');
 		expect(html).toContain('value="secret"');
-		expect(html).toContain('aria-label="Show password"');
+		expect(html).toContain('aria-label="პაროლის ჩვენება"');
 	});
 
 	it("connects labels, help, and server errors to distinct fields in multiple forms", () => {

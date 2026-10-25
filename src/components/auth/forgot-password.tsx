@@ -1,11 +1,12 @@
 import { validateEmailAddress } from "@better-auth-ui/core";
 import { useAuth, useFetchOptions } from "@better-auth-ui/react";
 import { useRequestPasswordResetOtp } from "@better-auth-ui/react/plugins/email-otp";
+import { useAppForm } from "#/components/form/app-form";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { FieldDescription, FieldGroup } from "#/components/ui/field";
 import { authClient } from "#/features/auth/auth-client";
+import { useMessages } from "#/i18n/messages";
 import { cn } from "#/lib/utils";
-import { useAuthForm } from "./auth-form";
 import { RESET_PASSWORD_EMAIL_STORAGE_KEY } from "./storage-keys";
 
 export type ForgotPasswordProps = {
@@ -14,6 +15,7 @@ export type ForgotPasswordProps = {
 
 /** Requests a password reset code and opens the reset form. */
 export function ForgotPassword({ className }: ForgotPasswordProps) {
+	const messages = useMessages();
 	const { basePaths, localization, navigate, plugins, viewPaths, Link } =
 		useAuth();
 
@@ -30,7 +32,7 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
 			},
 		});
 
-	const form = useAuthForm({
+	const form = useAppForm({
 		defaultValues: { email: "" },
 		onSubmit: async ({ value }) =>
 			await requestPasswordReset({
@@ -53,7 +55,7 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
 
 			<CardContent>
 				<form.AppForm>
-					<form.AuthFormRoot>
+					<form.FormRoot>
 						<FieldGroup>
 							<form.AppField
 								name="email"
@@ -66,7 +68,7 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
 								}}
 							>
 								{(field) => (
-									<field.AuthFormTextField
+									<field.FormTextField
 										label={localization.auth.email}
 										type="email"
 										autoComplete="email"
@@ -79,17 +81,17 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
 
 							{Captcha && <div className="flex justify-center">{Captcha}</div>}
 
-							<form.AuthFormServerError />
+							<form.FormServerError />
 							<div className="flex flex-col gap-3">
-								<form.AuthFormSubmitButton
+								<form.FormSubmitButton
 									isPending={isPending}
 									disabled={isPending}
 								>
-									Send reset code
-								</form.AuthFormSubmitButton>
+									{messages.forgotPassword.sendCode}
+								</form.FormSubmitButton>
 							</div>
 						</FieldGroup>
-					</form.AuthFormRoot>
+					</form.FormRoot>
 				</form.AppForm>
 
 				<div className="flex flex-col gap-3 items-center w-full mt-4">

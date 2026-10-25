@@ -2,14 +2,8 @@ import { getProviderId } from "@better-auth-ui/core";
 import { useAuth, useListAccounts } from "@better-auth-ui/react";
 import { Fragment } from "react";
 import { Card, CardContent } from "#/components/ui/card";
-import {
-	Item,
-	ItemContent,
-	ItemGroup,
-	ItemMedia,
-	ItemSeparator,
-} from "#/components/ui/item";
-import { Skeleton } from "#/components/ui/skeleton";
+import { ItemGroup, ItemSeparator } from "#/components/ui/item";
+import { ItemSkeleton } from "#/components/ui/item-skeleton";
 import { cn } from "#/lib/utils";
 import { LinkedAccount } from "./linked-account";
 
@@ -81,7 +75,7 @@ export function LinkedAccounts({ className }: LinkedAccountsProps) {
 							? socialProviders?.map((provider, index) => (
 									<Fragment key={getProviderId(provider)}>
 										{index > 0 && <ItemSeparator />}
-										<AccountRowSkeleton />
+										<ItemSkeleton />
 									</Fragment>
 								))
 							: allRows.map((row, index) => (
@@ -98,19 +92,5 @@ export function LinkedAccounts({ className }: LinkedAccountsProps) {
 				</CardContent>
 			</Card>
 		</div>
-	);
-}
-
-function AccountRowSkeleton() {
-	return (
-		<Item>
-			<ItemMedia>
-				<Skeleton className="size-10 rounded-md" />
-			</ItemMedia>
-			<ItemContent>
-				<Skeleton className="h-4 w-20" />
-				<Skeleton className="h-3 w-32" />
-			</ItemContent>
-		</Item>
 	);
 }

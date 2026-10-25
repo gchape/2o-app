@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
 import { Spinner } from "#/components/ui/spinner";
+import { fill, useMessages } from "#/i18n/messages";
 
 export function ResendCodeButton({
 	onResend,
@@ -11,14 +12,15 @@ export function ResendCodeButton({
 	onResend: () => Promise<unknown>;
 	disabled?: boolean;
 }) {
+	const messages = useMessages();
 	const [cooldown, setCooldown] = useState(60);
 	const resend = useMutation({
 		mutationFn: onResend,
 		onSuccess: () => {
 			setCooldown(60);
-			toast.success("A new code has been sent if the email is eligible.");
+			toast.success(messages.otp.resent);
 		},
-		onError: () => toast.error("Couldn't send a code. Please try again."),
+		onError: () => toast.error(messages.otp.resendFailed),
 	});
 
 	useEffect(() => {
@@ -35,7 +37,9 @@ export function ResendCodeButton({
 			onClick={() => resend.mutate()}
 		>
 			{resend.isPending && <Spinner />}
-			{cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+			{cooldown > 0
+				? fill(messages.otp.resendIn, { seconds: cooldown })
+				: messages.otp.resend}
 		</Button>
 	);
 }

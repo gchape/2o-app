@@ -3,287 +3,22 @@ import {
 	type AdditionalFieldFormValue,
 	DEFAULT_ADDITIONAL_FIELD_VALIDATION_DEBOUNCE_MS,
 	getFormFieldErrors,
-	normalizeAuthFormServerError,
 	validateAdditionalFieldRequired,
 	validateAdditionalFieldValue,
 } from "@better-auth-ui/core";
-import {
-	type AnyFormApi,
-	createFormHook,
-	createFormHookContexts,
-} from "@tanstack/react-form";
-import {
-	type ComponentProps,
-	type FormEvent,
-	type ReactNode,
-	useId,
-	useRef,
-} from "react";
+import { createFormHook } from "@tanstack/react-form";
 
-import { Button } from "#/components/ui/button";
 import {
-	Field,
-	FieldDescription,
-	FieldError,
-	FieldLabel,
-} from "#/components/ui/field";
-import { Input } from "#/components/ui/input";
-import { Skeleton } from "#/components/ui/skeleton";
-import { Spinner } from "#/components/ui/spinner";
+	clearFieldServerError,
+	fieldComponents,
+	fieldContext,
+	formComponents,
+	formContext,
+	isFieldInvalid,
+	useFieldContext,
+	useFormContext,
+} from "#/components/form/app-form";
 import { AdditionalField, type AdditionalFieldProps } from "./additional-field";
-import { PasswordInput } from "./password-input";
-
-const { fieldContext, formContext, useFieldContext, useFormContext } =
-	createFormHookContexts();
-
-const DEFAULT_AUTH_FORM_SERVER_ERROR = "Unable to submit this form. Try again.";
-
-function focusFirstInvalidAuthFormControl(form: HTMLFormElement) {
-	requestAnimationFrame(() => {
-		form
-			.querySelector<HTMLElement>(
-				'[aria-invalid="true"]:not([disabled]), :invalid:not([disabled])',
-			)
-			?.focus();
-	});
-}
-
-function AuthFormFieldError() {
-	const field = useFieldContext<unknown>();
-	const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-
-	if (!isInvalid) return null;
-
-	const errors = getFormFieldErrors(field.state.meta.errors);
-
-	return errors.length > 0 ? <FieldError errors={errors} /> : null;
-}
-
-function AuthFormServerError() {
-	const form = useFormContext();
-
-	return (
-		<form.Subscribe selector={(state) => state.errorMap.onServer}>
-			{(error) => {
-				const formError =
-					error && typeof error === "object" && "form" in error
-						? error.form
-						: error;
-				const errors = getFormFieldErrors(formError ? [formError] : []);
-				return errors.length > 0 ? <FieldError errors={errors} /> : null;
-			}}
-		</form.Subscribe>
-	);
-}
-
-function setAuthFormServerError(
-	form: AnyFormApi,
-	error: unknown,
-	fallbackMessage: string,
-) {
-	const normalized = normalizeAuthFormServerError(error, fallbackMessage);
-	form.setErrorMap({
-		onServer: {
-			fields: normalized.fields ?? {},
-			form: normalized.form,
-		},
-	});
-}
-
-function clearAuthFormServerError(form: AnyFormApi) {
-	form.setErrorMap({ onServer: { fields: {} } });
-}
-
-function clearAuthFormFieldServerError(form: AnyFormApi, fieldName: string) {
-	form.setErrorMap({ onServer: undefined });
-	if (!fieldName) return;
-
-	const fieldMeta = form.getFieldMeta(fieldName as never);
-	if (!fieldMeta?.errorMap.onServer) return;
-
-	form.setFieldMeta(fieldName as never, (current = fieldMeta) => ({
-		...current,
-		errorMap: { ...current.errorMap, onServer: undefined },
-		errorSourceMap: { ...current.errorSourceMap, onServer: undefined },
-	}));
-}
-
-async function submitAuthForm(
-	form: AnyFormApi,
-	serverErrorMessage = DEFAULT_AUTH_FORM_SERVER_ERROR,
-) {
-	clearAuthFormServerError(form);
-	try {
-		await form.handleSubmit();
-		return form.state.isValid;
-	} catch (error) {
-		if (!form.state.errorMap.onServer) {
-			setAuthFormServerError(form, error, serverErrorMessage);
-		}
-		return false;
-	}
-}
-
-type AuthFormRootProps = Omit<ComponentProps<"form">, "onSubmit"> & {
-	onBeforeSubmit?: () => void;
-	serverErrorMessage?: string;
-};
-
-function AuthFormRoot({
-	children,
-	onBeforeSubmit,
-	onInput,
-	serverErrorMessage = DEFAULT_AUTH_FORM_SERVER_ERROR,
-	...props
-}: AuthFormRootProps) {
-	const form = useFormContext();
-	const submittingRef = useRef(false);
-
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		if (submittingRef.current || form.state.isSubmitting) return;
-
-		const formElement = event.currentTarget;
-		onBeforeSubmit?.();
-		submittingRef.current = true;
-		try {
-			const isValid = await submitAuthForm(form, serverErrorMessage);
-			if (!isValid) focusFirstInvalidAuthFormControl(formElement);
-		} finally {
-			submittingRef.current = false;
-		}
-	}
-
-	return (
-		<form
-			{...props}
-			onInvalid={(event) =>
-				focusFirstInvalidAuthFormControl(event.currentTarget)
-			}
-			onInput={(event) => {
-				const target = event.target;
-				const fieldName =
-					target instanceof HTMLInputElement ||
-					target instanceof HTMLSelectElement ||
-					target instanceof HTMLTextAreaElement
-						? target.name
-						: "";
-				clearAuthFormFieldServerError(form, fieldName);
-				onInput?.(event);
-			}}
-			onSubmit={submit}
-		>
-			{children}
-		</form>
-	);
-}
-
-type AuthFormTextFieldProps = Omit<
-	ComponentProps<typeof Input>,
-	"name" | "onBlur" | "onChange" | "value"
-> & {
-	description?: ReactNode;
-	error?: ReactNode;
-	label: ReactNode;
-	isLoading?: boolean;
-	onValueChange?: (value: string) => void;
-};
-
-function AuthFormTextField({
-	isLoading = false,
-	description,
-	error,
-	children,
-	id,
-	label,
-	type,
-	onValueChange,
-	...props
-}: AuthFormTextFieldProps) {
-	const field = useFieldContext<string>();
-	const form = useFormContext();
-	const isInvalid = Boolean(error) || isAuthFormFieldInvalid(field.state.meta);
-	const generatedId = useId();
-	const inputId = id ?? `${generatedId}-${field.name}`;
-	const descriptionId = `${inputId}-description`;
-	const errorId = `${inputId}-error`;
-	const Control = type === "password" ? PasswordInput : Input;
-
-	return (
-		<Field data-invalid={isInvalid}>
-			<FieldLabel htmlFor={inputId}>{label}</FieldLabel>
-			{isLoading ? (
-				<Skeleton className="h-9 w-full" />
-			) : (
-				<Control
-					{...props}
-					type={type}
-					aria-describedby={
-						[
-							props["aria-describedby"],
-							description && descriptionId,
-							isInvalid && errorId,
-						]
-							.filter(Boolean)
-							.join(" ") || undefined
-					}
-					aria-busy={field.state.meta.isValidating || undefined}
-					aria-invalid={isInvalid}
-					id={inputId}
-					name={field.name}
-					onBlur={field.handleBlur}
-					onChange={(event) => {
-						clearAuthFormFieldServerError(form, field.name);
-						field.handleChange(event.target.value);
-						onValueChange?.(event.target.value);
-					}}
-					value={field.state.value}
-				/>
-			)}
-			{description && (
-				<FieldDescription id={descriptionId}>{description}</FieldDescription>
-			)}
-			{isInvalid && (
-				<div id={errorId}>
-					{error ? <FieldError>{error}</FieldError> : <AuthFormFieldError />}
-				</div>
-			)}
-			{children}
-		</Field>
-	);
-}
-
-function AuthFormSubmitButton({
-	children,
-	disabled,
-	isPending,
-	...props
-}: ComponentProps<typeof Button> & { isPending?: boolean }) {
-	const form = useFormContext();
-
-	return (
-		<form.Subscribe
-			selector={(state) => [state.isSubmitting, state.isValidating] as const}
-		>
-			{([isSubmitting, isValidating]) => (
-				<Button
-					{...props}
-					aria-busy={isPending || isSubmitting || undefined}
-					aria-disabled={
-						disabled || isPending || isSubmitting || isValidating || undefined
-					}
-					disabled={disabled || isPending || isSubmitting || isValidating}
-					type="submit"
-				>
-					{isPending || isSubmitting ? (
-						<Spinner data-icon="inline-start" />
-					) : null}
-					{children}
-				</Button>
-			)}
-		</form.Subscribe>
-	);
-}
 
 type AuthFormAdditionalFieldProps = Omit<
 	AdditionalFieldProps,
@@ -293,7 +28,7 @@ type AuthFormAdditionalFieldProps = Omit<
 function AuthFormAdditionalField(props: AuthFormAdditionalFieldProps) {
 	const field = useFieldContext<AdditionalFieldFormValue>();
 	const form = useFormContext();
-	const isInvalid = isAuthFormFieldInvalid(field.state.meta);
+	const isInvalid = isFieldInvalid(field.state.meta);
 
 	return (
 		<AdditionalField
@@ -305,7 +40,7 @@ function AuthFormAdditionalField(props: AuthFormAdditionalFieldProps) {
 			name={field.name}
 			onBlur={field.handleBlur}
 			onChange={(value) => {
-				clearAuthFormFieldServerError(form, field.name);
+				clearFieldServerError(form, field.name);
 				field.handleChange(value);
 			}}
 			value={field.state.value}
@@ -313,30 +48,16 @@ function AuthFormAdditionalField(props: AuthFormAdditionalFieldProps) {
 	);
 }
 
+/**
+ * `useAppForm` plus the component that renders Better Auth's configurable
+ * additional fields. Only the sign-up and profile forms need it.
+ */
 export const { useAppForm: useAuthForm } = createFormHook({
-	fieldComponents: {
-		AuthFormAdditionalField,
-		AuthFormFieldError,
-		AuthFormTextField,
-	},
+	fieldComponents: { ...fieldComponents, AuthFormAdditionalField },
 	fieldContext,
-	formComponents: {
-		AuthFormRoot,
-		AuthFormServerError,
-		AuthFormSubmitButton,
-	},
+	formComponents,
 	formContext,
 });
-
-function isAuthFormFieldInvalid({
-	isTouched,
-	isValid,
-}: {
-	isTouched: boolean;
-	isValid: boolean;
-}) {
-	return isTouched && !isValid;
-}
 
 export function getAuthAdditionalFieldValidators(
 	field: AdditionalFieldConfig,

@@ -1,4 +1,3 @@
-import { useAuth } from "@better-auth-ui/react";
 import { type ComponentProps, useState } from "react";
 import { Eye, EyeOff } from "#/components/icons";
 import {
@@ -7,6 +6,7 @@ import {
 	InputGroupButton,
 	InputGroupInput,
 } from "#/components/ui/input-group";
+import { useMessages } from "#/i18n/messages";
 
 export type PasswordInputProps = Omit<
 	ComponentProps<typeof InputGroupInput>,
@@ -18,11 +18,11 @@ export type PasswordInputProps = Omit<
  * forms with several password fields (new + confirm) need no extra state.
  */
 export function PasswordInput(props: PasswordInputProps) {
-	const { localization } = useAuth();
+	const messages = useMessages();
 	const [visible, setVisible] = useState(false);
 	const label = visible
-		? localization.auth.hidePassword
-		: localization.auth.showPassword;
+		? messages.form.hidePassword
+		: messages.form.showPassword;
 
 	return (
 		<InputGroup>

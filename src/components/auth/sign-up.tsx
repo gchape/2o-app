@@ -6,7 +6,6 @@ import {
 	getAuthLinkURL,
 	isPasswordCompromisedError,
 	validateEmailAddress,
-	validateMatchingValue,
 	validateStringLength,
 } from "@better-auth-ui/core";
 import {
@@ -17,6 +16,7 @@ import {
 } from "@better-auth-ui/react";
 import { useIsMutating } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { usePasswordValidation } from "#/components/auth/use-password-validation";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import {
 	FieldDescription,
@@ -125,6 +125,7 @@ export function SignUp({
 		() => additionalFields?.filter((field) => field.signUp) ?? [],
 		[additionalFields],
 	);
+	const { validatePassword, validateConfirmation } = usePasswordValidation();
 	const form = useAuthForm({
 		defaultValues: {
 			additionalFields: getAdditionalFieldDefaultValues(signUpFields),
@@ -182,7 +183,7 @@ export function SignUp({
 
 					{emailAndPassword?.enabled && (
 						<form.AppForm>
-							<form.AuthFormRoot>
+							<form.FormRoot>
 								<FieldGroup>
 									{emailAndPassword.name !== false && (
 										<form.AppField
@@ -196,7 +197,7 @@ export function SignUp({
 											}}
 										>
 											{(field) => (
-												<field.AuthFormTextField
+												<field.FormTextField
 													label={localization.auth.name}
 													type="text"
 													autoComplete="name"
@@ -219,7 +220,7 @@ export function SignUp({
 										}}
 									>
 										{(field) => (
-											<field.AuthFormTextField
+											<field.FormTextField
 												label={localization.auth.email}
 												type="email"
 												autoComplete="email"
@@ -255,24 +256,11 @@ export function SignUp({
 									<form.AppField
 										name="password"
 										validators={{
-											onChange: ({ value }) =>
-												validateStringLength(value, {
-													maxLength: emailAndPassword?.maxPasswordLength,
-													maxLengthMessage: localization.auth.tooLong.replace(
-														"{{max}}",
-														String(emailAndPassword?.maxPasswordLength),
-													),
-													minLength: emailAndPassword?.minPasswordLength,
-													minLengthMessage: localization.auth.tooShort.replace(
-														"{{min}}",
-														String(emailAndPassword?.minPasswordLength),
-													),
-													requiredMessage: localization.auth.fieldRequired,
-												}),
+											onChange: ({ value }) => validatePassword(value),
 										}}
 									>
 										{(field) => (
-											<field.AuthFormTextField
+											<field.FormTextField
 												label={localization.auth.password}
 												type="password"
 												autoComplete="new-password"
@@ -287,7 +275,7 @@ export function SignUp({
 												onValueChange={() => setIsCompromised(false)}
 											>
 												<PasswordStrengthMeter password={field.state.value} />
-											</field.AuthFormTextField>
+											</field.FormTextField>
 										)}
 									</form.AppField>
 
@@ -297,29 +285,14 @@ export function SignUp({
 											validators={{
 												onChangeListenTo: ["password"],
 												onChange: ({ fieldApi, value }) =>
-													validateStringLength(value, {
-														maxLength: emailAndPassword?.maxPasswordLength,
-														maxLengthMessage: localization.auth.tooLong.replace(
-															"{{max}}",
-															String(emailAndPassword?.maxPasswordLength),
-														),
-														minLength: emailAndPassword?.minPasswordLength,
-														minLengthMessage:
-															localization.auth.tooShort.replace(
-																"{{min}}",
-																String(emailAndPassword?.minPasswordLength),
-															),
-														requiredMessage: localization.auth.fieldRequired,
-													}) ??
-													validateMatchingValue(
+													validateConfirmation(
 														value,
 														fieldApi.form.getFieldValue("password"),
-														localization.auth.passwordsDoNotMatch,
 													),
 											}}
 										>
 											{(field) => (
-												<field.AuthFormTextField
+												<field.FormTextField
 													label={localization.auth.confirmPassword}
 													type="password"
 													autoComplete="new-password"
@@ -362,9 +335,9 @@ export function SignUp({
 									)}
 
 									<div className="flex flex-col gap-3">
-										<form.AuthFormSubmitButton disabled={isPending}>
+										<form.FormSubmitButton disabled={isPending}>
 											{localization.auth.signUp}
-										</form.AuthFormSubmitButton>
+										</form.FormSubmitButton>
 
 										{plugins.flatMap((plugin) =>
 											(plugin.authButtons ?? []).map((AuthButton, index) => (
@@ -376,7 +349,7 @@ export function SignUp({
 										)}
 									</div>
 								</FieldGroup>
-							</form.AuthFormRoot>
+							</form.FormRoot>
 						</form.AppForm>
 					)}
 

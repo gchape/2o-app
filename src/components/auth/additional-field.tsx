@@ -48,6 +48,8 @@ import {
 import { Slider } from "#/components/ui/slider";
 import { Switch } from "#/components/ui/switch";
 import { Textarea } from "#/components/ui/textarea";
+import { dateLocales, languageTags, useLocale } from "#/i18n/locale";
+import { useMessages } from "#/i18n/messages";
 import { cn } from "#/lib/utils";
 
 export type AdditionalFieldProps = {
@@ -137,6 +139,7 @@ export function AdditionalField({
 	isPending,
 	optionalLabel,
 }: AdditionalFieldProps) {
+	const messages = useMessages();
 	const field =
 		optionalLabel && !configuredField.required
 			? {
@@ -353,7 +356,7 @@ export function AdditionalField({
 					/>
 
 					<ComboboxContent>
-						<ComboboxEmpty>No items found.</ComboboxEmpty>
+						<ComboboxEmpty>{messages.form.noItems}</ComboboxEmpty>
 
 						<ComboboxList>
 							{(option) => (
@@ -525,7 +528,11 @@ function SliderField({
 	const numericValue = typeof value === "number" ? value : min;
 	const fieldErrors = getFormFieldErrors(errors ?? []);
 
-	const formatter = new Intl.NumberFormat(undefined, field.formatOptions);
+	const locale = useLocale();
+	const formatter = new Intl.NumberFormat(
+		languageTags[locale],
+		field.formatOptions,
+	);
 
 	return (
 		<Field data-invalid={isInvalid}>
@@ -571,6 +578,7 @@ function DateInput({
 	errors,
 	isPending,
 }: AdditionalFieldProps) {
+	const locale = useLocale();
 	const { localization } = useAuth();
 	const inputType = resolveInputType(field);
 	const isDateTime = inputType === "datetime";
@@ -604,13 +612,18 @@ function DateInput({
 							"data-[empty=true]:text-muted-foreground",
 						)}
 					>
-						{date ? format(date, "PPP") : <span>{field.placeholder}</span>}
+						{date ? (
+							format(date, "PPP", { locale: dateLocales[locale] })
+						) : (
+							<span>{field.placeholder}</span>
+						)}
 
 						{isDateTime ? <ChevronDownIcon /> : <CalendarIcon />}
 					</PopoverTrigger>
 
 					<PopoverContent className="w-auto overflow-hidden p-0" align="start">
 						<Calendar
+							locale={dateLocales[locale]}
 							mode="single"
 							selected={date}
 							defaultMonth={date}

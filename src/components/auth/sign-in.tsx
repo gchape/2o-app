@@ -1,8 +1,4 @@
-import {
-	authMutationKeys,
-	validateEmailAddress,
-	validateStringLength,
-} from "@better-auth-ui/core";
+import { authMutationKeys, validateEmailAddress } from "@better-auth-ui/core";
 import {
 	AuthPrompts,
 	useAuth,
@@ -10,6 +6,8 @@ import {
 	useSignInEmail,
 } from "@better-auth-ui/react";
 import { useIsMutating } from "@tanstack/react-query";
+import { usePasswordValidation } from "#/components/auth/use-password-validation";
+import { useAppForm } from "#/components/form/app-form";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { Checkbox } from "#/components/ui/checkbox";
 import {
@@ -20,7 +18,6 @@ import {
 	FieldSeparator,
 } from "#/components/ui/field";
 import { cn } from "#/lib/utils";
-import { useAuthForm } from "./auth-form";
 import { ProviderButtons, type SocialLayout } from "./provider-buttons";
 import { ReauthenticationNotice } from "./reauthentication";
 import { VERIFY_EMAIL_STORAGE_KEY } from "./storage-keys";
@@ -87,7 +84,8 @@ export function SignIn({
 	const Captcha = plugins.find(
 		(plugin) => plugin.captchaComponent,
 	)?.captchaComponent;
-	const form = useAuthForm({
+	const { validatePassword } = usePasswordValidation();
+	const form = useAppForm({
 		defaultValues: { email: "", password: "", rememberMe: false },
 		onSubmit: async ({ value }) =>
 			await signInEmail({
@@ -131,7 +129,7 @@ export function SignIn({
 
 					{emailAndPassword?.enabled && (
 						<form.AppForm>
-							<form.AuthFormRoot>
+							<form.FormRoot>
 								<FieldGroup>
 									<form.AppField
 										name="email"
@@ -144,7 +142,7 @@ export function SignIn({
 										}}
 									>
 										{(field) => (
-											<field.AuthFormTextField
+											<field.FormTextField
 												label={localization.auth.email}
 												type="email"
 												autoComplete="email"
@@ -158,24 +156,11 @@ export function SignIn({
 									<form.AppField
 										name="password"
 										validators={{
-											onChange: ({ value }) =>
-												validateStringLength(value, {
-													maxLength: emailAndPassword?.maxPasswordLength,
-													maxLengthMessage: localization.auth.tooLong.replace(
-														"{{max}}",
-														String(emailAndPassword?.maxPasswordLength),
-													),
-													minLength: emailAndPassword?.minPasswordLength,
-													minLengthMessage: localization.auth.tooShort.replace(
-														"{{min}}",
-														String(emailAndPassword?.minPasswordLength),
-													),
-													requiredMessage: localization.auth.fieldRequired,
-												}),
+											onChange: ({ value }) => validatePassword(value),
 										}}
 									>
 										{(field) => (
-											<field.AuthFormTextField
+											<field.FormTextField
 												label={localization.auth.password}
 												type="password"
 												autoComplete="current-password"
@@ -220,13 +205,13 @@ export function SignIn({
 									)}
 
 									<div className="flex flex-col gap-3">
-										<form.AuthFormSubmitButton
+										<form.FormSubmitButton
 											isPending={signInEmailPending}
 											className="relative overflow-visible"
 											disabled={isPending}
 										>
 											{localization.auth.signIn}
-										</form.AuthFormSubmitButton>
+										</form.FormSubmitButton>
 
 										{plugins.flatMap((plugin) =>
 											(plugin.authButtons ?? []).map((AuthButton, index) => (
@@ -238,7 +223,7 @@ export function SignIn({
 										)}
 									</div>
 								</FieldGroup>
-							</form.AuthFormRoot>
+							</form.FormRoot>
 						</form.AppForm>
 					)}
 

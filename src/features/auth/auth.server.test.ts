@@ -123,7 +123,7 @@ describe("email codes through Resend", () => {
 			(await post("/email-otp/request-password-reset", { email })).ok,
 		).toBe(true);
 		const otp = lastCode();
-		expect(emails.at(-1)?.subject).toBe("Your password reset code");
+		expect(emails.at(-1)?.subject).toBe("პაროლის აღდგენის კოდი");
 		const incorrect = otp === "000000" ? "111111" : "000000";
 		expect(
 			(

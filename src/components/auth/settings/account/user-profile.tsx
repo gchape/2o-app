@@ -79,7 +79,7 @@ export function UserProfile({ className }: UserProfileProps) {
 			</h2>
 
 			<form.AppForm>
-				<form.AuthFormRoot>
+				<form.FormRoot>
 					<Card className={cn(className)}>
 						<CardContent className="flex flex-col gap-6">
 							<ChangeAvatar />
@@ -96,7 +96,7 @@ export function UserProfile({ className }: UserProfileProps) {
 									}}
 								>
 									{(field) => (
-										<field.AuthFormTextField
+										<field.FormTextField
 											label={localization.auth.name}
 											autoComplete="name"
 											placeholder={localization.auth.name}
@@ -138,21 +138,21 @@ export function UserProfile({ className }: UserProfileProps) {
 									</form.AppField>
 								);
 							})}
-							<form.AuthFormServerError />
+							<form.FormServerError />
 						</CardContent>
 
 						{hasProfileFields && (
 							<CardFooter>
-								<form.AuthFormSubmitButton
+								<form.FormSubmitButton
 									size="sm"
 									disabled={isPending || !session}
 								>
 									{localization.settings.saveChanges}
-								</form.AuthFormSubmitButton>
+								</form.FormSubmitButton>
 							</CardFooter>
 						)}
 					</Card>
-				</form.AuthFormRoot>
+				</form.FormRoot>
 			</form.AppForm>
 		</div>
 	);
