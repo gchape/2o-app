@@ -1,3 +1,4 @@
+import { useTranslation } from "#/i18n/translate";
 import * as React from "react"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
@@ -6,9 +7,10 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons"
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
+	const t = useTranslation();
   return (
     <nav
-      aria-label="breadcrumb"
+      aria-label={t("breadcrumb")}
       data-slot="breadcrumb"
       className={cn(className)}
       {...props}

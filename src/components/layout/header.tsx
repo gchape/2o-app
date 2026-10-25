@@ -19,11 +19,14 @@ import {
 } from "#/components/ui/sheet";
 import { departmentSlugs, departments } from "#/data/catalog";
 import { CartButton } from "#/features/cart/components/cart-button";
+import { useTranslation } from "#/i18n/translate";
 import { AccountLink } from "./account-link";
 import { Container } from "./container";
+import { LanguageSelector } from "./language-selector";
 import { Logo } from "./logo";
 
 function DesktopNav() {
+	const t = useTranslation();
 	return (
 		<NavigationMenu className="hidden md:flex">
 			<NavigationMenuList>
@@ -36,7 +39,7 @@ function DesktopNav() {
 									to="/$department/{-$category}"
 									params={{ department: slug, category: undefined }}
 								>
-									{departments[slug].label}
+									{t(departments[slug].label)}
 								</Link>
 							}
 						/>
@@ -48,6 +51,7 @@ function DesktopNav() {
 }
 
 function MobileMenu() {
+	const t = useTranslation();
 	const [open, setOpen] = useState(false);
 
 	return (
@@ -58,7 +62,7 @@ function MobileMenu() {
 						variant="outline"
 						size="icon"
 						className="md:hidden"
-						aria-label="Open menu"
+						aria-label={t("Open menu")}
 					/>
 				}
 			>
@@ -66,7 +70,7 @@ function MobileMenu() {
 			</SheetTrigger>
 			<SheetContent side="left">
 				<SheetHeader>
-					<SheetTitle>Menu</SheetTitle>
+					<SheetTitle>{t("Menu")}</SheetTitle>
 				</SheetHeader>
 				<nav className="flex flex-col gap-2 px-5 py-4">
 					{departmentSlugs.map((slug) => (
@@ -77,7 +81,7 @@ function MobileMenu() {
 							onClick={() => setOpen(false)}
 							className="rounded-lg px-4 py-4 text-lg font-medium tracking-tight hover:bg-accent"
 						>
-							{departments[slug].label}
+							{t(departments[slug].label)}
 						</Link>
 					))}
 				</nav>
@@ -89,16 +93,17 @@ function MobileMenu() {
 export function Header() {
 	return (
 		<header className="dark border-b bg-background text-foreground">
-			<Container className="flex h-18 items-center justify-between gap-4 md:h-22">
+			<Container className="flex h-18 items-center justify-between gap-2 sm:gap-4 md:h-22">
 				<div className="flex items-center gap-8 lg:gap-12">
 					<Logo className="h-9 md:h-10" />
 					<DesktopNav />
 				</div>
 
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-1 sm:gap-2">
 					<AccountLink />
 					<CartButton />
 					<MobileMenu />
+					<LanguageSelector />
 				</div>
 			</Container>
 		</header>
