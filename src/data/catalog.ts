@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * Single source of truth for the storefront taxonomy.
  *
@@ -23,3 +25,6 @@ export const categories = {
 	shoes: { label: "Shoes" },
 	clothing: { label: "Clothing" },
 } satisfies Record<Category, { label: string }>;
+
+export const departmentSchema = z.enum(departmentSlugs);
+export const categorySchema = z.enum(categorySlugs);

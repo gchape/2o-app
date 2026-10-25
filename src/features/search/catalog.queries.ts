@@ -4,7 +4,7 @@ import {
 	type QueryClient,
 	queryOptions,
 } from "@tanstack/react-query";
-import { isDeal } from "#/features/catalog/product.types";
+import { isDeal } from "#/data/catalog.types";
 import { nextPageParam } from "#/lib/pagination";
 import { catalogFacetsFn, searchCatalogFn } from "./catalog.functions";
 import {

@@ -13,6 +13,7 @@ import {
 	type Department,
 	departments,
 } from "#/data/catalog";
+import { useTranslation } from "#/i18n/translate";
 
 type DepartmentBreadcrumbsProps = {
 	department: Department;
@@ -23,13 +24,14 @@ export function DepartmentBreadcrumbs({
 	department,
 	category,
 }: DepartmentBreadcrumbsProps) {
-	const departmentLabel = departments[department].label;
+	const t = useTranslation();
+	const departmentLabel = t(departments[department].label);
 
 	return (
 		<Breadcrumb>
 			<BreadcrumbList>
 				<BreadcrumbItem>
-					<BreadcrumbLink render={<Link to="/">Home</Link>} />
+					<BreadcrumbLink render={<Link to="/">{t("Home")}</Link>} />
 				</BreadcrumbItem>
 				<BreadcrumbSeparator />
 				<BreadcrumbItem>
@@ -52,7 +54,7 @@ export function DepartmentBreadcrumbs({
 					<>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
-							<BreadcrumbPage>{categories[category].label}</BreadcrumbPage>
+							<BreadcrumbPage>{t(categories[category].label)}</BreadcrumbPage>
 						</BreadcrumbItem>
 					</>
 				)}

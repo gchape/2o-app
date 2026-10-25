@@ -3,6 +3,14 @@ import type { ReactNode } from "react";
 import { InfiniteScrollFooter } from "#/components/infinite-scroll-footer";
 import { Button } from "#/components/ui/button";
 import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyTitle,
+} from "#/components/ui/empty";
+import { isDeal } from "#/data/catalog.types";
+import {
 	catalogFacetsQuery,
 	catalogQuery,
 } from "#/features/search/catalog.queries";
@@ -12,7 +20,7 @@ import {
 	DEFAULT_FILTERS,
 	hasActiveFilters,
 } from "#/features/search/catalog-filters";
-import { isDeal } from "../product.types";
+import { useTranslation } from "#/i18n/translate";
 import { DealCard, dealImageLoading } from "./deal-card";
 import { FilterBar } from "./filter-bar";
 import { ProductGrid } from "./product-grid";
@@ -35,6 +43,7 @@ export function CatalogListing({
 	onFiltersChange,
 	empty,
 }: CatalogListingProps) {
+	const t = useTranslation();
 	const {
 		data,
 		hasNextPage,
@@ -55,41 +64,41 @@ export function CatalogListing({
 					scope={scope}
 					filters={filters}
 					facets={facets}
+					total={total}
 					onChange={onFiltersChange}
 				/>
 			)}
 
-			{total > 0 && (
-				<p
-					className="mt-5 text-muted-foreground text-xs tracking-wide"
-					aria-live="polite"
-				>
-					<span className="type-num text-foreground">
-						{total.toLocaleString("en-US")}
-					</span>{" "}
-					{total === 1 ? "result" : "results"}
-				</p>
-			)}
-
 			{items.length === 0 ? (
 				filtered ? (
-					<div className="flex flex-col items-start gap-3 py-10">
-						<p className="font-medium">Nothing matches these filters.</p>
-						<p className="text-muted-foreground text-sm">
-							Try a shorter search or remove a filter.
-						</p>
-						<Button
-							variant="outline"
-							onClick={() =>
-								onFiltersChange({ ...DEFAULT_FILTERS, sort: filters.sort })
-							}
-						>
-							Clear filters
-						</Button>
-					</div>
+					<Empty className="my-8 border">
+						<EmptyHeader>
+							<EmptyTitle>{t("Nothing matches these filters.")}</EmptyTitle>
+							<EmptyDescription>
+								{t("Try a shorter search or remove a filter.")}
+							</EmptyDescription>
+						</EmptyHeader>
+						<EmptyContent>
+							<Button
+								variant="outline"
+								onClick={() =>
+									onFiltersChange({ ...DEFAULT_FILTERS, sort: filters.sort })
+								}
+							>
+								{t("Clear filters")}
+							</Button>
+						</EmptyContent>
+					</Empty>
 				) : (
 					(empty ?? (
-						<p className="py-10 text-muted-foreground">No products yet.</p>
+						<Empty className="my-8 border">
+							<EmptyHeader>
+								<EmptyTitle>{t("No products yet.")}</EmptyTitle>
+								<EmptyDescription>
+									{t("Check back after the next price refresh.")}
+								</EmptyDescription>
+							</EmptyHeader>
+						</Empty>
 					))
 				)
 			) : scope.mode === "deals" ? (

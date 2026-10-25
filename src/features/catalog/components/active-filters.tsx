@@ -5,23 +5,40 @@ import {
 	type CatalogFilters,
 	DEFAULT_FILTERS,
 } from "#/features/search/catalog-filters";
-import { formatPriceCompact } from "#/lib/price";
+import { useTranslation } from "#/i18n/translate";
+import { usePriceFormatter } from "#/lib/price";
 
 type Chip = { key: string; label: string; clear: Partial<CatalogFilters> };
 
 const capitalize = (text: string) =>
 	text.charAt(0).toUpperCase() + text.slice(1);
 
-function priceLabel({ minPrice, maxPrice }: CatalogFilters) {
+function priceLabel(
+	{ minPrice, maxPrice }: CatalogFilters,
+	t: ReturnType<typeof useTranslation>,
+	formatPriceCompact: ReturnType<
+		typeof usePriceFormatter
+	>["formatPriceCompact"],
+) {
 	if (minPrice != null && maxPrice != null) {
-		return `${formatPriceCompact(minPrice)} to ${formatPriceCompact(maxPrice)}`;
+		return t("{{min}} to {{max}}", {
+			min: formatPriceCompact(minPrice),
+			max: formatPriceCompact(maxPrice),
+		});
 	}
 	return minPrice != null
-		? `From ${formatPriceCompact(minPrice)}`
-		: `Up to ${formatPriceCompact(maxPrice ?? 0)}`;
+		? t("From {{price}}", { price: formatPriceCompact(minPrice) })
+		: t("Up to {{price}}", { price: formatPriceCompact(maxPrice ?? 0) });
 }
 
-function chipsFor(filters: CatalogFilters, showSale: boolean): Chip[] {
+function chipsFor(
+	filters: CatalogFilters,
+	showSale: boolean,
+	t: ReturnType<typeof useTranslation>,
+	formatPriceCompact: ReturnType<
+		typeof usePriceFormatter
+	>["formatPriceCompact"],
+): Chip[] {
 	const chips: Chip[] = [];
 
 	if (filters.q) {
@@ -37,7 +54,7 @@ function chipsFor(filters: CatalogFilters, showSale: boolean): Chip[] {
 	for (const size of filters.sizes) {
 		chips.push({
 			key: `size:${size}`,
-			label: `Size ${size.toUpperCase()}`,
+			label: t("Size {{size}}", { size: size.toUpperCase() }),
 			clear: { sizes: filters.sizes.filter((s) => s !== size) },
 		});
 	}
@@ -51,12 +68,12 @@ function chipsFor(filters: CatalogFilters, showSale: boolean): Chip[] {
 	if (filters.minPrice != null || filters.maxPrice != null) {
 		chips.push({
 			key: "price",
-			label: priceLabel(filters),
+			label: priceLabel(filters, t, formatPriceCompact),
 			clear: { minPrice: undefined, maxPrice: undefined },
 		});
 	}
 	if (showSale && filters.sale) {
-		chips.push({ key: "sale", label: "On sale", clear: { sale: false } });
+		chips.push({ key: "sale", label: t("On sale"), clear: { sale: false } });
 	}
 
 	return chips;
@@ -75,20 +92,22 @@ export function ActiveFilters({
 	showSale,
 	onChange,
 }: ActiveFiltersProps) {
-	const chips = chipsFor(filters, showSale);
+	const t = useTranslation();
+	const { formatPriceCompact } = usePriceFormatter();
+	const chips = chipsFor(filters, showSale, t, formatPriceCompact);
 	if (chips.length === 0) return null;
 
 	return (
 		<ul
 			className="flex flex-wrap items-center gap-2"
-			aria-label="Active filters"
+			aria-label={t("Active filters")}
 		>
 			{chips.map((chip) => (
 				<li key={chip.key}>
 					<Button
 						variant="secondary"
 						size="xs"
-						aria-label={`Remove filter: ${chip.label}`}
+						aria-label={t("Remove filter: {{label}}", { label: chip.label })}
 						onClick={() => onChange({ ...filters, ...chip.clear })}
 					>
 						{chip.label}
@@ -102,7 +121,7 @@ export function ActiveFilters({
 					size="xs"
 					onClick={() => onChange({ ...DEFAULT_FILTERS, sort: filters.sort })}
 				>
-					Clear all
+					{t("Clear all")}
 				</Button>
 			</li>
 		</ul>

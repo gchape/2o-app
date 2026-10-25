@@ -1,4 +1,4 @@
-import { formatPrice, isOnSale } from "#/lib/price";
+import { isOnSale, usePriceFormatter } from "#/lib/price";
 
 type PriceProps = {
 	price: number;
@@ -7,6 +7,7 @@ type PriceProps = {
 };
 
 export function Price({ price, originalPrice, currency }: PriceProps) {
+	const { formatPrice } = usePriceFormatter();
 	return (
 		<>
 			{formatPrice(price, currency)}

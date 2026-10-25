@@ -1,9 +1,13 @@
-import type { ProductListItem } from "#/features/catalog/product.types";
+import type { ProductListItem } from "#/data/catalog.types";
+import { useTranslation } from "#/i18n/translate";
 import { ProductCard } from "./product-card";
 
 export function ProductGrid({ products }: { products: ProductListItem[] }) {
+	const t = useTranslation();
 	if (products.length === 0) {
-		return <p className="py-10 text-muted-foreground">No products yet.</p>;
+		return (
+			<p className="py-10 text-muted-foreground">{t("No products yet.")}</p>
+		);
 	}
 
 	return (

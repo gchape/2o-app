@@ -1,29 +1,35 @@
 import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 import { Container } from "#/components/layout/container";
-import { categories, departments } from "#/data/catalog";
+import {
+	categories,
+	categorySchema,
+	departmentSchema,
+	departments,
+} from "#/data/catalog";
 import { site } from "#/data/site";
 import { CatalogListing } from "#/features/catalog/components/catalog-listing";
 import { DepartmentBreadcrumbs } from "#/features/catalog/components/department-breadcrumbs";
-import {
-	categorySchema,
-	departmentSchema,
-} from "#/features/catalog/product.schema";
 import { loadCatalog } from "#/features/search/catalog.queries";
 import {
 	catalogFiltersSchema,
 	DEFAULT_FILTERS,
 } from "#/features/search/catalog-filters";
+import { translate as t } from "#/i18n/translate";
 import { parseParam } from "#/lib/route-guards";
 
 export const Route = createFileRoute("/$department/{-$category}")({
-	beforeLoad: ({ params }) => {
+	beforeLoad: ({ params, context }) => {
 		const department = parseParam(departmentSchema, params.department);
 		const category = parseParam(categorySchema.optional(), params.category);
 		return {
 			scope: { department, category, mode: "listing" as const },
 			title: category
-				? `${departments[department].label} ${categories[category].label.toLowerCase()}`
-				: departments[department].label,
+				? t(
+						`${departments[department].label} ${categories[category].label.toLowerCase()}`,
+						{},
+						context.locale,
+					)
+				: t(departments[department].label, {}, context.locale),
 		};
 	},
 	validateSearch: catalogFiltersSchema,

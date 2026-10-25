@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-	categorySchema,
-	departmentSchema,
-} from "#/features/catalog/product.schema";
+import { categorySchema, departmentSchema } from "#/data/catalog";
 
 /** Products per page of a listing. */
 export const CATALOG_PAGE_SIZE = 48;

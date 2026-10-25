@@ -8,6 +8,7 @@ import {
 	InputGroupInput,
 } from "#/components/ui/input-group";
 import { useDebouncedCallback } from "#/hooks/use-debounced-callback";
+import { useTranslation } from "#/i18n/translate";
 
 type SearchBoxProps = {
 	/** The search text currently in the URL. */
@@ -18,6 +19,7 @@ type SearchBoxProps = {
 };
 
 export function SearchBox({ value, onCommit, className }: SearchBoxProps) {
+	const t = useTranslation();
 	const [draft, setDraft] = useState(value);
 	const committed = useRef(value);
 
@@ -57,8 +59,8 @@ export function SearchBox({ value, onCommit, className }: SearchBoxProps) {
 				<InputGroupInput
 					type="search"
 					autoComplete="off"
-					placeholder="Search shoes and clothing"
-					aria-label="Search products"
+					placeholder={t("Search shoes and clothing")}
+					aria-label={t("Search products")}
 					className="[&::-webkit-search-cancel-button]:hidden"
 					value={draft}
 					onChange={(event) => {
@@ -70,7 +72,7 @@ export function SearchBox({ value, onCommit, className }: SearchBoxProps) {
 					<InputGroupAddon align="inline-end">
 						<InputGroupButton
 							size="icon-xs"
-							aria-label="Clear search"
+							aria-label={t("Clear search")}
 							onClick={clear}
 						>
 							<HugeiconsIcon icon={Cancel01Icon} size={14} />

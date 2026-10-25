@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { Button } from "#/components/ui/button";
+import { useTranslation } from "#/i18n/translate";
 
 type InfiniteScrollFooterProps = {
 	hasNextPage: boolean;
@@ -20,6 +21,7 @@ export function InfiniteScrollFooter({
 	isError,
 	fetchNextPage,
 }: InfiniteScrollFooterProps) {
+	const t = useTranslation();
 	const { ref, inView } = useInView({ rootMargin: "600px" });
 
 	useEffect(() => {
@@ -39,13 +41,13 @@ export function InfiniteScrollFooter({
 				onClick={() => fetchNextPage()}
 			>
 				{isFetchingNextPage
-					? "Loading more…"
+					? t("Loading more…")
 					: isError
-						? "Couldn't load more. Try again"
-						: "Load more"}
+						? t("Couldn't load more. Try again")
+						: t("Load more")}
 			</Button>
 			<span role="status" className="sr-only">
-				{isFetchingNextPage ? "Loading more results" : ""}
+				{isFetchingNextPage ? t("Loading more results") : ""}
 			</span>
 		</div>
 	);

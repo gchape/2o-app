@@ -1,6 +1,6 @@
 import type { Category } from "#/data/catalog";
-import type { CatalogItem } from "#/features/catalog/product.types";
-import { compareSizes } from "#/features/catalog/sizes";
+import type { CatalogItem } from "#/data/catalog.types";
+import { compareSizes } from "#/data/sizes";
 import { pageOffset } from "#/lib/pagination";
 import type { CatalogDoc } from "./catalog-doc";
 import type { TagField } from "./catalog-fields";

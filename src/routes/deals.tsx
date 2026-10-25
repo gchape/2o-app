@@ -11,6 +11,8 @@ import {
 } from "#/features/search/catalog-filters";
 import { priceCheckNote } from "#/features/stats/format-checked-at";
 import { statsQuery } from "#/features/stats/stats.queries";
+import { useLocale } from "#/i18n/locale";
+import { translate as t, useTranslation } from "#/i18n/translate";
 
 const scope: CatalogScope = { mode: "deals" };
 
@@ -24,20 +26,25 @@ export const Route = createFileRoute("/deals")({
 			context.queryClient.query(statsQuery),
 		]);
 	},
-	head: () => ({ meta: [{ title: `Deals | ${site.name}` }] }),
+	head: ({ match }) => ({
+		meta: [{ title: `${t("Deals", {}, match.context.locale)} | ${site.name}` }],
+	}),
 	component: DealsPage,
 });
 
 function DealsPage() {
+	const t = useTranslation();
+	const locale = useLocale();
 	const filters = Route.useSearch();
 	const navigate = Route.useNavigate();
 	const { data: stats } = useSuspenseQuery(statsQuery);
 
 	return (
 		<Container className="py-10 md:py-14">
-			<h1 className="type-title text-3xl md:text-5xl">All deals</h1>
-			<p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-				Everything on sale right now. {priceCheckNote(stats.checkedAt)}
+			<h1 className="type-title text-3xl md:text-5xl">{t("All deals")}</h1>
+			<p className="type-body mt-4 max-w-2xl text-sm text-muted-foreground sm:text-base">
+				{t("Everything on sale right now.")}{" "}
+				{priceCheckNote(stats.checkedAt, undefined, locale)}
 			</p>
 
 			<CatalogListing
@@ -48,8 +55,10 @@ function DealsPage() {
 				}
 				empty={
 					<p className="py-10 text-muted-foreground">
-						No deals right now. New prices land every morning at{" "}
-						{site.priceCheckTime}.
+						{t(
+							"No deals right now. New prices land every morning at {{time}}.",
+							{ time: site.priceCheckTime },
+						)}
 					</p>
 				}
 			/>

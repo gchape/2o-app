@@ -8,6 +8,7 @@ import {
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { loadCatalog } from "#/features/search/catalog.queries";
 import { DEFAULT_FILTERS } from "#/features/search/catalog-filters";
+import type { Locale } from "#/i18n/locale";
 import type { Route as RootRoute } from "#/routes/__root";
 import { Route } from "#/routes/$department.{-$category}";
 
@@ -18,12 +19,13 @@ vi.mock("#/features/catalog/components/catalog-listing", () => ({
 	CatalogListing: () => null,
 }));
 
-function routerFor(path: string) {
+function routerFor(path: string, readLocale: () => Locale = () => "ka") {
 	const loader: NonNullable<typeof RootRoute.options.loader> = async () => ({
 		chatEmbedUrl: null,
 		socialProviders: [],
 	});
 	const root = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+		beforeLoad: async () => ({ locale: readLocale() }),
 		loader,
 	});
 	const department = createRoute({
@@ -47,10 +49,10 @@ beforeEach(() => vi.clearAllMocks());
 
 describe("department route", () => {
 	it.each([
-		["/men", "men", undefined, "Men"],
-		["/women", "women", undefined, "Women"],
-		["/kids/shoes", "kids", "shoes", "Kids shoes"],
-		["/women/clothing", "women", "clothing", "Women clothing"],
+		["/men", "men", undefined, "მამაკაცები"],
+		["/women", "women", undefined, "ქალები"],
+		["/kids/shoes", "kids", "shoes", "ბავშვის ფეხსაცმელი"],
+		["/women/clothing", "women", "clothing", "ქალის ტანსაცმელი"],
 	])(
 		"loads %s with its validated scope",
 		async (path, department, category, title) => {
@@ -109,5 +111,26 @@ describe("department route", () => {
 			routeId: "/$department/{-$category}",
 			params: { department: "women" },
 		});
+	});
+});
+
+it("refreshes localized titles while preserving the current URL and filters", async () => {
+	let locale: Locale = "ka";
+	const router = routerFor("/men/shoes?q=boots&minPrice=5000", () => locale);
+	await router.load();
+	const location = router.state.location.href;
+	expect(router.state.matches.at(-1)?.context).toMatchObject({
+		title: "მამაკაცის ფეხსაცმელი",
+	});
+	locale = "en";
+	await router.invalidate({ sync: true });
+	expect(router.state.matches.at(-1)?.context).toMatchObject({
+		title: "Men shoes",
+	});
+	expect(router.state.location.href).toBe(location);
+	const reloaded = routerFor(location, () => locale);
+	await reloaded.load();
+	expect(reloaded.state.matches.at(-1)?.context).toMatchObject({
+		title: "Men shoes",
 	});
 });

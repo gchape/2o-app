@@ -1,10 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Badge } from "#/components/ui/badge";
-import { buttonVariants } from "#/components/ui/button";
-import { Card, CardContent, CardFooter } from "#/components/ui/card";
-import type { ProductListItem } from "#/features/catalog/product.types";
+import { Card, CardContent } from "#/components/ui/card";
+import type { ProductListItem } from "#/data/catalog.types";
+import { useTranslation } from "#/i18n/translate";
 import { isOnSale } from "#/lib/price";
-import { cn } from "#/lib/utils";
 import { Price } from "./price";
 import { ProductImage } from "./product-image";
 
@@ -14,6 +13,7 @@ import { ProductImage } from "./product-image";
  * navigation to a single stop per product.
  */
 export function ProductCard({ product }: { product: ProductListItem }) {
+	const t = useTranslation();
 	const { slug, name, brand, imageUrl, price, originalPrice, currency } =
 		product;
 
@@ -26,13 +26,13 @@ export function ProductCard({ product }: { product: ProductListItem }) {
 					className="aspect-4/5 rounded-xl [&_img]:transition-transform [&_img]:duration-500 motion-safe:group-hover:[&_img]:scale-[1.03]"
 				/>
 				{isOnSale(price, originalPrice) && (
-					<Badge className="absolute top-3 left-3">Sale</Badge>
+					<Badge className="absolute top-3 left-3">{t("Sale")}</Badge>
 				)}
 			</div>
 
 			<CardContent className="flex-1 space-y-2 px-0">
 				{brand && <p className="type-eyebrow text-muted-foreground">{brand}</p>}
-				<h3 className="min-h-11 text-sm font-medium leading-snug tracking-tight sm:text-base">
+				<h3 className="type-card-title line-clamp-2 min-h-[2.7em] text-sm sm:text-base">
 					<Link
 						to="/product/$slug"
 						params={{ slug }}
@@ -41,7 +41,7 @@ export function ProductCard({ product }: { product: ProductListItem }) {
 						{name}
 					</Link>
 				</h3>
-				<p className="text-muted-foreground text-sm font-semibold tabular-nums sm:text-base">
+				<p className="type-num text-foreground text-sm sm:text-base">
 					<Price
 						price={price}
 						originalPrice={originalPrice}
@@ -49,19 +49,6 @@ export function ProductCard({ product }: { product: ProductListItem }) {
 					/>
 				</p>
 			</CardContent>
-
-			<CardFooter className="px-0">
-				{/* Visual affordance only; the stretched link above does the work. */}
-				<span
-					aria-hidden
-					className={cn(
-						buttonVariants(),
-						"h-11 w-full rounded-lg text-xs sm:text-sm",
-					)}
-				>
-					Choose size
-				</span>
-			</CardFooter>
 		</Card>
 	);
 }

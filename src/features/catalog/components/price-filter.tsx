@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Slider } from "#/components/ui/slider";
-import { formatPriceCompact } from "#/lib/price";
+import { useTranslation } from "#/i18n/translate";
+import { usePriceFormatter } from "#/lib/price";
 import { FilterPopover } from "./filter-popover";
 
 type PriceFilterProps = {
@@ -38,6 +39,8 @@ function PriceFilterInner({
 	maxPrice,
 	onChange,
 }: PriceFilterInnerProps) {
+	const { formatPriceCompact } = usePriceFormatter();
+	const t = useTranslation();
 	// Where the thumbs sit while being dragged; the URL only hears about it on release.
 	const [draft, setDraft] = useState<[number, number] | null>(null);
 
@@ -53,24 +56,30 @@ function PriceFilterInner({
 
 	return (
 		<FilterPopover
-			label="Price"
+			label={t("Price")}
 			trigger={
 				active
-					? `${formatPriceCompact(from * 100)} to ${formatPriceCompact(to * 100)}`
-					: "Price"
+					? t("{{min}} to {{max}}", {
+							min: formatPriceCompact(from * 100),
+							max: formatPriceCompact(to * 100),
+						})
+					: t("Price")
 			}
 			active={active}
 			onClear={() => onChange({ minPrice: undefined, maxPrice: undefined })}
 		>
 			<p className="type-num text-lg">
-				{formatPriceCompact(from * 100)} to {formatPriceCompact(to * 100)}
+				{t("{{min}} to {{max}}", {
+					min: formatPriceCompact(from * 100),
+					max: formatPriceCompact(to * 100),
+				})}
 			</p>
 			<Slider
 				min={lo}
 				max={hi}
 				step={1}
 				value={[from, to]}
-				aria-label="Price range"
+				aria-label={t("Price range")}
 				onValueChange={(value) => setDraft(toRange(value))}
 				onValueCommitted={(value) => {
 					const [nextFrom, nextTo] = toRange(value);

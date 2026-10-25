@@ -8,6 +8,7 @@ import {
 	PopoverTitle,
 	PopoverTrigger,
 } from "#/components/ui/popover";
+import { useTranslation } from "#/i18n/translate";
 import { cn } from "#/lib/utils";
 
 type FilterPopoverProps = {
@@ -26,6 +27,7 @@ export function FilterPopover({
 	onClear,
 	children,
 }: FilterPopoverProps) {
+	const t = useTranslation();
 	return (
 		<Popover>
 			<PopoverTrigger
@@ -45,7 +47,7 @@ export function FilterPopover({
 						className="self-start"
 						onClick={onClear}
 					>
-						Clear {label.toLowerCase()}
+						{t("Clear {{label}}", { label: label.toLowerCase() })}
 					</Button>
 				)}
 			</PopoverContent>
