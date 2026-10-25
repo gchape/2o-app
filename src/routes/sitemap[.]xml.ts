@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { desc } from "drizzle-orm";
+import { and, desc, eq, exists } from "drizzle-orm";
 import { escape as escapeXml } from "es-toolkit";
 import { categorySlugs, departmentSlugs } from "#/data/catalog";
 import { db } from "#/db";
-import { product } from "#/db/schema";
+import { product, skus } from "#/db/schema";
 import { env } from "#/server/env.server";
 
 /** Per the sitemap protocol, one file lists at most 50,000 URLs. */
@@ -30,6 +30,16 @@ export const Route = createFileRoute("/sitemap.xml")({
 				const products = await db
 					.select({ slug: product.slug, updatedAt: product.updatedAt })
 					.from(product)
+					.where(
+						exists(
+							db
+								.select({ id: skus.id })
+								.from(skus)
+								.where(
+									and(eq(skus.productId, product.id), eq(skus.inStock, true)),
+								),
+						),
+					)
 					.orderBy(desc(product.updatedAt))
 					.limit(MAX_SITEMAP_URLS - staticPaths.length);
 
