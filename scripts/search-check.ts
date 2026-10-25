@@ -120,7 +120,7 @@ type Check = { name: string; hint: string; test: () => Promise<void> };
 const checks: Check[] = [
 	{
 		name: "Search and JSON modules are loaded",
-		hint: "Use the redis:8.10.2-alpine image. If you keep a `command:` override in docker-compose.yaml, it may be skipping the module flags the image normally passes.",
+		hint: "Use the redis:8.10.2-alpine image. If you keep a `command:` override in docker-compose.dev.yaml or docker-compose.prod.yaml, it may be skipping the module flags the image normally passes.",
 		test: async () => {
 			const list = JSON.stringify(
 				await (await getRedis()).sendCommand(["MODULE", "LIST"]),
@@ -274,7 +274,7 @@ async function main() {
 			`✗ Could not create the test index: ${error instanceof Error ? error.message : error}`,
 		);
 		console.log(
-			"  Is Redis running with the Search and JSON modules? (docker compose up -d redis)",
+			"  Is Redis running with the Search and JSON modules? (docker compose -f docker-compose.dev.yaml up -d redis)",
 		);
 		process.exit(1);
 	}
