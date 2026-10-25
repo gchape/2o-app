@@ -1,9 +1,11 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { z } from "zod";
+import { site } from "#/data/site";
 import { ProductDetails } from "#/features/catalog/components/product-details";
 import { getProductFn } from "#/features/catalog/product.functions";
+import { productSlugSchema } from "#/features/catalog/product.schema";
 import { resolveSelection } from "#/features/catalog/product-selection";
-import { pageTitle } from "#/lib/seo";
+import { parseParam } from "#/lib/route-guards";
 
 /**
  * The chosen color and size live in the URL: links are shareable, the server
@@ -17,8 +19,11 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/product/$slug")({
 	validateSearch: searchSchema,
-	loader: async ({ params }) => {
-		const product = await getProductFn({ data: params.slug });
+	loader: async ({ params, abortController }) => {
+		const product = await getProductFn({
+			data: parseParam(productSlugSchema, params.slug),
+			signal: abortController.signal,
+		});
 		if (!product) throw notFound();
 		return product;
 	},
@@ -26,7 +31,11 @@ export const Route = createFileRoute("/product/$slug")({
 	staleTime: 30_000,
 	head: ({ loaderData }) => ({
 		meta: [
-			{ title: pageTitle(loaderData?.name) },
+			{
+				title: loaderData?.name
+					? `${loaderData.name} | ${site.name}`
+					: site.name,
+			},
 			...(loaderData?.description
 				? [{ name: "description", content: loaderData.description }]
 				: []),

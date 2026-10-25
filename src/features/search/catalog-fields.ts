@@ -13,9 +13,11 @@ const FIELDS = {
 	colors: { path: "$.colors", type: "TAG", separator: "," },
 	sizes: { path: "$.sizes", type: "TAG", separator: "," },
 	price: { path: "$.price", type: "NUMERIC" },
+	dealPrice: { path: "$.deal.price", type: "NUMERIC" },
 	discount: { path: "$.discount", type: "NUMERIC" },
 	sortName: { path: "$.sort.name", type: "NUMERIC" },
 	sortPrice: { path: "$.sort.price", type: "NUMERIC" },
+	sortDealPrice: { path: "$.sort.dealPrice", type: "NUMERIC" },
 	sortDiscount: { path: "$.sort.discount", type: "NUMERIC" },
 } as const satisfies Record<
 	string,

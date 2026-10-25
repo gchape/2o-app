@@ -30,7 +30,7 @@ export function FilterPopover({
 		<Popover>
 			<PopoverTrigger
 				render={<Button variant="outline" size="sm" />}
-				className={cn(active && "border-foreground/40")}
+				className={cn("h-10 rounded-lg px-4", active && "border-foreground/40")}
 			>
 				{trigger}
 				<HugeiconsIcon icon={ArrowDown01Icon} size={14} />

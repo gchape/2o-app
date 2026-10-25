@@ -1,5 +1,4 @@
 import {
-	getViewURL,
 	isPasswordCompromisedError,
 	validateMatchingValue,
 	validateStringLength,
@@ -9,22 +8,19 @@ import {
 	useChangePassword,
 	useFetchOptions,
 	useListAccounts,
-	useRequestPasswordReset,
 	useSession,
 } from "@better-auth-ui/react";
+import { useRequestPasswordResetOtp } from "@better-auth-ui/react/plugins/email-otp";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
 import { Card, CardContent, CardFooter } from "#/components/ui/card";
-import { Field, FieldError, FieldLabel } from "#/components/ui/field";
-import { Input } from "#/components/ui/input";
-import { Skeleton } from "#/components/ui/skeleton";
 import { Spinner } from "#/components/ui/spinner";
+import { authClient as otpAuthClient } from "#/features/auth/auth-client";
 import { cn } from "#/lib/utils";
-import { isAuthFormFieldInvalid, useAuthForm } from "../../auth-form";
-import { OpenEmailButton } from "../../open-email-button";
-import { PasswordInput } from "../../password-input";
+import { useAuthForm } from "../../auth-form";
 import { PasswordStrengthMeter } from "../../password-strength-meter";
+import { RESET_PASSWORD_EMAIL_STORAGE_KEY } from "../../storage-keys";
 
 export type ChangePasswordProps = {
 	className?: string;
@@ -64,23 +60,21 @@ export function ChangePassword({ className }: ChangePasswordProps) {
 }
 
 function SetPassword({ className }: { className?: string }) {
-	const { authClient, basePaths, baseURL, localization, plugins, viewPaths } =
+	const { authClient, basePaths, navigate, localization, plugins, viewPaths } =
 		useAuth();
 	const { data: session } = useSession(authClient);
 	const { fetchOptions, resetFetchOptions } = useFetchOptions();
-	const [sentEmail, setSentEmail] = useState("");
 
-	const { mutate: requestPasswordReset, isPending } = useRequestPasswordReset(
-		authClient,
-		{
+	const { mutate: requestPasswordReset, isPending } =
+		useRequestPasswordResetOtp(otpAuthClient, {
 			onError: () => {
 				resetFetchOptions();
 			},
 			onSuccess: (_data, { email }) => {
-				setSentEmail(email);
+				sessionStorage.setItem(RESET_PASSWORD_EMAIL_STORAGE_KEY, email);
+				navigate({ to: `${basePaths.auth}/${viewPaths.auth.resetPassword}` });
 			},
-		},
-	);
+		});
 
 	const Captcha = plugins.find(
 		(plugin) => plugin.captchaComponent,
@@ -91,11 +85,6 @@ function SetPassword({ className }: { className?: string }) {
 
 		requestPasswordReset({
 			email: session.user.email,
-			redirectTo: getViewURL(
-				baseURL,
-				basePaths.auth,
-				viewPaths.auth.resetPassword,
-			),
 			fetchOptions,
 		});
 	};
@@ -118,32 +107,18 @@ function SetPassword({ className }: { className?: string }) {
 						</p>
 					</div>
 
-					{sentEmail ? (
-						<div className="flex flex-col gap-3 items-start sm:items-end">
-							<p className="text-sm" role="status">
-								{localization.auth.resetLinkSentTo.replace(
-									"{{email}}",
-									sentEmail,
-								)}
-							</p>
+					<div className="flex flex-col gap-3 items-start sm:items-end">
+						{Captcha && <div>{Captcha}</div>}
 
-							<OpenEmailButton email={sentEmail} className="w-auto" />
-						</div>
-					) : (
-						<div className="flex flex-col gap-3 items-start sm:items-end">
-							{Captcha && <div>{Captcha}</div>}
-
-							<Button
-								size="sm"
-								disabled={isPending || !session?.user.email}
-								onClick={handleSetPassword}
-							>
-								{isPending && <Spinner />}
-
-								{localization.auth.sendResetLink}
-							</Button>
-						</div>
-					)}
+						<Button
+							size="sm"
+							disabled={isPending || !session?.user.email}
+							onClick={handleSetPassword}
+						>
+							{isPending && <Spinner />}
+							Send reset code
+						</Button>
+					</div>
 				</CardContent>
 			</Card>
 		</div>
@@ -218,36 +193,17 @@ function ChangePasswordForm({
 								}}
 							>
 								{(field) => (
-									<Field
-										data-invalid={isAuthFormFieldInvalid(field.state.meta)}
-									>
-										<FieldLabel htmlFor="currentPassword">
-											{localization.settings.currentPassword}
-										</FieldLabel>
-
-										{session ? (
-											<PasswordInput
-												id="currentPassword"
-												name={field.name}
-												autoComplete="current-password"
-												placeholder={
-													localization.settings.currentPasswordPlaceholder
-												}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-												disabled={isPending}
-												required
-												aria-invalid={isAuthFormFieldInvalid(field.state.meta)}
-											/>
-										) : (
-											<Skeleton>
-												<Input className="invisible" />
-											</Skeleton>
-										)}
-
-										<field.AuthFormFieldError />
-									</Field>
+									<field.AuthFormTextField
+										label={localization.settings.currentPassword}
+										type="password"
+										autoComplete="current-password"
+										placeholder={
+											localization.settings.currentPasswordPlaceholder
+										}
+										required
+										disabled={isPending}
+										isLoading={!session}
+									/>
 								)}
 							</form.AppField>
 
@@ -270,52 +226,25 @@ function ChangePasswordForm({
 										}),
 								}}
 							>
-								{(field) => {
-									const isInvalid =
-										isAuthFormFieldInvalid(field.state.meta) || isCompromised;
-
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor="newPassword">
-												{localization.auth.newPassword}
-											</FieldLabel>
-
-											{session ? (
-												<PasswordInput
-													id="newPassword"
-													name={field.name}
-													autoComplete="new-password"
-													placeholder={localization.auth.newPasswordPlaceholder}
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													onChange={(e) => {
-														field.handleChange(e.target.value);
-														setIsCompromised(false);
-													}}
-													minLength={emailAndPassword.minPasswordLength}
-													maxLength={emailAndPassword.maxPasswordLength}
-													disabled={isPending}
-													required
-													aria-invalid={isInvalid}
-												/>
-											) : (
-												<Skeleton>
-													<Input className="invisible" />
-												</Skeleton>
-											)}
-
-											{isCompromised ? (
-												<FieldError>
-													{localization.auth.passwordCompromised}
-												</FieldError>
-											) : (
-												<field.AuthFormFieldError />
-											)}
-
-											<PasswordStrengthMeter password={field.state.value} />
-										</Field>
-									);
-								}}
+								{(field) => (
+									<field.AuthFormTextField
+										label={localization.auth.newPassword}
+										type="password"
+										autoComplete="new-password"
+										placeholder={localization.auth.newPasswordPlaceholder}
+										required
+										disabled={isPending}
+										minLength={emailAndPassword?.minPasswordLength}
+										maxLength={emailAndPassword?.maxPasswordLength}
+										isLoading={!session}
+										error={
+											isCompromised && localization.auth.passwordCompromised
+										}
+										onValueChange={() => setIsCompromised(false)}
+									>
+										<PasswordStrengthMeter password={field.state.value} />
+									</field.AuthFormTextField>
+								)}
 							</form.AppField>
 
 							{emailAndPassword.confirmPassword && (
@@ -345,40 +274,17 @@ function ChangePasswordForm({
 									}}
 								>
 									{(field) => (
-										<Field
-											data-invalid={isAuthFormFieldInvalid(field.state.meta)}
-										>
-											<FieldLabel htmlFor="confirmPassword">
-												{localization.auth.confirmPassword}
-											</FieldLabel>
-
-											{session ? (
-												<PasswordInput
-													id="confirmPassword"
-													name={field.name}
-													autoComplete="new-password"
-													placeholder={
-														localization.auth.confirmPasswordPlaceholder
-													}
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													onChange={(e) => field.handleChange(e.target.value)}
-													minLength={emailAndPassword.minPasswordLength}
-													maxLength={emailAndPassword.maxPasswordLength}
-													disabled={isPending}
-													required
-													aria-invalid={isAuthFormFieldInvalid(
-														field.state.meta,
-													)}
-												/>
-											) : (
-												<Skeleton>
-													<Input className="invisible" />
-												</Skeleton>
-											)}
-
-											<field.AuthFormFieldError />
-										</Field>
+										<field.AuthFormTextField
+											label={localization.auth.confirmPassword}
+											type="password"
+											autoComplete="new-password"
+											placeholder={localization.auth.confirmPasswordPlaceholder}
+											required
+											disabled={isPending}
+											minLength={emailAndPassword?.minPasswordLength}
+											maxLength={emailAndPassword?.maxPasswordLength}
+											isLoading={!session}
+										/>
 									)}
 								</form.AppField>
 							)}

@@ -1,11 +1,14 @@
 import type { ComponentProps } from "react";
 import { cn } from "#/lib/utils";
 
-/** Centers content in the site's standard 6xl column. */
+/** Centers content in the site's standard content column. */
 export function Container({ className, ...props }: ComponentProps<"div">) {
 	return (
 		<div
-			className={cn("mx-auto w-full max-w-6xl px-4", className)}
+			className={cn(
+				"mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10",
+				className,
+			)}
 			{...props}
 		/>
 	);

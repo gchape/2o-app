@@ -36,10 +36,10 @@ export function HowItWorks({ warehouses }: HowItWorksProps) {
 	];
 
 	return (
-		<Section className="bg-muted/50 py-14">
-			<h2 className="type-display text-3xl md:text-4xl">How it works</h2>
+		<Section className="bg-muted/50 py-16 md:py-22">
+			<h2 className="type-title text-3xl md:text-4xl">How it works</h2>
 
-			<ol className="mt-8 grid gap-8 md:grid-cols-3">
+			<ol className="mt-10 grid gap-10 md:mt-12 md:grid-cols-3 md:gap-12">
 				{steps.map((step, i) => (
 					<li key={step.title}>
 						<div className="flex items-center gap-3">
@@ -48,8 +48,12 @@ export function HowItWorks({ warehouses }: HowItWorksProps) {
 							</span>
 							<HugeiconsIcon icon={step.icon} size={22} />
 						</div>
-						<h3 className="mt-3 font-semibold text-lg">{step.title}</h3>
-						<p className="mt-1 text-muted-foreground">{step.body}</p>
+						<h3 className="mt-5 font-semibold text-lg tracking-tight">
+							{step.title}
+						</h3>
+						<p className="mt-3 max-w-sm text-sm leading-7 text-muted-foreground">
+							{step.body}
+						</p>
 					</li>
 				))}
 			</ol>

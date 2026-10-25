@@ -38,9 +38,9 @@ export function AnnouncementBar() {
 	return (
 		<section
 			aria-label="Announcements"
-			className="bg-neutral-900 text-white/80 text-xs"
+			className="bg-neutral-900 text-white/80 text-xs tracking-wide"
 		>
-			<Container className="flex h-8 items-center justify-center gap-6 md:justify-between">
+			<Container className="flex min-h-9 items-center py-2 justify-center gap-6 md:justify-between">
 				<Item icon={Clock01Icon}>
 					Prices refreshed every morning at {site.priceCheckTime}
 				</Item>

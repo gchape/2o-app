@@ -1,5 +1,6 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
+import { emailOTP } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { site } from "#/data/site";
 import { db } from "#/db";
@@ -39,16 +40,19 @@ export const auth = betterAuth({
 
 	emailAndPassword: {
 		enabled: true,
-		sendResetPassword: async ({ user, url }) => {
-			void sendEmail({ to: user.email, ...emailTemplates.resetPassword(url) });
-		},
+		requireEmailVerification: true,
+		revokeSessionsOnPasswordReset: true,
+	},
+
+	emailVerification: {
+		sendOnSignIn: true,
 	},
 
 	user: {
 		changeEmail: {
 			enabled: true,
 			sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
-				void sendEmail({
+				await sendEmail({
 					to: user.email,
 					...emailTemplates.approveEmailChange(newEmail, url),
 				});
@@ -72,5 +76,15 @@ export const auth = betterAuth({
 
 	socialProviders,
 
-	plugins: [tanstackStartCookies()],
+	plugins: [
+		emailOTP({
+			overrideDefaultEmailVerification: true,
+			disableSignUp: true,
+			storeOTP: "hashed",
+			async sendVerificationOTP({ email, otp, type }) {
+				await sendEmail({ to: email, ...emailTemplates.code(otp, type) });
+			},
+		}),
+		tanstackStartCookies(),
+	],
 });

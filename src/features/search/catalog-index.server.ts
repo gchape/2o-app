@@ -14,11 +14,12 @@ export const INDEX = `${FAMILY}${createHash("sha1")
 	.digest("hex")
 	.slice(0, 8)}`;
 
-let indexReady: Promise<void> | undefined;
+let indexReady: Promise<boolean> | undefined;
 
 async function createIndex() {
 	const existing = await ft.list();
-	if (!existing.includes(INDEX)) {
+	const created = !existing.includes(INDEX);
+	if (created) {
 		await ft.create(INDEX, KEY_PREFIX, schemaArgs());
 	}
 	// Indexes from an older schema only cost memory.
@@ -27,6 +28,7 @@ async function createIndex() {
 			.filter((name) => name.startsWith(FAMILY) && name !== INDEX)
 			.map((name) => ft.dropIndex(name)),
 	);
+	return created;
 }
 
 const ensureIndex = () => {
@@ -108,12 +110,13 @@ let catalogReady: Promise<void> | undefined;
  */
 export const ensureCatalogReady = () => {
 	catalogReady ??= (async () => {
-		await ensureIndex();
+		const created = await ensureIndex();
 		const { total } = await ft.search(INDEX, "*", {
 			offset: 0,
 			limit: 0,
 		});
-		if (total === 0) await syncCatalogIndex();
+		// Existing JSON documents also need new derived fields after a schema change.
+		if (created || total === 0) await syncCatalogIndex();
 	})().catch((error: unknown) => {
 		catalogReady = undefined;
 		throw error;

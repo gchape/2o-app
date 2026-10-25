@@ -43,7 +43,10 @@ export function OptionGroup({
 						value={o.value}
 						disabled={o.soldOut}
 						aria-label={o.ariaLabel}
-						className={cn(o.soldOut && "line-through")}
+						className={cn(
+							"min-h-11 min-w-12 rounded-lg px-4",
+							o.soldOut && "line-through",
+						)}
 					>
 						{o.label}
 					</ToggleGroupItem>

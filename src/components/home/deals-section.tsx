@@ -39,13 +39,13 @@ export function DealsSection({ deals, total, checkedAt }: DealsSectionProps) {
 	};
 
 	return (
-		<Section id="deals" className="scroll-mt-4 py-12">
+		<Section id="deals" className="scroll-mt-8 py-16 md:py-24">
 			<div className="flex flex-wrap items-end justify-between gap-4">
 				<div>
-					<h2 className="type-display text-3xl md:text-4xl">
+					<h2 className="type-title text-3xl md:text-4xl">
 						Today's biggest drops
 					</h2>
-					<p className="mt-2 text-muted-foreground">
+					<p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
 						Sorted by discount. {priceCheckNote(checkedAt)}
 					</p>
 				</div>
@@ -53,7 +53,7 @@ export function DealsSection({ deals, total, checkedAt }: DealsSectionProps) {
 				<div className="flex items-center gap-4">
 					<Link
 						to="/deals"
-						className="font-medium text-sm underline underline-offset-4"
+						className="py-2 font-semibold text-sm underline decoration-1 underline-offset-8"
 					>
 						See all {total.toLocaleString("en-US")} deals
 					</Link>
@@ -62,7 +62,7 @@ export function DealsSection({ deals, total, checkedAt }: DealsSectionProps) {
 							type="button"
 							variant="outline"
 							size="icon-lg"
-							className="rounded-xl"
+							className="rounded-full"
 							aria-label="Previous deals"
 							disabled={atStart}
 							onClick={() => scrollByPage(-1)}
@@ -73,7 +73,7 @@ export function DealsSection({ deals, total, checkedAt }: DealsSectionProps) {
 							type="button"
 							variant="outline"
 							size="icon-lg"
-							className="rounded-xl"
+							className="rounded-full"
 							aria-label="Next deals"
 							disabled={atEnd}
 							onClick={() => scrollByPage(1)}
@@ -86,12 +86,12 @@ export function DealsSection({ deals, total, checkedAt }: DealsSectionProps) {
 
 			<ul
 				ref={scroller}
-				className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+				className="mt-9 flex snap-x snap-mandatory gap-5 md:mt-10 md:gap-6 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
 			>
 				{deals.map((deal, i) => (
 					<li
 						key={deal.id}
-						className="w-[68%] shrink-0 snap-start sm:w-[40%] md:w-[calc((100%-3rem)/4)]"
+						className="w-[68%] shrink-0 snap-start sm:w-[40%] md:w-[calc((100%-4.5rem)/4)]"
 					>
 						<DealCard deal={deal} loading={dealImageLoading(i)} />
 					</li>

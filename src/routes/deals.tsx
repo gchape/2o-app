@@ -11,7 +11,6 @@ import {
 } from "#/features/search/catalog-filters";
 import { priceCheckNote } from "#/features/stats/format-checked-at";
 import { statsQuery } from "#/features/stats/stats.queries";
-import { pageTitle } from "#/lib/seo";
 
 const scope: CatalogScope = { mode: "deals" };
 
@@ -25,7 +24,7 @@ export const Route = createFileRoute("/deals")({
 			context.queryClient.query(statsQuery),
 		]);
 	},
-	head: () => ({ meta: [{ title: pageTitle("Deals") }] }),
+	head: () => ({ meta: [{ title: `Deals | ${site.name}` }] }),
 	component: DealsPage,
 });
 
@@ -35,9 +34,9 @@ function DealsPage() {
 	const { data: stats } = useSuspenseQuery(statsQuery);
 
 	return (
-		<Container className="py-8">
-			<h1 className="type-display text-3xl md:text-4xl">All deals</h1>
-			<p className="mt-2 text-muted-foreground">
+		<Container className="py-10 md:py-14">
+			<h1 className="type-title text-3xl md:text-5xl">All deals</h1>
+			<p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
 				Everything on sale right now. {priceCheckNote(stats.checkedAt)}
 			</p>
 

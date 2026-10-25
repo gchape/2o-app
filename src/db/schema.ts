@@ -9,6 +9,7 @@ import {
 	text,
 	timestamp,
 	unique,
+	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
 import { categorySlugs, departmentSlugs } from "#/data/catalog";
@@ -140,12 +141,40 @@ export const orderItem = pgTable(
 	(t) => [index("order_item_order_idx").on(t.orderId)],
 );
 
+export const address = pgTable(
+	"address",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		fullName: text("full_name").notNull(),
+		phone: text("phone").notNull(),
+		line1: text("line1").notNull(),
+		line2: text("line2"),
+		city: text("city").notNull(),
+		postalCode: text("postal_code"),
+		country: text("country").notNull().default(site.delivery.region),
+		isPrimary: boolean("is_primary").notNull().default(false),
+		...timestamps,
+	},
+	(t) => [
+		index("address_user_idx").on(t.userId),
+		// At most one primary address per user, enforced by the database.
+		uniqueIndex("address_primary_uq").on(t.userId).where(sql`${t.isPrimary}`),
+	],
+);
+
 export const relations = defineRelations(
-	{ user, account, product, skus, orders, orderItem },
+	{ user, account, product, skus, orders, orderItem, address },
 	(r) => ({
 		user: {
 			accounts: r.many.account({ from: r.user.id, to: r.account.userId }),
 			orders: r.many.orders({ from: r.user.id, to: r.orders.userId }),
+			addresses: r.many.address({ from: r.user.id, to: r.address.userId }),
+		},
+		address: {
+			user: r.one.user({ from: r.address.userId, to: r.user.id }),
 		},
 		account: {
 			user: r.one.user({ from: r.account.userId, to: r.user.id }),

@@ -19,21 +19,12 @@ import { useIsMutating } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import {
-	Field,
 	FieldDescription,
-	FieldError,
 	FieldGroup,
-	FieldLabel,
 	FieldSeparator,
 } from "#/components/ui/field";
-import { Input } from "#/components/ui/input";
 import { cn } from "#/lib/utils";
-import {
-	getAuthAdditionalFieldValidators,
-	isAuthFormFieldInvalid,
-	useAuthForm,
-} from "./auth-form";
-import { PasswordInput } from "./password-input";
+import { getAuthAdditionalFieldValidators, useAuthForm } from "./auth-form";
 import { PasswordStrengthMeter } from "./password-strength-meter";
 import { ProviderButtons, type SocialLayout } from "./provider-buttons";
 import { VERIFY_EMAIL_STORAGE_KEY } from "./storage-keys";
@@ -204,37 +195,16 @@ export function SignUp({
 													}),
 											}}
 										>
-											{(field) => {
-												const isInvalid = isAuthFormFieldInvalid(
-													field.state.meta,
-												);
-
-												return (
-													<Field data-invalid={isInvalid}>
-														<FieldLabel htmlFor="name">
-															{localization.auth.name}
-														</FieldLabel>
-
-														<Input
-															id="name"
-															name={field.name}
-															type="text"
-															autoComplete="name"
-															placeholder={localization.auth.namePlaceholder}
-															required
-															disabled={isPending}
-															value={field.state.value}
-															onBlur={field.handleBlur}
-															onChange={(event) =>
-																field.handleChange(event.target.value)
-															}
-															aria-invalid={isInvalid}
-														/>
-
-														<field.AuthFormFieldError />
-													</Field>
-												);
-											}}
+											{(field) => (
+												<field.AuthFormTextField
+													label={localization.auth.name}
+													type="text"
+													autoComplete="name"
+													placeholder={localization.auth.namePlaceholder}
+													required
+													disabled={isPending}
+												/>
+											)}
 										</form.AppField>
 									)}
 
@@ -248,37 +218,16 @@ export function SignUp({
 												}),
 										}}
 									>
-										{(field) => {
-											const isInvalid = isAuthFormFieldInvalid(
-												field.state.meta,
-											);
-
-											return (
-												<Field data-invalid={isInvalid}>
-													<FieldLabel htmlFor="email">
-														{localization.auth.email}
-													</FieldLabel>
-
-													<Input
-														id="email"
-														name={field.name}
-														type="email"
-														autoComplete="email"
-														placeholder={localization.auth.emailPlaceholder}
-														required
-														disabled={isPending}
-														value={field.state.value}
-														onBlur={field.handleBlur}
-														onChange={(event) =>
-															field.handleChange(event.target.value)
-														}
-														aria-invalid={isInvalid}
-													/>
-
-													<field.AuthFormFieldError />
-												</Field>
-											);
-										}}
+										{(field) => (
+											<field.AuthFormTextField
+												label={localization.auth.email}
+												type="email"
+												autoComplete="email"
+												placeholder={localization.auth.emailPlaceholder}
+												required
+												disabled={isPending}
+											/>
+										)}
 									</form.AppField>
 
 									{signUpFields.map(
@@ -322,47 +271,24 @@ export function SignUp({
 												}),
 										}}
 									>
-										{(field) => {
-											const isInvalid =
-												isAuthFormFieldInvalid(field.state.meta) ||
-												isCompromised;
-
-											return (
-												<Field data-invalid={isInvalid}>
-													<FieldLabel htmlFor="password">
-														{localization.auth.password}
-													</FieldLabel>
-
-													<PasswordInput
-														id="password"
-														name={field.name}
-														autoComplete="new-password"
-														value={field.state.value}
-														onBlur={field.handleBlur}
-														onChange={(e) => {
-															field.handleChange(e.target.value);
-															setIsCompromised(false);
-														}}
-														placeholder={localization.auth.passwordPlaceholder}
-														required
-														minLength={emailAndPassword?.minPasswordLength}
-														maxLength={emailAndPassword?.maxPasswordLength}
-														disabled={isPending}
-														aria-invalid={isInvalid}
-													/>
-
-													{isCompromised ? (
-														<FieldError>
-															{localization.auth.passwordCompromised}
-														</FieldError>
-													) : (
-														<field.AuthFormFieldError />
-													)}
-
-													<PasswordStrengthMeter password={field.state.value} />
-												</Field>
-											);
-										}}
+										{(field) => (
+											<field.AuthFormTextField
+												label={localization.auth.password}
+												type="password"
+												autoComplete="new-password"
+												placeholder={localization.auth.passwordPlaceholder}
+												required
+												disabled={isPending}
+												minLength={emailAndPassword?.minPasswordLength}
+												maxLength={emailAndPassword?.maxPasswordLength}
+												error={
+													isCompromised && localization.auth.passwordCompromised
+												}
+												onValueChange={() => setIsCompromised(false)}
+											>
+												<PasswordStrengthMeter password={field.state.value} />
+											</field.AuthFormTextField>
+										)}
 									</form.AppField>
 
 									{emailAndPassword?.confirmPassword && (
@@ -392,40 +318,20 @@ export function SignUp({
 													),
 											}}
 										>
-											{(field) => {
-												const isInvalid = isAuthFormFieldInvalid(
-													field.state.meta,
-												);
-
-												return (
-													<Field data-invalid={isInvalid}>
-														<FieldLabel htmlFor="confirmPassword">
-															{localization.auth.confirmPassword}
-														</FieldLabel>
-
-														<PasswordInput
-															id="confirmPassword"
-															name={field.name}
-															autoComplete="new-password"
-															value={field.state.value}
-															onBlur={field.handleBlur}
-															onChange={(e) =>
-																field.handleChange(e.target.value)
-															}
-															placeholder={
-																localization.auth.confirmPasswordPlaceholder
-															}
-															required
-															minLength={emailAndPassword?.minPasswordLength}
-															maxLength={emailAndPassword?.maxPasswordLength}
-															disabled={isPending}
-															aria-invalid={isInvalid}
-														/>
-
-														<field.AuthFormFieldError />
-													</Field>
-												);
-											}}
+											{(field) => (
+												<field.AuthFormTextField
+													label={localization.auth.confirmPassword}
+													type="password"
+													autoComplete="new-password"
+													placeholder={
+														localization.auth.confirmPasswordPlaceholder
+													}
+													required
+													disabled={isPending}
+													minLength={emailAndPassword?.minPasswordLength}
+													maxLength={emailAndPassword?.maxPasswordLength}
+												/>
+											)}
 										</form.AppField>
 									)}
 

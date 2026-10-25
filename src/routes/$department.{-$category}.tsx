@@ -1,6 +1,7 @@
 import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 import { Container } from "#/components/layout/container";
 import { categories, departments } from "#/data/catalog";
+import { site } from "#/data/site";
 import { CatalogListing } from "#/features/catalog/components/catalog-listing";
 import { DepartmentBreadcrumbs } from "#/features/catalog/components/department-breadcrumbs";
 import {
@@ -13,7 +14,6 @@ import {
 	DEFAULT_FILTERS,
 } from "#/features/search/catalog-filters";
 import { parseParam } from "#/lib/route-guards";
-import { pageTitle } from "#/lib/seo";
 
 export const Route = createFileRoute("/$department/{-$category}")({
 	beforeLoad: ({ params }) => {
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/$department/{-$category}")({
 	loader: ({ context, deps }) =>
 		loadCatalog(context.queryClient, context.scope, deps.search),
 	head: ({ match }) => ({
-		meta: [{ title: pageTitle(match.context.title) }],
+		meta: [{ title: `${match.context.title} | ${site.name}` }],
 	}),
 	component: DepartmentPage,
 });
@@ -43,12 +43,12 @@ function DepartmentPage() {
 	const navigate = Route.useNavigate();
 
 	return (
-		<Container className="py-6">
+		<Container className="py-8 md:py-12">
 			<DepartmentBreadcrumbs
 				department={scope.department}
 				category={scope.category}
 			/>
-			<h1 className="type-display mt-6 text-3xl md:text-4xl">{title}</h1>
+			<h1 className="type-title mt-7 text-3xl md:text-5xl">{title}</h1>
 			<CatalogListing
 				key={`${scope.department}/${scope.category ?? ""}`}
 				scope={scope}

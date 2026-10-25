@@ -14,7 +14,7 @@ const info = [
 
 function FooterHeading({ children }: { children: string }) {
 	return (
-		<h3 className="font-semibold text-brand text-sm uppercase tracking-wide">
+		<h3 className="font-semibold text-brand text-xs uppercase tracking-[0.16em]">
 			{children}
 		</h3>
 	);
@@ -28,10 +28,12 @@ export function Footer() {
 
 	return (
 		<footer className="bg-neutral-950 text-white">
-			<Container className="grid gap-10 py-14 md:grid-cols-4">
-				<div className="md:col-span-2">
-					<Logo className="h-12" />
-					<p className="mt-4 max-w-sm text-white/60">{site.pitch}</p>
+			<Container className="grid grid-cols-2 gap-x-8 gap-y-10 py-14 md:grid-cols-4 md:gap-12 md:py-18">
+				<div className="col-span-2">
+					<Logo className="h-10" />
+					<p className="mt-5 max-w-sm text-sm leading-7 text-white/60">
+						{site.pitch}
+					</p>
 
 					{links.length > 0 && (
 						<ul className="mt-6 flex items-center gap-3">
@@ -54,7 +56,7 @@ export function Footer() {
 
 				<div>
 					<FooterHeading>Shop</FooterHeading>
-					<ul className="mt-4 space-y-2">
+					<ul className="mt-5 space-y-3 text-sm">
 						{departmentSlugs.map((slug) => (
 							<li key={slug}>
 								<Link
@@ -71,7 +73,7 @@ export function Footer() {
 
 				<div>
 					<FooterHeading>Good to know</FooterHeading>
-					<ul className="mt-4 space-y-2 text-white/70">
+					<ul className="mt-5 space-y-3 text-sm text-white/70">
 						{info.map((item) => (
 							<li key={item}>{item}</li>
 						))}
@@ -80,7 +82,7 @@ export function Footer() {
 			</Container>
 
 			<div className="border-white/10 border-t">
-				<Container className="flex flex-col gap-2 py-6 text-white/50 text-xs md:flex-row md:justify-between">
+				<Container className="flex flex-col gap-3 py-6 text-white/50 text-xs leading-relaxed md:flex-row md:justify-between md:gap-10">
 					<p>
 						© {new Date().getFullYear()} {site.name}. All rights reserved.
 					</p>

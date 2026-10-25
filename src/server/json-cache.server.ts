@@ -45,7 +45,7 @@ export function createJsonCache<S extends z.ZodType>({
 	return {
 		async get(): Promise<Value> {
 			const cached = await read();
-			if (cached) return cached;
+			if (cached !== null) return cached;
 
 			const value = await compute();
 			write(value).catch((error) =>

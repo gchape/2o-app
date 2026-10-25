@@ -38,34 +38,34 @@ export function DealCard({ deal, loading, className }: DealCardProps) {
 					src={imageUrl}
 					alt=""
 					loading={loading}
-					className="aspect-4/5 rounded-xl [&_img]:transition-transform [&_img]:duration-300 group-hover:[&_img]:scale-105"
+					className="aspect-4/5 rounded-xl [&_img]:transition-transform [&_img]:duration-500 motion-safe:group-hover:[&_img]:scale-[1.03]"
 				/>
 				<SkewTag className="type-num absolute top-3 left-3 text-sm">
 					−{discount}%
 				</SkewTag>
 			</div>
 
-			<div className="mt-3 space-y-1">
-				{brand && <p className="text-muted-foreground text-xs">{brand}</p>}
-				<h3 className="font-medium leading-snug">
+			<div className="mt-5 space-y-2">
+				{brand && <p className="type-eyebrow text-muted-foreground">{brand}</p>}
+				<h3 className="min-h-11 text-sm font-medium leading-snug tracking-tight sm:text-base">
 					<Link
 						to="/product/$slug"
 						params={{ slug }}
-						className="after:absolute after:inset-0"
+						className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4"
 					>
 						{name}
 					</Link>
 				</h3>
-				<p className="flex items-baseline gap-2 pt-1">
+				<p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 pt-1">
 					<span className="text-muted-foreground text-xs">From</span>
-					<span className="type-num text-xl">
+					<span className="type-num text-lg sm:text-xl">
 						{formatPriceCompact(price, currency)}
 					</span>
 					<span className="text-muted-foreground text-sm line-through">
 						{formatPriceCompact(originalPrice, currency)}
 					</span>
 				</p>
-				<p className="font-semibold text-green-700 text-sm">
+				<p className="font-medium text-green-700 text-xs sm:text-sm">
 					You save {formatPriceCompact(originalPrice - price, currency)}
 				</p>
 			</div>

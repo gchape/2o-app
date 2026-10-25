@@ -68,14 +68,14 @@ function MobileMenu() {
 				<SheetHeader>
 					<SheetTitle>Menu</SheetTitle>
 				</SheetHeader>
-				<nav className="flex flex-col gap-1 px-4">
+				<nav className="flex flex-col gap-2 px-5 py-4">
 					{departmentSlugs.map((slug) => (
 						<Link
 							key={slug}
 							to="/$department/{-$category}"
 							params={{ department: slug, category: undefined }}
 							onClick={() => setOpen(false)}
-							className="rounded-md px-3 py-2 text-base hover:bg-accent"
+							className="rounded-lg px-4 py-4 text-lg font-medium tracking-tight hover:bg-accent"
 						>
 							{departments[slug].label}
 						</Link>
@@ -89,9 +89,9 @@ function MobileMenu() {
 export function Header() {
 	return (
 		<header className="dark border-b bg-background text-foreground">
-			<Container className="flex h-16 items-center justify-between gap-4">
-				<div className="flex items-center gap-6">
-					<Logo className="h-9" />
+			<Container className="flex h-18 items-center justify-between gap-4 md:h-22">
+				<div className="flex items-center gap-8 lg:gap-12">
+					<Logo className="h-9 md:h-10" />
 					<DesktopNav />
 				</div>
 

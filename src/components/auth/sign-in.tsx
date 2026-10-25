@@ -19,10 +19,8 @@ import {
 	FieldLabel,
 	FieldSeparator,
 } from "#/components/ui/field";
-import { Input } from "#/components/ui/input";
 import { cn } from "#/lib/utils";
-import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form";
-import { PasswordInput } from "./password-input";
+import { useAuthForm } from "./auth-form";
 import { ProviderButtons, type SocialLayout } from "./provider-buttons";
 import { ReauthenticationNotice } from "./reauthentication";
 import { VERIFY_EMAIL_STORAGE_KEY } from "./storage-keys";
@@ -145,35 +143,16 @@ export function SignIn({
 												}),
 										}}
 									>
-										{(field) => {
-											const isInvalid = isAuthFormFieldInvalid(
-												field.state.meta,
-											);
-											return (
-												<Field data-invalid={isInvalid}>
-													<FieldLabel htmlFor="email">
-														{localization.auth.email}
-													</FieldLabel>
-
-													<Input
-														id="email"
-														name={field.name}
-														type="email"
-														autoComplete="email"
-														placeholder={localization.auth.emailPlaceholder}
-														required
-														disabled={isPending}
-														value={field.state.value}
-														onBlur={field.handleBlur}
-														onChange={(event) =>
-															field.handleChange(event.target.value)
-														}
-														aria-invalid={isInvalid}
-													/>
-													<field.AuthFormFieldError />
-												</Field>
-											);
-										}}
+										{(field) => (
+											<field.AuthFormTextField
+												label={localization.auth.email}
+												type="email"
+												autoComplete="email"
+												placeholder={localization.auth.emailPlaceholder}
+												required
+												disabled={isPending}
+											/>
+										)}
 									</form.AppField>
 
 									<form.AppField
@@ -195,37 +174,18 @@ export function SignIn({
 												}),
 										}}
 									>
-										{(field) => {
-											const isInvalid = isAuthFormFieldInvalid(
-												field.state.meta,
-											);
-											return (
-												<Field data-invalid={isInvalid}>
-													<FieldLabel htmlFor="password">
-														{localization.auth.password}
-													</FieldLabel>
-
-													<PasswordInput
-														id="password"
-														name={field.name}
-														autoComplete="current-password"
-														value={field.state.value}
-														onBlur={field.handleBlur}
-														onChange={(event) =>
-															field.handleChange(event.target.value)
-														}
-														placeholder={localization.auth.passwordPlaceholder}
-														required
-														minLength={emailAndPassword?.minPasswordLength}
-														maxLength={emailAndPassword?.maxPasswordLength}
-														disabled={isPending}
-														aria-invalid={isInvalid}
-													/>
-
-													<field.AuthFormFieldError />
-												</Field>
-											);
-										}}
+										{(field) => (
+											<field.AuthFormTextField
+												label={localization.auth.password}
+												type="password"
+												autoComplete="current-password"
+												placeholder={localization.auth.passwordPlaceholder}
+												required
+												disabled={isPending}
+												minLength={emailAndPassword?.minPasswordLength}
+												maxLength={emailAndPassword?.maxPasswordLength}
+											/>
+										)}
 									</form.AppField>
 
 									{emailAndPassword.rememberMe && (

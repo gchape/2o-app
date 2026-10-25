@@ -38,7 +38,7 @@ export type CatalogDoc = {
 	 * Sort keys with a per-product sequence mixed in. A plain SORTBY with ties
 	 * would let offset pages overlap or skip; these are unique, so they can't.
 	 */
-	sort: { name: number; price: number; discount: number };
+	sort: { name: number; price: number; dealPrice: number; discount: number };
 };
 
 type SourceSku = {
@@ -115,6 +115,7 @@ export function buildCatalogDocs(products: SourceProduct[]): CatalogDoc[] {
 				sort: {
 					name: nameRank.get(p.id) ?? 0,
 					price: cheapest.price * SEQ + seq,
+					dealPrice: (deal?.price ?? cheapest.price) * SEQ + seq,
 					discount: deepest.discount * SEQ + seq,
 				},
 			};

@@ -50,7 +50,10 @@ const fixture: SourceProduct[] = [
 		department: "men",
 		category: "shoes",
 		currency: "GEL",
-		skus: [sku("black", "40", 8000, 10000, 20), sku("white", "41", 9000)],
+		skus: [
+			sku("black", "40", 8000, 10000, 20),
+			sku("white", "41", 14000, 20000, 30),
+		],
 	},
 	{
 		id: "b",
@@ -90,7 +93,7 @@ const search = (q: Query = {}) =>
 			...q.filters,
 		}),
 		{
-			sort: sortOptions(q.sort ?? "relevance"),
+			sort: sortOptions(q.sort ?? "relevance", q.scope ?? { mode: "listing" }),
 			offset: q.offset ?? 0,
 			limit: q.limit ?? 10,
 		},
@@ -186,6 +189,16 @@ const checks: Check[] = [
 				"b",
 				"a",
 			]);
+		},
+	},
+	{
+		name: "Deals filter and sort by the displayed variant's price",
+		hint: "Check dealPrice and sortDealPrice in the index schema and rebuild the catalog documents.",
+		test: async () => {
+			const scope = { mode: "deals" } as const;
+			same(await ids({ scope, filters: { maxPrice: 13000 } }), ["b"]);
+			same(await ids({ scope, sort: "price-asc" }), ["b", "a"]);
+			same(await ids({ scope, sort: "price-desc" }), ["a", "b"]);
 		},
 	},
 	{

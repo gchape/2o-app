@@ -3,6 +3,6 @@ import { getStatsFn } from "./stats.functions";
 
 export const statsQuery = queryOptions({
 	queryKey: ["stats"],
-	queryFn: () => getStatsFn(),
+	queryFn: ({ signal }) => getStatsFn({ signal }),
 	staleTime: 5 * 60_000,
 });

@@ -7,6 +7,8 @@ x-app-env: &app-env
     NODE_ENV: production
     DB_HOST: db
     DB_PORT: "5432"
+    DB_SSL: "true"
+    DB_SSL_SERVERNAME: ${DB_SSL_SERVERNAME:?DB_SSL_SERVERNAME is required}
     REDIS_HOST: redis
     REDIS_PORT: "6379"
 
@@ -18,8 +20,28 @@ services:
       POSTGRES_USER: ${DB_USER:?DB_USER is required}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       POSTGRES_DB: ${DB_NAME:?DB_NAME is required}
+    command:
+      - postgres
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/etc/postgresql/certs/fullchain.pem
+      - -c
+      - ssl_key_file=/etc/postgresql/certs/privkey.pem
     volumes:
       - pgdata:/var/lib/postgresql
+      - type: bind
+        source: ./certs/fullchain.pem
+        target: /etc/postgresql/certs/fullchain.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./certs/privkey.pem
+        target: /etc/postgresql/certs/privkey.pem
+        read_only: true
+        bind:
+          create_host_path: false
     healthcheck:
       test:
         ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
@@ -77,6 +99,20 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - type: bind
+        source: ./certs/fullchain.pem
+        target: /etc/nginx/certs/fullchain.pem
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./certs/privkey.pem
+        target: /etc/nginx/certs/privkey.pem
+        read_only: true
+        bind:
+          create_host_path: false
     depends_on:
       app:
         condition: service_healthy

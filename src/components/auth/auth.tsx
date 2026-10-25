@@ -6,7 +6,6 @@ import { AuthRedirect } from "./auth-redirect";
 import { AuthCallback, AuthError } from "./auth-result";
 import { ForgotPassword } from "./forgot-password";
 import type { SocialLayout } from "./provider-buttons";
-import { ResetLinkSent } from "./reset-link-sent";
 import { ResetPassword } from "./reset-password";
 import { SignIn } from "./sign-in";
 import { SignOut } from "./sign-out";
@@ -43,7 +42,7 @@ const AUTH_VIEWS: Partial<Record<AuthView, ComponentType<AuthProps>>> = {
 	signUp: SignUp,
 	forgotPassword: ForgotPassword,
 	resetPassword: ResetPassword,
-	resetLinkSent: ResetLinkSent,
+	resetLinkSent: ResetPassword,
 	verifyEmail: VerifyEmail,
 };
 

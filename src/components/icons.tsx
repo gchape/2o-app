@@ -12,7 +12,6 @@ import {
 	Login01Icon,
 	Logout01Icon,
 	PlugSocketIcon,
-	QrCodeIcon,
 	Settings01Icon,
 	Shield01Icon,
 	SmartPhone01Icon,
@@ -57,7 +56,6 @@ export const LogIn = createIcon(Login01Icon);
 export const LogOut = createIcon(Logout01Icon);
 export const Monitor = createIcon(ComputerIcon);
 export const Plug = createIcon(PlugSocketIcon);
-export const QrCode = createIcon(QrCodeIcon);
 export const Settings = createIcon(Settings01Icon);
 export const Shield = createIcon(Shield01Icon);
 export const Smartphone = createIcon(SmartPhone01Icon);

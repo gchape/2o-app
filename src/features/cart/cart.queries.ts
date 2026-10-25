@@ -3,5 +3,5 @@ import { getCartFn } from "./cart.functions";
 
 export const cartQuery = queryOptions({
 	queryKey: ["cart"],
-	queryFn: () => getCartFn(),
+	queryFn: ({ signal }) => getCartFn({ signal }),
 });

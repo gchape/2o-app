@@ -50,7 +50,7 @@ export function SearchBox({ value, onCommit, className }: SearchBoxProps) {
 				commit.flush();
 			}}
 		>
-			<InputGroup>
+			<InputGroup className="h-10">
 				<InputGroupAddon align="inline-start">
 					<HugeiconsIcon icon={Search01Icon} size={16} />
 				</InputGroupAddon>

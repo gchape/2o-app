@@ -60,7 +60,10 @@ export function CatalogListing({
 			)}
 
 			{total > 0 && (
-				<p className="mt-4 text-muted-foreground text-sm" aria-live="polite">
+				<p
+					className="mt-5 text-muted-foreground text-xs tracking-wide"
+					aria-live="polite"
+				>
 					<span className="type-num text-foreground">
 						{total.toLocaleString("en-US")}
 					</span>{" "}
@@ -90,7 +93,7 @@ export function CatalogListing({
 					))
 				)
 			) : scope.mode === "deals" ? (
-				<ul className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
+				<ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4">
 					{items.filter(isDeal).map((deal, index) => (
 						<li key={deal.id}>
 							<DealCard deal={deal} loading={dealImageLoading(index)} />

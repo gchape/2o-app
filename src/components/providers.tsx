@@ -3,6 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { ComponentProps, ReactNode } from "react";
+import { addressesPlugin } from "#/features/addresses/addresses-plugin";
 import { authClient } from "#/features/auth/auth-client";
 import { publicConfigQuery } from "#/features/config/config.queries";
 import { AuthProvider } from "./auth/auth-provider";
@@ -21,6 +22,8 @@ const socialProviderDisplay = {
 	},
 };
 
+const plugins = [addressesPlugin];
+
 export function Providers({ children }: { children: ReactNode }) {
 	const navigate = useNavigate();
 	const { data: config } = useSuspenseQuery(publicConfigQuery);
@@ -30,7 +33,8 @@ export function Providers({ children }: { children: ReactNode }) {
 			emailAndPassword={{
 				enabled: true,
 				confirmPassword: true,
-				forgotPassword: false,
+				forgotPassword: true,
+				requireEmailVerification: true,
 			}}
 			authClient={authClient}
 			redirectTo="/"
@@ -39,6 +43,7 @@ export function Providers({ children }: { children: ReactNode }) {
 				...socialProviderDisplay[id],
 			}))}
 			navigate={navigate}
+			plugins={plugins}
 			Link={AuthLink}
 		>
 			{children}

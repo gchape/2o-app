@@ -155,11 +155,28 @@
 	font-weight: 900;
 	font-stretch: 118%;
 	letter-spacing: -0.02em;
+	text-wrap: balance;
+}
+
+@utility type-title {
+	font-family: var(--font-heading);
+	font-weight: 600;
+	line-height: 1.12;
+	letter-spacing: -0.045em;
+	text-wrap: balance;
+}
+
+@utility type-eyebrow {
+	font-size: 0.6875rem;
+	font-weight: 600;
+	line-height: 1.5;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
 }
 
 @utility type-num {
 	font-family: var(--font-display);
-	font-weight: 800;
+	font-weight: 700;
 	font-variant-numeric: tabular-nums;
 	letter-spacing: -0.01em;
 }
@@ -178,6 +195,17 @@
 
 	body {
 		@apply bg-background text-foreground antialiased;
+		line-height: 1.6;
+	}
+
+	h1,
+	h2,
+	h3 {
+		overflow-wrap: break-word;
+	}
+
+	:focus-visible {
+		outline-offset: 4px;
 	}
 
 	a,
@@ -191,5 +219,17 @@
 	button:not(:disabled),
 	[role="button"]:not(:disabled) {
 		cursor: pointer;
+	}
+}
+
+/* Keep reduced-motion preferences above layered animation utilities. */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms;
+		animation-iteration-count: 1;
+		transition-duration: 0.01ms;
+		scroll-behavior: auto;
 	}
 }

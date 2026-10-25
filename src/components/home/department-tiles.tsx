@@ -21,18 +21,18 @@ const tones = {
 /** Big typographic tiles: the whole tile opens the department, the chips jump to a category. */
 export function DepartmentTiles() {
 	return (
-		<Section className="py-12">
-			<h2 className="type-display text-3xl md:text-4xl">Shop by department</h2>
-			<p className="mt-2 text-muted-foreground">
+		<Section className="pb-16 pt-4 md:pb-24 md:pt-2">
+			<h2 className="type-title text-3xl md:text-4xl">Shop by department</h2>
+			<p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
 				Shoes and clothing for the whole family.
 			</p>
 
-			<ul className="mt-8 grid gap-4 md:grid-cols-3">
+			<ul className="mt-9 grid gap-5 md:mt-10 md:grid-cols-3 md:gap-6">
 				{departmentSlugs.map((slug) => (
 					<li
 						key={slug}
 						className={cn(
-							"group relative flex min-h-48 flex-col justify-between overflow-hidden rounded-2xl p-6 md:min-h-72",
+							"group relative flex min-h-56 flex-col justify-between overflow-hidden rounded-xl p-7 md:min-h-80 lg:p-9",
 							tones[slug],
 						)}
 					>
@@ -41,7 +41,7 @@ export function DepartmentTiles() {
 							className="absolute -right-6 -bottom-8 h-48 w-28 -skew-x-12 bg-current/5 transition-transform duration-300 group-hover:-translate-x-3"
 						/>
 
-						<h3 className="type-display text-5xl md:text-6xl">
+						<h3 className="type-display text-4xl sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl">
 							<Link
 								to="/$department/{-$category}"
 								params={{ department: slug, category: undefined }}
@@ -58,7 +58,7 @@ export function DepartmentTiles() {
 										<Link
 											to="/$department/{-$category}"
 											params={{ department: slug, category }}
-											className="relative z-10 block rounded-full bg-current/10 px-3 py-1 font-medium text-sm hover:bg-current/20"
+											className="relative z-10 block rounded-full bg-current/10 px-4 py-2 font-medium text-sm hover:bg-current/20"
 										>
 											{categories[category].label}
 										</Link>

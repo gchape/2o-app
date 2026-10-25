@@ -16,6 +16,7 @@ import {
 	type ComponentProps,
 	type FormEvent,
 	type ReactNode,
+	useId,
 	useRef,
 } from "react";
 
@@ -30,6 +31,7 @@ import { Input } from "#/components/ui/input";
 import { Skeleton } from "#/components/ui/skeleton";
 import { Spinner } from "#/components/ui/spinner";
 import { AdditionalField, type AdditionalFieldProps } from "./additional-field";
+import { PasswordInput } from "./password-input";
 
 const { fieldContext, formContext, useFieldContext, useFormContext } =
 	createFormHookContexts();
@@ -181,21 +183,31 @@ type AuthFormTextFieldProps = Omit<
 	"name" | "onBlur" | "onChange" | "value"
 > & {
 	description?: ReactNode;
+	error?: ReactNode;
 	label: ReactNode;
 	isLoading?: boolean;
+	onValueChange?: (value: string) => void;
 };
 
 function AuthFormTextField({
 	isLoading = false,
 	description,
+	error,
+	children,
 	id,
 	label,
+	type,
+	onValueChange,
 	...props
 }: AuthFormTextFieldProps) {
 	const field = useFieldContext<string>();
 	const form = useFormContext();
-	const isInvalid = isAuthFormFieldInvalid(field.state.meta);
-	const inputId = id ?? field.name;
+	const isInvalid = Boolean(error) || isAuthFormFieldInvalid(field.state.meta);
+	const generatedId = useId();
+	const inputId = id ?? `${generatedId}-${field.name}`;
+	const descriptionId = `${inputId}-description`;
+	const errorId = `${inputId}-error`;
+	const Control = type === "password" ? PasswordInput : Input;
 
 	return (
 		<Field data-invalid={isInvalid}>
@@ -203,8 +215,18 @@ function AuthFormTextField({
 			{isLoading ? (
 				<Skeleton className="h-9 w-full" />
 			) : (
-				<Input
+				<Control
 					{...props}
+					type={type}
+					aria-describedby={
+						[
+							props["aria-describedby"],
+							description && descriptionId,
+							isInvalid && errorId,
+						]
+							.filter(Boolean)
+							.join(" ") || undefined
+					}
 					aria-busy={field.state.meta.isValidating || undefined}
 					aria-invalid={isInvalid}
 					id={inputId}
@@ -213,12 +235,20 @@ function AuthFormTextField({
 					onChange={(event) => {
 						clearAuthFormFieldServerError(form, field.name);
 						field.handleChange(event.target.value);
+						onValueChange?.(event.target.value);
 					}}
 					value={field.state.value}
 				/>
 			)}
-			{description ? <FieldDescription>{description}</FieldDescription> : null}
-			<AuthFormFieldError />
+			{description && (
+				<FieldDescription id={descriptionId}>{description}</FieldDescription>
+			)}
+			{isInvalid && (
+				<div id={errorId}>
+					{error ? <FieldError>{error}</FieldError> : <AuthFormFieldError />}
+				</div>
+			)}
+			{children}
 		</Field>
 	);
 }
@@ -298,7 +328,7 @@ export const { useAppForm: useAuthForm } = createFormHook({
 	formContext,
 });
 
-export function isAuthFormFieldInvalid({
+function isAuthFormFieldInvalid({
 	isTouched,
 	isValid,
 }: {

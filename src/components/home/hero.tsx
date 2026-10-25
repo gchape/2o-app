@@ -12,8 +12,10 @@ const number = new Intl.NumberFormat("en-US");
 
 const Stat = ({ label, value }: { label: string; value: string }) => (
 	<div>
-		<dt className="text-sm text-white/60">{label}</dt>
-		<dd className="type-num mt-1 text-2xl">{value}</dd>
+		<dt className="text-[11px] font-medium uppercase tracking-[0.12em] text-white/60">
+			{label}
+		</dt>
+		<dd className="type-num mt-2 text-2xl sm:text-3xl">{value}</dd>
 	</div>
 );
 
@@ -36,7 +38,7 @@ export function Hero({ stats, topDiscount }: HeroProps) {
 	];
 
 	return (
-		<section className="relative isolate flex items-center overflow-hidden bg-neutral-950 py-12 md:min-h-108 md:py-16">
+		<section className="relative isolate flex items-center overflow-hidden bg-neutral-950 py-14 sm:py-18 md:min-h-140 md:py-20">
 			<img
 				src="/images/hero.webp"
 				alt=""
@@ -50,7 +52,7 @@ export function Hero({ stats, topDiscount }: HeroProps) {
 					<SkewTag className="text-sm">Up to {topDiscount}% off today</SkewTag>
 				) : null}
 
-				<h1 className="type-display mt-5 max-w-2xl text-4xl sm:text-5xl md:text-7xl">
+				<h1 className="type-display mt-6 max-w-3xl text-[clamp(2.5rem,6.2vw,5.25rem)] leading-[1.04]">
 					{lines.map((line) => (
 						<span key={line} className="block">
 							{line.trim()}
@@ -58,14 +60,16 @@ export function Hero({ stats, topDiscount }: HeroProps) {
 					))}
 				</h1>
 
-				<p className="mt-4 max-w-sm text-lg text-white/80">{site.heroPitch}</p>
+				<p className="mt-6 max-w-md text-base leading-relaxed text-white/80 sm:text-lg">
+					{site.heroPitch}
+				</p>
 
-				<div className="mt-7 flex flex-wrap items-center gap-3">
+				<div className="mt-8 flex flex-wrap items-center gap-3">
 					<a
 						href="#deals"
 						className={cn(
 							buttonVariants({ size: "lg" }),
-							"h-11 rounded-xl px-5",
+							"h-12 rounded-lg px-6 text-sm font-semibold sm:h-13 sm:px-7",
 						)}
 					>
 						See today's biggest drops
@@ -73,7 +77,7 @@ export function Hero({ stats, topDiscount }: HeroProps) {
 					</a>
 				</div>
 
-				<dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4">
+				<dl className="mt-12 flex flex-wrap gap-x-8 gap-y-6 sm:gap-x-12 md:mt-14">
 					{items.map((item) => (
 						<Stat key={item.label} {...item} />
 					))}

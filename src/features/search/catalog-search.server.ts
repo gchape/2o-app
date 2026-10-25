@@ -50,7 +50,7 @@ export async function searchCatalog(
 		INDEX,
 		buildQuery(scope, filters),
 		{
-			sort: sortOptions(effectiveSort(filters, scope)),
+			sort: sortOptions(effectiveSort(filters, scope), scope),
 			offset,
 			limit: pageSize,
 		},
@@ -94,16 +94,17 @@ async function priceBounds(scope: CatalogScope, filters: CatalogFilters) {
 		minPrice: undefined,
 		maxPrice: undefined,
 	});
-	const edge = async (direction: "ASC" | "DESC") =>
-		(
-			await ft.search<CatalogDoc>(INDEX, query, {
-				sort: { BY: "sortPrice", DIRECTION: direction },
-				offset: 0,
-				limit: 1,
-			})
-		).docs[0]?.price;
+	const edge = async (sort: "price-asc" | "price-desc") => {
+		const { docs } = await ft.search<CatalogDoc>(INDEX, query, {
+			sort: sortOptions(sort, scope),
+			offset: 0,
+			limit: 1,
+		});
+		const doc = docs[0];
+		return doc && toItem(scope.mode)(doc).price;
+	};
 
-	const [min, max] = await Promise.all([edge("ASC"), edge("DESC")]);
+	const [min, max] = await Promise.all([edge("price-asc"), edge("price-desc")]);
 	return min != null && max != null ? { min, max } : null;
 }
 

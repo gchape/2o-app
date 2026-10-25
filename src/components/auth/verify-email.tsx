@@ -1,123 +1,101 @@
-import { useAuth, useSendVerificationEmail } from "@better-auth-ui/react";
-import { useEffect, useState } from "react";
+import { useAuth } from "@better-auth-ui/react";
+import { useVerifyEmailOtp } from "@better-auth-ui/react/plugins/email-otp";
 import { toast } from "sonner";
-import { Button } from "#/components/ui/button";
+import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
-import { FieldDescription } from "#/components/ui/field";
-import { Spinner } from "#/components/ui/spinner";
+import { FieldDescription, FieldGroup } from "#/components/ui/field";
+import { authClient } from "#/features/auth/auth-client";
 import { cn } from "#/lib/utils";
-import { OpenEmailButton } from "./open-email-button";
+import { useAuthForm } from "./auth-form";
+import { ResendCodeButton } from "./resend-code-button";
 import { VERIFY_EMAIL_STORAGE_KEY } from "./storage-keys";
 import { useStoredEmail } from "./use-stored-email";
 
-export type VerifyEmailProps = {
-	className?: string;
-};
+export type VerifyEmailProps = { className?: string };
 
-/** Seconds the resend button stays disabled to prevent spamming the endpoint. */
-const RESEND_COOLDOWN_SECONDS = 60;
-
-/**
- * Render a card prompting the user to verify their email, with a resend button
- * that is rate-limited by a cooldown timer.
- *
- * The target email is read from `sessionStorage` (set when sign-up or sign-in
- * redirects here); the OpenEmail/Resend controls are only shown when an email
- * is stored. The resend button is disabled while a cooldown is active and shows
- * the remaining seconds.
- *
- * @param className - Additional CSS classes applied to the card
- * @returns The verify-email card React element
- */
 export function VerifyEmail({ className }: VerifyEmailProps) {
-	const {
-		authClient,
-		basePaths,
-		baseURL,
-		localization,
-		redirectTo,
-		viewPaths,
-		Link,
-	} = useAuth();
-
+	const { basePaths, viewPaths, navigate, Link } = useAuth();
 	const email = useStoredEmail(VERIFY_EMAIL_STORAGE_KEY);
-	const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
-
-	useEffect(() => {
-		if (cooldown <= 0 || !email) return;
-
-		const interval = setInterval(() => {
-			setCooldown((current) => (current > 0 ? current - 1 : 0));
-		}, 1000);
-
-		return () => clearInterval(interval);
-	}, [cooldown, email]);
-
-	const { mutate: sendVerificationEmail, isPending } = useSendVerificationEmail(
-		authClient,
-		{
-			onSuccess: () => {
-				toast.success(localization.auth.verificationEmailSent);
-				setCooldown(RESEND_COOLDOWN_SECONDS);
-			},
+	const verify = useVerifyEmailOtp(authClient, {
+		onSuccess: () => {
+			sessionStorage.removeItem(VERIFY_EMAIL_STORAGE_KEY);
+			toast.success("Email verified. You can now sign in.");
+			navigate({ to: `${basePaths.auth}/${viewPaths.auth.signIn}` });
 		},
-	);
-
-	const isCoolingDown = cooldown > 0;
+	});
+	const form = useAuthForm({
+		defaultValues: { otp: "" },
+		onSubmit: async ({ value }) => {
+			await verify.mutateAsync({ email, otp: value.otp });
+		},
+	});
 
 	return (
 		<Card className={cn("w-full max-w-sm", className)}>
 			<CardHeader>
 				<CardTitle className="text-xl font-semibold">
-					{localization.auth.verifyEmail}
+					Verify your email
 				</CardTitle>
 			</CardHeader>
-
 			<CardContent>
-				<div className="flex flex-col gap-4">
+				{email ? (
+					<form.AppForm>
+						<form.AuthFormRoot>
+							<FieldGroup>
+								<FieldDescription>
+									Enter the six-digit code sent to {email}. It expires in 5
+									minutes.
+								</FieldDescription>
+								<form.AppField
+									name="otp"
+									validators={{
+										onChange: z
+											.string()
+											.regex(/^\d{6}$/, "Enter the six-digit code"),
+									}}
+								>
+									{(field) => (
+										<field.AuthFormTextField
+											label="Verification code"
+											inputMode="numeric"
+											autoComplete="one-time-code"
+											maxLength={6}
+											required
+											disabled={verify.isPending}
+										/>
+									)}
+								</form.AppField>
+								<form.AuthFormServerError />
+								<form.AuthFormSubmitButton isPending={verify.isPending}>
+									Verify email
+								</form.AuthFormSubmitButton>
+								<ResendCodeButton
+									disabled={verify.isPending}
+									onResend={async () => {
+										const { error } =
+											await authClient.emailOtp.sendVerificationOtp({
+												email,
+												type: "email-verification",
+											});
+										if (error) throw new Error(error.message);
+									}}
+								/>
+							</FieldGroup>
+						</form.AuthFormRoot>
+					</form.AppForm>
+				) : (
 					<FieldDescription>
-						{localization.auth.checkYourEmail}
+						Sign in or create an account to request a verification code.
 					</FieldDescription>
-
-					{email && (
-						<div className="flex flex-col gap-3">
-							<OpenEmailButton email={email} />
-
-							<Button
-								type="button"
-								variant="outline"
-								disabled={!email || isCoolingDown || isPending}
-								onClick={() =>
-									sendVerificationEmail({
-										email,
-										callbackURL: `${baseURL}${redirectTo}`,
-									})
-								}
-							>
-								{isPending && <Spinner />}
-
-								{isCoolingDown
-									? localization.auth.resendIn.replace(
-											"{{seconds}}",
-											String(cooldown),
-										)
-									: localization.auth.resend}
-							</Button>
-						</div>
-					)}
-				</div>
-
-				<div className="flex flex-col gap-3 items-center w-full mt-4">
-					<FieldDescription className="text-center">
-						{localization.auth.alreadyVerifiedYourEmail}{" "}
-						<Link
-							href={`${basePaths.auth}/${viewPaths.auth.signIn}`}
-							className="underline underline-offset-4"
-						>
-							{localization.auth.signIn}
-						</Link>
-					</FieldDescription>
-				</div>
+				)}
+				<FieldDescription className="mt-4 text-center">
+					<Link
+						href={`${basePaths.auth}/${viewPaths.auth.signIn}`}
+						className="underline underline-offset-4"
+					>
+						Back to sign in
+					</Link>
+				</FieldDescription>
 			</CardContent>
 		</Card>
 	);

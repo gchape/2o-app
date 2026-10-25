@@ -39,7 +39,7 @@ export function buildQuery(scope: CatalogScope, filters: CatalogFilters) {
 		tag("sizes", filters.sizes),
 		tag("colors", filters.colors),
 		filters.minPrice != null || filters.maxPrice != null
-			? `@price:[${filters.minPrice ?? "-inf"} ${filters.maxPrice ?? "+inf"}]`
+			? `@${scope.mode === "deals" ? "dealPrice" : "price"}:[${filters.minPrice ?? "-inf"} ${filters.maxPrice ?? "+inf"}]`
 			: "",
 		filters.sale || scope.mode === "deals" ? "@discount:[1 +inf]" : "",
 	].filter(Boolean);
@@ -47,15 +47,20 @@ export function buildQuery(scope: CatalogScope, filters: CatalogFilters) {
 	return clauses.length > 0 ? clauses.join(" ") : "*";
 }
 
-const SORT_OPTIONS: Record<CatalogSort, FtSearchOptions["SORTBY"]> = {
+const SORT_OPTIONS = {
 	relevance: undefined,
 	name: { BY: "sortName", DIRECTION: "ASC" },
 	"price-asc": { BY: "sortPrice", DIRECTION: "ASC" },
 	"price-desc": { BY: "sortPrice", DIRECTION: "DESC" },
 	discount: { BY: "sortDiscount", DIRECTION: "DESC" },
-};
+} satisfies Record<CatalogSort, FtSearchOptions["SORTBY"]>;
 
-export const sortOptions = (sort: CatalogSort) => SORT_OPTIONS[sort];
+export function sortOptions(sort: CatalogSort, scope: CatalogScope) {
+	const options = SORT_OPTIONS[sort];
+	return scope.mode === "deals" && options?.BY === "sortPrice"
+		? { ...options, BY: "sortDealPrice" }
+		: options;
+}
 
 /** Count products per tag value using the Redis client's aggregation options. */
 export const facetOptions = (field: TagField) => ({

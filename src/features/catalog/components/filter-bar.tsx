@@ -45,10 +45,10 @@ export function FilterBar({
 	const isListing = scope.mode === "listing";
 
 	return (
-		<div className="flex flex-col gap-3 pt-4">
+		<div className="mt-7 flex flex-col gap-4 border-y py-5">
 			<div className="flex flex-wrap items-center gap-2">
 				<SearchBox
-					className="w-full sm:w-64"
+					className="w-full sm:w-72"
 					value={filters.q ?? ""}
 					onCommit={(q) => set({ q: q.trim() || undefined })}
 				/>
@@ -86,7 +86,7 @@ export function FilterBar({
 					<Toggle
 						variant="outline"
 						size="sm"
-						className="aria-pressed:border-foreground/40"
+						className="h-10 rounded-lg px-4 aria-pressed:border-foreground/40"
 						pressed={filters.sale}
 						onPressedChange={(sale) => set({ sale })}
 					>
@@ -94,7 +94,7 @@ export function FilterBar({
 					</Toggle>
 				)}
 
-				<div className="ml-auto">
+				<div className="w-full sm:ml-auto sm:w-auto">
 					<Select
 						items={sortChoices}
 						value={sort}
@@ -104,7 +104,10 @@ export function FilterBar({
 							})
 						}
 					>
-						<SelectTrigger className="w-48" aria-label="Sort by">
+						<SelectTrigger
+							className="h-10 w-full rounded-lg sm:w-48"
+							aria-label="Sort by"
+						>
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>

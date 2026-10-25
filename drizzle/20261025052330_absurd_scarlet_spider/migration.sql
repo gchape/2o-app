@@ -1,6 +1,21 @@
 CREATE TYPE "category" AS ENUM('shoes', 'clothing');--> statement-breakpoint
 CREATE TYPE "department" AS ENUM('men', 'women', 'kids');--> statement-breakpoint
 CREATE TYPE "order_status" AS ENUM('pending', 'paid', 'shipped', 'delivered', 'cancelled');--> statement-breakpoint
+CREATE TABLE "address" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"user_id" text NOT NULL,
+	"full_name" text NOT NULL,
+	"phone" text NOT NULL,
+	"line1" text NOT NULL,
+	"line2" text,
+	"city" text NOT NULL,
+	"postal_code" text,
+	"country" text DEFAULT 'Georgia' NOT NULL,
+	"is_primary" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "order_item" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"order_id" uuid NOT NULL,
@@ -85,12 +100,15 @@ CREATE TABLE "user" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE INDEX "address_user_idx" ON "address" ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "address_primary_uq" ON "address" ("user_id") WHERE "is_primary";--> statement-breakpoint
 CREATE INDEX "order_item_order_idx" ON "order_item" ("order_id");--> statement-breakpoint
 CREATE INDEX "orders_user_idx" ON "orders" ("user_id");--> statement-breakpoint
 CREATE INDEX "product_listing_idx" ON "product" ("department","category");--> statement-breakpoint
 CREATE INDEX "skus_product_price_idx" ON "skus" ("product_id","price");--> statement-breakpoint
 CREATE INDEX "skus_deals_idx" ON "skus" ("product_id","discount" DESC NULLS LAST,"id") WHERE "in_stock" and "discount" > 0;--> statement-breakpoint
 CREATE INDEX "account_userId_idx" ON "account" ("user_id");--> statement-breakpoint
+ALTER TABLE "address" ADD CONSTRAINT "address_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "order_item" ADD CONSTRAINT "order_item_order_id_orders_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "order_item" ADD CONSTRAINT "order_item_sku_id_skus_id_fkey" FOREIGN KEY ("sku_id") REFERENCES "skus"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT;--> statement-breakpoint

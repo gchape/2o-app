@@ -17,8 +17,8 @@ import {
 export const catalogQuery = (scope: CatalogScope, filters: CatalogFilters) =>
 	infiniteQueryOptions({
 		queryKey: ["catalog", scope, filters],
-		queryFn: ({ pageParam }) =>
-			searchCatalogFn({ data: { scope, filters, page: pageParam } }),
+		queryFn: ({ pageParam, signal }) =>
+			searchCatalogFn({ data: { scope, filters, page: pageParam }, signal }),
 		initialPageParam: 1,
 		getNextPageParam: nextPageParam,
 		staleTime: 60_000,
@@ -30,7 +30,8 @@ export const catalogFacetsQuery = (
 ) =>
 	queryOptions({
 		queryKey: ["catalog-facets", scope, filters],
-		queryFn: () => catalogFacetsFn({ data: { scope, filters } }),
+		queryFn: ({ signal }) =>
+			catalogFacetsFn({ data: { scope, filters }, signal }),
 		staleTime: 60_000,
 		// Keep the bar on screen while the next counts arrive.
 		placeholderData: keepPreviousData,
@@ -39,8 +40,9 @@ export const catalogFacetsQuery = (
 /** The home page's drops row: the biggest discounts, no filters. */
 export const homeDealsQuery = queryOptions({
 	queryKey: ["catalog", "home-deals"],
-	queryFn: () =>
+	queryFn: ({ signal }) =>
 		searchCatalogFn({
+			signal,
 			data: {
 				scope: { mode: "deals" },
 				filters: DEFAULT_FILTERS,

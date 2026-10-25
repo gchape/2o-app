@@ -93,9 +93,33 @@ describe("buildCatalogDocs", () => {
 				product({ id, name: "Same", skus: [sku({ price: 100 })] }),
 			),
 		);
-		for (const key of ["name", "price", "discount"] as const) {
+		for (const key of ["name", "price", "dealPrice", "discount"] as const) {
 			expect(new Set(docs.map((d) => d.sort[key])).size).toBe(3);
 		}
+	});
+
+	it("orders deals independently of the cheapest variant", () => {
+		const docs = buildCatalogDocs([
+			product({
+				id: "a",
+				skus: [
+					sku({ price: 1000 }),
+					sku({ price: 8000, originalPrice: 16000, discount: 50 }),
+				],
+			}),
+			product({
+				id: "b",
+				skus: [sku({ price: 5000, originalPrice: 10000, discount: 50 })],
+			}),
+		]);
+		expect(
+			docs.toSorted((a, b) => a.sort.price - b.sort.price).map((doc) => doc.id),
+		).toEqual(["a", "b"]);
+		expect(
+			docs
+				.toSorted((a, b) => a.sort.dealPrice - b.sort.dealPrice)
+				.map((doc) => doc.id),
+		).toEqual(["b", "a"]);
 	});
 
 	it("ranks names alphabetically", () => {

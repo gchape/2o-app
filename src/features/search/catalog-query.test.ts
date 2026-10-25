@@ -87,16 +87,32 @@ describe("buildQuery", () => {
 			"@discount:[1 +inf]",
 		);
 	});
+
+	it("filters deals by the displayed variant's price", () => {
+		expect(
+			buildQuery({ mode: "deals" }, { ...DEFAULT_FILTERS, maxPrice: 6000 }),
+		).toBe("@dealPrice:[-inf 6000] @discount:[1 +inf]");
+	});
 });
 
 describe("sortOptions / facetOptions / schemaArgs", () => {
 	it("sorts on the unique keys", () => {
-		expect(sortOptions("price-desc")).toEqual({
+		expect(sortOptions("price-desc", listing)).toEqual({
 			BY: "sortPrice",
 			DIRECTION: "DESC",
 		});
-		expect(sortOptions("relevance")).toBeUndefined();
+		expect(sortOptions("relevance", listing)).toBeUndefined();
 	});
+
+	it.each(["price-asc", "price-desc"] as const)(
+		"sorts deals by their displayed price (%s)",
+		(sort) => {
+			expect(sortOptions(sort, { mode: "deals" })).toEqual({
+				BY: "sortDealPrice",
+				DIRECTION: sort === "price-asc" ? "ASC" : "DESC",
+			});
+		},
+	);
 
 	it("groups a facet by its own field", () => {
 		expect(facetOptions("sizes").STEPS[0]).toMatchObject({

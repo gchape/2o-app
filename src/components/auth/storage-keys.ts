@@ -2,4 +2,5 @@
 export const VERIFY_EMAIL_STORAGE_KEY = "better-auth-ui.verify-email";
 
 /** `sessionStorage` key the forgot-password form stores the submitted email under. */
-export const RESET_LINK_SENT_STORAGE_KEY = "better-auth-ui.reset-link-sent";
+export const RESET_PASSWORD_EMAIL_STORAGE_KEY =
+	"better-auth-ui.reset-password-email";

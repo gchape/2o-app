@@ -9,6 +9,7 @@ export function AddToCartButton({ sku }: { sku?: string }) {
 	return (
 		<Button
 			size="lg"
+			className="h-13 w-full rounded-lg text-sm font-semibold"
 			disabled={!sku || isAdding}
 			onClick={() => sku && addItem(sku)}
 		>

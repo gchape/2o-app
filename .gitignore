@@ -18,3 +18,4 @@ dist
 
 # test coverage
 coverage
+certs/

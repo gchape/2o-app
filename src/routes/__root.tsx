@@ -3,9 +3,11 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
+	Outlet,
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import type { ReactNode } from "react";
 import { SiteLayout } from "#/components/layout/site-layout";
 import { Providers } from "#/components/providers";
 import { site } from "#/data/site";
@@ -33,15 +35,29 @@ export const Route = createRootRouteWithContext<{
 			? [chatWidgetScript(loaderData.chatEmbedUrl)]
 			: [],
 	}),
-	shellComponent: ({ children }) => (
+	component: RootLayout,
+	shellComponent: RootDocument,
+});
+
+function RootLayout() {
+	return (
+		<Providers>
+			<SiteLayout>
+				<Outlet />
+			</SiteLayout>
+		</Providers>
+	);
+}
+
+// Keep the document independent of loader data so root errors can render.
+function RootDocument({ children }: { children: ReactNode }) {
+	return (
 		<html lang="en" className="scrollbar-gutter-stable">
 			<head>
 				<HeadContent />
 			</head>
 			<body>
-				<Providers>
-					<SiteLayout>{children}</SiteLayout>
-				</Providers>
+				{children}
 				<TanStackDevtools
 					config={{ position: "bottom-left" }}
 					plugins={[
@@ -54,5 +70,5 @@ export const Route = createRootRouteWithContext<{
 				<Scripts />
 			</body>
 		</html>
-	),
-});
+	);
+}

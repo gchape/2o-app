@@ -20,14 +20,20 @@ export async function sendEmail({ to, subject, html }: Email & { to: string }) {
 		html,
 	});
 
-	if (error) console.error("Failed to send email:", error);
+	if (error) {
+		console.error("Failed to send email:", error);
+		throw new Error("Unable to send email. Please try again.");
+	}
 }
 
 /** Transactional email bodies, kept out of the auth configuration. */
 export const emailTemplates = {
-	resetPassword: (url: string): Email => ({
-		subject: "Reset your password",
-		html: `<p>Click <a href="${escapeHtml(url)}">here</a> to reset your password. If you didn't request this, ignore this email.</p>`,
+	code: (otp: string, type: string): Email => ({
+		subject:
+			type === "forget-password"
+				? "Your password reset code"
+				: "Your email verification code",
+		html: `<p>Your confirmation code is <strong>${escapeHtml(otp)}</strong>.</p><p>It expires in 5 minutes. If you didn't request this, ignore this email.</p>`,
 	}),
 
 	approveEmailChange: (newEmail: string, url: string): Email => ({

@@ -11,7 +11,7 @@ export function Price({ price, originalPrice, currency }: PriceProps) {
 		<>
 			{formatPrice(price, currency)}
 			{isOnSale(price, originalPrice) && (
-				<span className="ml-2 text-muted-foreground line-through">
+				<span className="ml-2 text-[0.8em] font-normal text-muted-foreground line-through">
 					{formatPrice(originalPrice, currency)}
 				</span>
 			)}

@@ -25,10 +25,12 @@ export function CartDrawer() {
 		<Sheet open={open} onOpenChange={cartDrawer.actions.set}>
 			<SheetContent
 				side="right"
-				className="flex w-full flex-col gap-0 sm:max-w-md"
+				className="flex w-full flex-col gap-0 sm:max-w-lg"
 			>
-				<SheetHeader>
-					<SheetTitle>Your cart</SheetTitle>
+				<SheetHeader className="px-6 py-7">
+					<SheetTitle className="text-xl font-semibold tracking-tight">
+						Your cart
+					</SheetTitle>
 				</SheetHeader>
 
 				{isPending ? (
@@ -51,7 +53,7 @@ export function CartDrawer() {
 				) : (
 					<>
 						<CartLines items={items} />
-						<SheetFooter className="border-t">
+						<SheetFooter className="gap-4 border-t p-6">
 							<div className="flex items-center justify-between font-semibold text-lg">
 								<span>Subtotal</span>
 								<span>{formatPrice(subtotal, currency)}</span>
@@ -62,7 +64,7 @@ export function CartDrawer() {
 							<LinkButton
 								to="/checkout"
 								size="lg"
-								className="w-full"
+								className="h-12 w-full rounded-lg"
 								onClick={cartDrawer.actions.close}
 							>
 								Checkout
@@ -93,19 +95,21 @@ function CartLines({ items }: { items: CartItem[] }) {
 	const { setQuantity, removeItem } = useCartLineActions();
 
 	return (
-		<ul className="flex-1 divide-y overflow-y-auto px-4">
+		<ul className="flex-1 divide-y overflow-y-auto px-6">
 			{items.map((item) => (
-				<li key={item.id} className="flex gap-4 py-4">
+				<li key={item.id} className="flex gap-4 py-6">
 					<ProductImage
 						src={item.image}
 						alt={item.name}
-						className="size-20 shrink-0 rounded-md"
+						className="size-24 shrink-0 rounded-lg"
 					/>
 
 					<div className="flex min-w-0 flex-1 flex-col">
 						<div className="flex justify-between gap-2">
-							<p className="truncate font-medium">{item.name}</p>
-							<p className="font-semibold">
+							<p className="line-clamp-2 text-sm font-medium leading-snug">
+								{item.name}
+							</p>
+							<p className="shrink-0 text-sm font-semibold tabular-nums">
 								{formatPrice(item.price * item.quantity, item.currency)}
 							</p>
 						</div>

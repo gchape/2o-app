@@ -1,11 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Container } from "#/components/layout/container";
 import { LinkButton } from "#/components/link-button";
-import { noIndexMeta, pageTitle } from "#/lib/seo";
+import { site } from "#/data/site";
 
 // Placeholder until checkout exists; keep it out of search results meanwhile.
 export const Route = createFileRoute("/checkout")({
-	head: () => ({ meta: [{ title: pageTitle("Checkout") }, noIndexMeta] }),
+	head: () => ({
+		meta: [
+			{ title: `Checkout | ${site.name}` },
+			{ name: "robots", content: "noindex" },
+		],
+	}),
 	component: CheckoutComingSoon,
 });
 
