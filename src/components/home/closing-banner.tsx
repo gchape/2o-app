@@ -35,7 +35,7 @@ export function ClosingBanner({ total }: { total: number }) {
 				<LinkButton
 					to="/deals"
 					size="lg"
-					className="h-13 rounded-lg px-8 font-semibold"
+					className="h-auto min-h-13 max-w-full whitespace-normal rounded-lg px-8 py-3 text-center font-semibold"
 				>
 					{t("See all {{count}} deals", {
 						count: total.toLocaleString(languageTags[locale]),

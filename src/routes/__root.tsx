@@ -61,7 +61,7 @@ function RootLayout() {
 function RootDocument({ children }: { children: ReactNode }) {
 	const { locale } = Route.useRouteContext();
 	return (
-		<html lang={locale ?? DEFAULT_LOCALE} className="scrollbar-gutter-stable">
+		<html lang={locale ?? DEFAULT_LOCALE}>
 			<head>
 				<HeadContent />
 			</head>

@@ -1,6 +1,7 @@
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Container } from "#/components/layout/container";
+import { LinkButton } from "#/components/link-button";
 import { buttonVariants } from "#/components/ui/button";
 import { site } from "#/data/site";
 import { SkewTag } from "#/features/catalog/components/skew-tag";
@@ -57,7 +58,7 @@ export function Hero({ stats, topDiscount }: HeroProps) {
 		<section className="brand-surface hero-scene relative isolate flex items-center overflow-hidden py-14 sm:py-18 md:min-h-140 md:py-20">
 			<Container className="text-white">
 				<div className="grid items-center gap-6 lg:grid-cols-[1.1fr_1fr] lg:gap-8">
-					<div className="relative z-10">
+					<div className="relative z-10 min-w-0">
 						{topDiscount ? (
 							<SkewTag className="text-sm">
 								{t("Up to {{discount}}% off today", { discount: topDiscount })}
@@ -77,16 +78,22 @@ export function Hero({ stats, topDiscount }: HeroProps) {
 						</p>
 
 						<div className="mt-8 flex flex-wrap items-center gap-3">
-							<a
-								href="#deals"
-								className={cn(
-									buttonVariants({ size: "lg" }),
-									"h-12 rounded-lg px-6 text-sm font-semibold sm:h-13 sm:px-7",
-								)}
-							>
-								{t("See today's biggest drops")}
-								<HugeiconsIcon icon={ArrowDown01Icon} size={16} />
-							</a>
+							{topDiscount ? (
+								<a
+									href="#deals"
+									className={cn(
+										buttonVariants({ size: "lg" }),
+										"h-auto min-h-12 max-w-full whitespace-normal rounded-lg px-6 py-3 text-center text-sm font-semibold sm:min-h-13 sm:px-7",
+									)}
+								>
+									{t("See today's biggest drops")}
+									<HugeiconsIcon icon={ArrowDown01Icon} size={16} />
+								</a>
+							) : (
+								<LinkButton to="/deals" size="lg">
+									{t("All deals")}
+								</LinkButton>
+							)}
 						</div>
 					</div>
 					<div

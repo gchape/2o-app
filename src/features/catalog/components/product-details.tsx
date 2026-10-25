@@ -32,8 +32,9 @@ export function ProductDetails({
 		<Container className="grid items-start gap-8 py-8 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:py-12 lg:gap-20 lg:py-16">
 			<ProductImage
 				src={imageUrl}
-				alt={`${product.name}, ${color}`}
-				className="aspect-4/5 rounded-xl"
+				alt={[product.name, color].filter(Boolean).join(", ")}
+				fetchPriority="high"
+				className="aspect-4/5 rounded-xl md:sticky md:top-8"
 			/>
 
 			<div className="flex min-w-0 max-w-xl flex-col gap-7 md:py-4 lg:gap-8">

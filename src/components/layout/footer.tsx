@@ -59,6 +59,11 @@ export function Footer() {
 				<div>
 					<FooterHeading>{t("Shop")}</FooterHeading>
 					<ul className="mt-5 space-y-3 text-sm">
+						<li>
+							<Link to="/deals" className="text-white/70 hover:text-white">
+								{t("All deals")}
+							</Link>
+						</li>
 						{departmentSlugs.map((slug) => (
 							<li key={slug}>
 								<Link

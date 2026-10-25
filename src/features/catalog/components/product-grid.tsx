@@ -11,10 +11,12 @@ export function ProductGrid({ products }: { products: ProductListItem[] }) {
 	}
 
 	return (
-		<div className="grid grid-cols-2 gap-x-4 gap-y-10 py-8 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4">
-			{products.map((p) => (
-				<ProductCard key={p.id} product={p} />
+		<ul className="grid grid-cols-2 gap-x-4 gap-y-10 py-8 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4">
+			{products.map((p, index) => (
+				<li key={p.id} className="min-w-0">
+					<ProductCard product={p} loading={index < 4 ? "eager" : "lazy"} />
+				</li>
 			))}
-		</div>
+		</ul>
 	);
 }

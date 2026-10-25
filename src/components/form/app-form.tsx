@@ -9,8 +9,8 @@ import {
 } from "@tanstack/react-form";
 import {
 	type ComponentProps,
-	type FormEvent,
 	type ReactNode,
+	type SubmitEvent,
 	useId,
 	useRef,
 } from "react";
@@ -131,7 +131,7 @@ function FormRoot({
 	const messages = useMessages();
 	const submittingRef = useRef(false);
 
-	async function submit(event: FormEvent<HTMLFormElement>) {
+	async function submit(event: SubmitEvent<HTMLFormElement>) {
 		event.preventDefault();
 		if (submittingRef.current || form.state.isSubmitting) return;
 

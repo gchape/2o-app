@@ -1,4 +1,3 @@
-import "dotenv/config"; // must run before ./src/db/connection reads process.env
 import { defineConfig } from "drizzle-kit";
 import { dbConnection } from "./src/db/connection";
 

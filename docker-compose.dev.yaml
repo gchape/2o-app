@@ -2,7 +2,7 @@ name: 2o-dev
 
 x-app-env: &app-env
   env_file:
-    - .env
+    - .env.development
   environment:
     NODE_ENV: development
     DB_HOST: db

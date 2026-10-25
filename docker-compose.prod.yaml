@@ -2,7 +2,7 @@ name: 2o
 
 x-app-env: &app-env
   env_file:
-    - .env
+    - .env.production
   environment:
     NODE_ENV: production
     DB_HOST: db

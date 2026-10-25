@@ -7,7 +7,6 @@
  *
  * Run it after changing the Redis image or version. Each failure says what to fix.
  */
-import "dotenv/config"; // must run before the Redis client reads process.env
 import {
 	buildCatalogDocs,
 	type CatalogDoc,

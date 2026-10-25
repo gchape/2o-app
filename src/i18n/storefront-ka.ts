@@ -1,5 +1,7 @@
 /** English source strings are also the English catalog. Keep placeholders unchanged. */
 export const storefrontKa = {
+	"Image unavailable": "სურათი მიუწვდომელია",
+	"Updating your cart…": "კალათა ახლდება…",
 	Language: "ენა",
 	"Couldn't change the language. Please try again.":
 		"ენის შეცვლა ვერ მოხერხდა. სცადეთ ხელახლა.",
@@ -165,7 +167,7 @@ export const storefrontKa = {
 	Name: "სახელი",
 	"Price: low to high": "ფასი: ზრდადობით",
 	"Price: high to low": "ფასი: კლებადობით",
-	"Biggest discount": "ყველაზე დიდი ფასდაკლება",
+	"Biggest discount": "დიდი ფასდაკლება",
 	"Address 1": "ქუჩა და სახლის ნომერი",
 	"Address 2": "მისამართის დამატებითი ინფორმაცია",
 	"Apartment, suite, or forwarding account number (optional).":

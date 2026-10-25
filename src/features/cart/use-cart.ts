@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useIsMutating,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
@@ -10,7 +15,11 @@ import {
 import { addItemFn, setQuantityFn } from "#/features/cart/cart.functions";
 import { cartQuery } from "#/features/cart/cart.queries";
 import { useTranslation } from "#/i18n/translate";
+import { CART_MUTATION_KEY, cartMutationOptions } from "./cart.mutations";
 import { cartDrawer } from "./cart-drawer.store";
+
+export const useCartUpdating = () =>
+	useIsMutating({ mutationKey: CART_MUTATION_KEY }) > 0;
 
 /** The cart's line items plus derived count, subtotal and currency. */
 export const useCart = () => {
@@ -27,23 +36,19 @@ const useCartError = () => {
 	return () => toast.error(t("Couldn't update your cart. Please try again."));
 };
 
-const useRefetchCart = () => {
-	const queryClient = useQueryClient();
-
-	return () => queryClient.invalidateQueries({ queryKey: cartQuery.queryKey });
-};
-
 /** Adds one unit of a SKU and opens the drawer after a successful update. */
 export function useAddToCart() {
 	const showCartError = useCartError();
-	const refetch = useRefetchCart();
+	const queryClient = useQueryClient();
 	const addItemFnCall = useServerFn(addItemFn);
+	const options = cartMutationOptions(queryClient);
 
 	const { mutate, isPending } = useMutation({
+		...options,
 		mutationFn: (sku: string) => addItemFnCall({ data: { sku } }),
 		onError: showCartError,
 		onSettled: async (_data, error) => {
-			await refetch();
+			await options.onSettled();
 			if (!error) cartDrawer.actions.open();
 		},
 	});
@@ -51,31 +56,22 @@ export function useAddToCart() {
 	return { addItem: mutate, isAdding: isPending };
 }
 
-/** Quantity changes show up immediately and roll back if the server refuses. */
+/** Apply confirmed changes in order, so a failed write cannot undo another line. */
 export function useCartLineActions() {
 	const showCartError = useCartError();
 	const queryClient = useQueryClient();
-	const refetch = useRefetchCart();
 	const setQuantityFnCall = useServerFn(setQuantityFn);
 
 	const { mutate } = useMutation({
+		...cartMutationOptions(queryClient),
 		mutationFn: (change: LineChange) => setQuantityFnCall({ data: change }),
-		onMutate: async (change) => {
-			await queryClient.cancelQueries({ queryKey: cartQuery.queryKey });
-			const previous = queryClient.getQueryData(cartQuery.queryKey);
+		onSuccess: (_data, change) => {
 			queryClient.setQueryData(
 				cartQuery.queryKey,
 				(items) => items && applyLineChange(items, change),
 			);
-			return { previous };
 		},
-		onError: (_error, _change, context) => {
-			if (context?.previous) {
-				queryClient.setQueryData(cartQuery.queryKey, context.previous);
-			}
-			showCartError();
-		},
-		onSettled: refetch,
+		onError: showCartError,
 	});
 
 	return {

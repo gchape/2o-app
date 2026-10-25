@@ -6,7 +6,6 @@
  * Every seeded product lives under a reserved `.example` warehouse domain, so
  * re-running replaces the previous seed and never touches real imported data.
  */
-import "dotenv/config"; // must run before #/db reads process.env
 import { like } from "drizzle-orm";
 import {
 	type Category,

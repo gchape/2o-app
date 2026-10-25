@@ -26,7 +26,7 @@ export function PriceFilter(props: PriceFilterProps) {
 	// Remounting on committed-value change resets the drag draft.
 	return (
 		<PriceFilterInner
-			key={`${props.minPrice ?? ""}-${props.maxPrice ?? ""}`}
+			key={`${props.minPrice ?? ""}-${props.maxPrice ?? ""}-${props.range.min}-${props.range.max}`}
 			{...props}
 			range={props.range}
 		/>

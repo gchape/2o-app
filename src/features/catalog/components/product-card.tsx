@@ -12,7 +12,13 @@ import { ProductImage } from "./product-image";
  * three separate links to the same page, which keeps keyboard and screen-reader
  * navigation to a single stop per product.
  */
-export function ProductCard({ product }: { product: ProductListItem }) {
+export function ProductCard({
+	product,
+	loading,
+}: {
+	product: ProductListItem;
+	loading?: "lazy" | "eager";
+}) {
 	const t = useTranslation();
 	const { slug, name, brand, imageUrl, price, originalPrice, currency } =
 		product;
@@ -23,6 +29,7 @@ export function ProductCard({ product }: { product: ProductListItem }) {
 				<ProductImage
 					src={imageUrl}
 					alt=""
+					loading={loading}
 					className="aspect-4/5 rounded-xl [&_img]:transition-transform [&_img]:duration-500 motion-safe:group-hover:[&_img]:scale-[1.03]"
 				/>
 				{isOnSale(price, originalPrice) && (
@@ -31,7 +38,11 @@ export function ProductCard({ product }: { product: ProductListItem }) {
 			</div>
 
 			<CardContent className="flex-1 space-y-2 px-0">
-				{brand && <p className="type-eyebrow text-muted-foreground">{brand}</p>}
+				{brand && (
+					<p className="type-eyebrow wrap-anywhere text-muted-foreground">
+						{brand}
+					</p>
+				)}
 				<h3 className="type-card-title line-clamp-2 min-h-[2.7em] text-sm sm:text-base">
 					<Link
 						to="/product/$slug"

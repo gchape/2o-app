@@ -1,18 +1,20 @@
 import { Button } from "#/components/ui/button";
 import { Spinner } from "#/components/ui/spinner";
-import { useAddToCart } from "#/features/cart/use-cart";
+import { useAddToCart, useCartUpdating } from "#/features/cart/use-cart";
 import { useTranslation } from "#/i18n/translate";
 
 /** Adds the chosen SKU to the cart; disabled until a size has been picked. */
 export function AddToCartButton({ sku }: { sku?: string }) {
 	const t = useTranslation();
 	const { addItem, isAdding } = useAddToCart();
+	const updating = useCartUpdating();
 
 	return (
 		<Button
 			size="lg"
 			className="h-13 w-full rounded-lg text-sm font-semibold"
-			disabled={!sku || isAdding}
+			disabled={!sku || updating}
+			aria-busy={isAdding}
 			onClick={() => sku && addItem(sku)}
 		>
 			{isAdding && <Spinner />}

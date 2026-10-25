@@ -45,41 +45,42 @@ export function SearchBox({ value, onCommit, className }: SearchBoxProps) {
 	};
 
 	return (
-		<form
-			className={className}
-			onSubmit={(event) => {
-				event.preventDefault();
-				commit.flush();
-			}}
-		>
-			<InputGroup className="h-10">
-				<InputGroupAddon align="inline-start">
-					<HugeiconsIcon icon={Search01Icon} size={16} />
-				</InputGroupAddon>
-				<InputGroupInput
-					type="search"
-					autoComplete="off"
-					placeholder={t("Search shoes and clothing")}
-					aria-label={t("Search products")}
-					className="[&::-webkit-search-cancel-button]:hidden"
-					value={draft}
-					onChange={(event) => {
-						setDraft(event.target.value);
-						commit(event.target.value);
-					}}
-				/>
-				{draft && (
-					<InputGroupAddon align="inline-end">
-						<InputGroupButton
-							size="icon-xs"
-							aria-label={t("Clear search")}
-							onClick={clear}
-						>
-							<HugeiconsIcon icon={Cancel01Icon} size={14} />
-						</InputGroupButton>
+		<search className={className}>
+			<form
+				onSubmit={(event) => {
+					event.preventDefault();
+					commit.flush();
+				}}
+			>
+				<InputGroup className="h-11 min-w-0">
+					<InputGroupAddon align="inline-start">
+						<HugeiconsIcon icon={Search01Icon} size={16} />
 					</InputGroupAddon>
-				)}
-			</InputGroup>
-		</form>
+					<InputGroupInput
+						type="search"
+						autoComplete="off"
+						placeholder={t("Search shoes and clothing")}
+						aria-label={t("Search products")}
+						className="[&::-webkit-search-cancel-button]:hidden"
+						value={draft}
+						onChange={(event) => {
+							setDraft(event.target.value);
+							commit(event.target.value);
+						}}
+					/>
+					{draft && (
+						<InputGroupAddon align="inline-end">
+							<InputGroupButton
+								size="icon-xs"
+								aria-label={t("Clear search")}
+								onClick={clear}
+							>
+								<HugeiconsIcon icon={Cancel01Icon} size={14} />
+							</InputGroupButton>
+						</InputGroupAddon>
+					)}
+				</InputGroup>
+			</form>
+		</search>
 	);
 }

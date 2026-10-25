@@ -70,14 +70,13 @@ export function FilterBar({
 		<Select
 			items={sortChoices}
 			value={sort}
-			onValueChange={(next) =>
-				set({
-					sort: next === naturalSort ? undefined : (next as CatalogSort),
-				})
-			}
+			onValueChange={(next) => {
+				if (!next) return;
+				set({ sort: next === naturalSort ? undefined : next });
+			}}
 		>
 			<SelectTrigger
-				className="h-11 w-full rounded-lg sm:w-48"
+				className="h-11 w-full min-w-0 rounded-lg md:w-48"
 				aria-label={t("Sort by")}
 			>
 				<SelectValue />
@@ -138,16 +137,16 @@ export function FilterBar({
 
 	return (
 		<div className="mt-7 flex flex-col gap-4 border-y py-5">
-			<div className="grid grid-cols-[1fr_auto] items-center gap-3 md:grid-cols-[minmax(16rem,22rem)_1fr_auto]">
+			<div className="grid min-w-0 grid-cols-1 items-center gap-3 md:grid-cols-[minmax(12rem,22rem)_1fr_auto]">
 				<SearchBox
-					className="col-span-full w-full md:col-span-1"
+					className="min-w-0 w-full"
 					value={filters.q ?? ""}
 					onCommit={(q) => set({ q: q.trim() || undefined })}
 				/>
 				<div className="hidden md:block">{resultCount}</div>
 				<div className="hidden md:block">{sortControl}</div>
 				<div className="md:hidden">{resultCount}</div>
-				<div className="flex items-center justify-end gap-2 md:hidden">
+				<div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-2 md:hidden">
 					<Button
 						variant="outline"
 						className="h-11 rounded-lg px-4"
@@ -157,7 +156,7 @@ export function FilterBar({
 					>
 						{filtersOpen ? t("Hide filters") : t("Filters")}
 					</Button>
-					<div className="w-36 sm:w-44">{sortControl}</div>
+					{sortControl}
 				</div>
 			</div>
 
