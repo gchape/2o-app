@@ -3,3 +3,19 @@ allowBuilds:
   lightningcss: true
   workerd: false
   protobufjs: false
+permissions:
+  "@better-auth-ui/core":
+    skills: true
+  "@better-auth-ui/react":
+    skills: true
+  "@tanstack/devtools-vite":
+    skills: true
+  "@tanstack/react-router":
+    skills: true
+  "@tanstack/react-start":
+    skills: true
+  drizzle-kit:
+    skills: true
+skills:
+  dirs:
+    - .agents/skills
