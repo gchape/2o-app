@@ -3,8 +3,10 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "#/components/ui/button";
 import { cartDrawer } from "#/features/cart/cart-drawer.store";
 import { useCart } from "#/features/cart/use-cart";
+import { useTranslation } from "#/i18n/translate";
 
 export function CartButton() {
+	const t = useTranslation();
 	const { count } = useCart();
 
 	return (
@@ -13,7 +15,12 @@ export function CartButton() {
 			variant="outline"
 			size="icon"
 			className="relative size-10 rounded-xl"
-			aria-label={`Open cart, ${count} ${count === 1 ? "item" : "items"}`}
+			aria-label={t(
+				count === 1
+					? "Open cart, {{count}} item"
+					: "Open cart, {{count}} items",
+				{ count },
+			)}
 			onClick={cartDrawer.actions.open}
 		>
 			<HugeiconsIcon icon={ShoppingBag01Icon} size={20} />

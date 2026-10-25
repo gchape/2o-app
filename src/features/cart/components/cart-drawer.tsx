@@ -14,9 +14,12 @@ import {
 } from "#/features/cart/cart-drawer.store";
 import { useCart, useCartLineActions } from "#/features/cart/use-cart";
 import { ProductImage } from "#/features/catalog/components/product-image";
-import { formatPrice } from "#/lib/price";
+import { useTranslation } from "#/i18n/translate";
+import { usePriceFormatter } from "#/lib/price";
 
 export function CartDrawer() {
+	const { formatPrice } = usePriceFormatter();
+	const t = useTranslation();
 	const open = useCartDrawerOpen();
 	const { items, subtotal, currency, isPending, isError, isFetching, refetch } =
 		useCart();
@@ -29,23 +32,23 @@ export function CartDrawer() {
 			>
 				<SheetHeader className="px-6 py-7">
 					<SheetTitle className="text-xl font-semibold tracking-tight">
-						Your cart
+						{t("Your cart")}
 					</SheetTitle>
 				</SheetHeader>
 
 				{isPending ? (
 					<p role="status" className="p-4 text-muted-foreground">
-						Loading your cart…
+						{t("Loading your cart…")}
 					</p>
 				) : isError ? (
 					<div className="flex flex-col items-start gap-3 p-4">
-						<p role="alert">Couldn't load your cart.</p>
+						<p role="alert">{t("Couldn't load your cart.")}</p>
 						<Button
 							variant="outline"
 							disabled={isFetching}
 							onClick={() => refetch()}
 						>
-							{isFetching ? "Trying again…" : "Try again"}
+							{isFetching ? t("Trying again…") : t("Try again")}
 						</Button>
 					</div>
 				) : items.length === 0 ? (
@@ -55,11 +58,11 @@ export function CartDrawer() {
 						<CartLines items={items} />
 						<SheetFooter className="gap-4 border-t p-6">
 							<div className="flex items-center justify-between font-semibold text-lg">
-								<span>Subtotal</span>
+								<span>{t("Subtotal")}</span>
 								<span>{formatPrice(subtotal, currency)}</span>
 							</div>
 							<p className="text-muted-foreground text-xs">
-								Shipping and taxes are calculated at checkout.
+								{t("Shipping and taxes are calculated at checkout.")}
 							</p>
 							<LinkButton
 								to="/checkout"
@@ -67,7 +70,7 @@ export function CartDrawer() {
 								className="h-12 w-full rounded-lg"
 								onClick={cartDrawer.actions.close}
 							>
-								Checkout
+								{t("Checkout")}
 							</LinkButton>
 						</SheetFooter>
 					</>
@@ -78,20 +81,23 @@ export function CartDrawer() {
 }
 
 function EmptyCart() {
+	const t = useTranslation();
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
-			<p className="font-medium">Your cart is empty</p>
+			<p className="font-medium">{t("Your cart is empty")}</p>
 			<p className="text-muted-foreground text-sm">
-				Add some deals and they will show up here.
+				{t("Add some deals and they will show up here.")}
 			</p>
 			<Button variant="outline" onClick={cartDrawer.actions.close}>
-				Continue shopping
+				{t("Continue shopping")}
 			</Button>
 		</div>
 	);
 }
 
 function CartLines({ items }: { items: CartItem[] }) {
+	const { formatPrice } = usePriceFormatter();
+	const t = useTranslation();
 	const { setQuantity, removeItem } = useCartLineActions();
 
 	return (
@@ -114,7 +120,9 @@ function CartLines({ items }: { items: CartItem[] }) {
 							</p>
 						</div>
 						<p className="text-muted-foreground text-sm">
-							{formatPrice(item.price, item.currency)} each
+							{t("{{price}} each", {
+								price: formatPrice(item.price, item.currency),
+							})}
 						</p>
 
 						<div className="mt-auto flex items-center justify-between pt-2">
@@ -122,7 +130,9 @@ function CartLines({ items }: { items: CartItem[] }) {
 								<Button
 									variant="outline"
 									size="icon-sm"
-									aria-label={`Decrease quantity of ${item.name}`}
+									aria-label={t("Decrease quantity of {{name}}", {
+										name: item.name,
+									})}
 									onClick={() => setQuantity(item.id, item.quantity - 1)}
 								>
 									−
@@ -131,7 +141,9 @@ function CartLines({ items }: { items: CartItem[] }) {
 								<Button
 									variant="outline"
 									size="icon-sm"
-									aria-label={`Increase quantity of ${item.name}`}
+									aria-label={t("Increase quantity of {{name}}", {
+										name: item.name,
+									})}
 									disabled={item.quantity >= MAX_QUANTITY}
 									onClick={() => setQuantity(item.id, item.quantity + 1)}
 								>
@@ -145,7 +157,7 @@ function CartLines({ items }: { items: CartItem[] }) {
 								className="h-auto p-0 text-muted-foreground hover:text-foreground"
 								onClick={() => removeItem(item.id)}
 							>
-								Remove
+								{t("Remove")}
 							</Button>
 						</div>
 					</div>

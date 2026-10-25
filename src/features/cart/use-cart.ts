@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
 	applyLineChange,
@@ -8,6 +9,7 @@ import {
 } from "#/features/cart/cart";
 import { addItemFn, setQuantityFn } from "#/features/cart/cart.functions";
 import { cartQuery } from "#/features/cart/cart.queries";
+import { useTranslation } from "#/i18n/translate";
 import { cartDrawer } from "./cart-drawer.store";
 
 /** The cart's line items plus derived count, subtotal and currency. */
@@ -20,8 +22,10 @@ export const useCart = () => {
 	return { ...(data ?? EMPTY_CART), isPending, isError, isFetching, refetch };
 };
 
-const showCartError = () =>
-	toast.error("Couldn't update your cart. Please try again.");
+const useCartError = () => {
+	const t = useTranslation();
+	return () => toast.error(t("Couldn't update your cart. Please try again."));
+};
 
 const useRefetchCart = () => {
 	const queryClient = useQueryClient();
@@ -31,10 +35,12 @@ const useRefetchCart = () => {
 
 /** Adds one unit of a SKU and opens the drawer after a successful update. */
 export function useAddToCart() {
+	const showCartError = useCartError();
 	const refetch = useRefetchCart();
+	const addItemFnCall = useServerFn(addItemFn);
 
 	const { mutate, isPending } = useMutation({
-		mutationFn: (sku: string) => addItemFn({ data: { sku } }),
+		mutationFn: (sku: string) => addItemFnCall({ data: { sku } }),
 		onError: showCartError,
 		onSettled: async (_data, error) => {
 			await refetch();
@@ -47,11 +53,13 @@ export function useAddToCart() {
 
 /** Quantity changes show up immediately and roll back if the server refuses. */
 export function useCartLineActions() {
+	const showCartError = useCartError();
 	const queryClient = useQueryClient();
 	const refetch = useRefetchCart();
+	const setQuantityFnCall = useServerFn(setQuantityFn);
 
 	const { mutate } = useMutation({
-		mutationFn: (change: LineChange) => setQuantityFn({ data: change }),
+		mutationFn: (change: LineChange) => setQuantityFnCall({ data: change }),
 		onMutate: async (change) => {
 			await queryClient.cancelQueries({ queryKey: cartQuery.queryKey });
 			const previous = queryClient.getQueryData(cartQuery.queryKey);
