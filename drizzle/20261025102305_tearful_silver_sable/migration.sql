@@ -9,8 +9,9 @@ CREATE TABLE "address" (
 	"line1" text NOT NULL,
 	"line2" text,
 	"city" text NOT NULL,
-	"postal_code" text,
-	"country" text DEFAULT 'Georgia' NOT NULL,
+	"state" text NOT NULL,
+	"postal_code" text NOT NULL,
+	"country" text NOT NULL,
 	"is_primary" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL

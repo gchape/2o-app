@@ -1,6 +1,12 @@
-import { useId } from "react";
-import { useAuthForm } from "#/components/auth/auth-form";
+import { useId, useMemo } from "react";
+import { useAppForm } from "#/components/form/app-form";
 import { Button } from "#/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "#/components/ui/dialog";
 import {
 	Field,
 	FieldContent,
@@ -8,44 +14,26 @@ import {
 	FieldGroup,
 	FieldLabel,
 } from "#/components/ui/field";
-import {
-	Sheet,
-	SheetContent,
-	SheetDescription,
-	SheetFooter,
-	SheetHeader,
-	SheetTitle,
-} from "#/components/ui/sheet";
 import { Switch } from "#/components/ui/switch";
-import { site } from "#/data/site";
+import { useLocale } from "#/i18n/locale";
+import { useTranslation } from "#/i18n/translate";
 import type { Address } from "../address.functions";
-import { addressSchema } from "../address.schema";
+import { createAddressSchema } from "../address.schema";
 import { useSaveAddress } from "../use-addresses";
 
 const textFields = [
-	{
-		name: "fullName",
-		label: "Full name",
-		autoComplete: "name",
-		required: true,
-	},
-	{
-		name: "phone",
-		label: "Phone number",
-		autoComplete: "tel",
-		type: "tel",
-		required: true,
-	},
+	{ name: "fullName", label: "Name", autoComplete: "name", required: true },
 	{
 		name: "line1",
-		label: "Street address",
+		label: "Address 1",
 		autoComplete: "address-line1",
 		required: true,
 	},
 	{
 		name: "line2",
-		label: "Apartment, floor, entrance (optional)",
+		label: "Address 2",
 		autoComplete: "address-line2",
+		description: "Apartment, suite, or forwarding account number (optional).",
 	},
 	{
 		name: "city",
@@ -54,13 +42,33 @@ const textFields = [
 		required: true,
 	},
 	{
+		name: "state",
+		label: "State",
+		autoComplete: "address-level1",
+		required: true,
+	},
+	{
 		name: "postalCode",
-		label: "Postal code (optional)",
+		label: "ZIP",
 		autoComplete: "postal-code",
+		required: true,
+	},
+	{
+		name: "country",
+		label: "Country",
+		autoComplete: "country-name",
+		required: true,
+	},
+	{
+		name: "phone",
+		label: "Tel",
+		autoComplete: "tel",
+		type: "tel",
+		required: true,
 	},
 ] as const;
 
-type AddressSheetProps = {
+type AddressDialogProps = {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	/** The address being edited; leave out to add a new one. */
@@ -70,41 +78,50 @@ type AddressSheetProps = {
 };
 
 /**
- * The add/edit form in a side sheet. The sheet unmounts its content when it
+ * The add/edit form in a centered dialog. The dialog unmounts its content when it
  * closes, so every opening starts from a fresh form.
  */
-export function AddressSheet({
+export function AddressDialog({
 	open,
 	onOpenChange,
 	address,
 	firstAddress = false,
-}: AddressSheetProps) {
+}: AddressDialogProps) {
+	const t = useTranslation();
 	return (
-		<Sheet open={open} onOpenChange={onOpenChange}>
-			<SheetContent className="data-[side=right]:w-full data-[side=right]:sm:max-w-md">
-				<SheetHeader>
-					<SheetTitle>{address ? "Edit address" : "Add address"}</SheetTitle>
-					<SheetDescription>
-						We deliver within {site.delivery.region}.
-					</SheetDescription>
-				</SheetHeader>
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl sm:max-w-2xl">
+				<DialogHeader>
+					<DialogTitle>
+						{address ? t("Edit address") : t("Add address")}
+					</DialogTitle>
+					<p className="text-sm text-muted-foreground">
+						{t("Enter the recipient and delivery address details.")}
+					</p>
+				</DialogHeader>
 
 				<AddressForm
 					address={address}
 					firstAddress={firstAddress}
 					onDone={() => onOpenChange(false)}
 				/>
-			</SheetContent>
-		</Sheet>
+			</DialogContent>
+		</Dialog>
 	);
 }
 
-function primaryHint(address: Address | undefined, firstAddress: boolean) {
+function primaryHint(
+	address: Address | undefined,
+	firstAddress: boolean,
+	t: ReturnType<typeof useTranslation>,
+) {
 	if (address?.isPrimary) {
-		return "This is your primary address. Make another address primary to change it.";
+		return t(
+			"This is your primary address. Make another address primary to change it.",
+		);
 	}
-	if (firstAddress) return "Your first address is primary automatically.";
-	return "Make this your default delivery address.";
+	if (firstAddress) return t("Your first address is primary automatically.");
+	return t("Make this your default delivery address.");
 }
 
 type AddressFormProps = {
@@ -114,18 +131,23 @@ type AddressFormProps = {
 };
 
 function AddressForm({ address, firstAddress, onDone }: AddressFormProps) {
+	const locale = useLocale();
+	const addressSchema = useMemo(() => createAddressSchema(locale), [locale]);
+	const t = useTranslation();
 	const save = useSaveAddress();
 	const primaryId = useId();
 	// An account always has a primary address, so these cases can't be unticked.
 	const lockedPrimary = Boolean(address?.isPrimary) || firstAddress;
 
-	const form = useAuthForm({
+	const form = useAppForm({
 		defaultValues: {
 			fullName: address?.fullName ?? "",
 			phone: address?.phone ?? "",
 			line1: address?.line1 ?? "",
 			line2: address?.line2 ?? "",
 			city: address?.city ?? "",
+			state: address?.state ?? "",
+			country: address?.country ?? "United States",
 			postalCode: address?.postalCode ?? "",
 			isPrimary: lockedPrimary,
 		},
@@ -138,22 +160,28 @@ function AddressForm({ address, firstAddress, onDone }: AddressFormProps) {
 
 	return (
 		<form.AppForm>
-			<form.AuthFormRoot className="flex min-h-0 flex-1 flex-col">
-				<FieldGroup className="flex-1 gap-4 overflow-y-auto px-6 pb-6">
+			<form.FormRoot className="flex min-h-0 flex-1 flex-col">
+				<FieldGroup className="gap-5 pb-6">
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 						{textFields.map(({ name, ...props }) => (
 							<div
 								key={name}
 								className={
-									name === "city" || name === "postalCode"
-										? undefined
-										: "sm:col-span-2"
+									name === "fullName" || name === "line1" || name === "line2"
+										? "sm:col-span-2"
+										: undefined
 								}
 							>
 								<form.AppField name={name}>
 									{(field) => (
-										<field.AuthFormTextField
+										<field.FormTextField
 											{...props}
+											label={t(props.label)}
+											description={
+												"description" in props
+													? t(props.description)
+													: undefined
+											}
 											disabled={save.isPending}
 										/>
 									)}
@@ -167,10 +195,10 @@ function AddressForm({ address, firstAddress, onDone }: AddressFormProps) {
 							<Field orientation="horizontal">
 								<FieldContent>
 									<FieldLabel htmlFor={primaryId}>
-										Use as primary address
+										{t("Use as primary address")}
 									</FieldLabel>
 									<FieldDescription>
-										{primaryHint(address, firstAddress)}
+										{primaryHint(address, firstAddress, t)}
 									</FieldDescription>
 								</FieldContent>
 								<Switch
@@ -185,23 +213,23 @@ function AddressForm({ address, firstAddress, onDone }: AddressFormProps) {
 						)}
 					</form.AppField>
 
-					<form.AuthFormServerError />
+					<form.FormServerError />
 				</FieldGroup>
 
-				<SheetFooter className="flex-row justify-end border-t">
+				<div className="flex justify-end gap-2 border-t pt-5">
 					<Button
 						type="button"
 						variant="outline"
 						disabled={save.isPending}
 						onClick={onDone}
 					>
-						Cancel
+						{t("Cancel")}
 					</Button>
-					<form.AuthFormSubmitButton isPending={save.isPending}>
-						{address ? "Save changes" : "Save address"}
-					</form.AuthFormSubmitButton>
-				</SheetFooter>
-			</form.AuthFormRoot>
+					<form.FormSubmitButton isPending={save.isPending}>
+						{address ? t("Save changes") : t("Save address")}
+					</form.FormSubmitButton>
+				</div>
+			</form.FormRoot>
 		</form.AppForm>
 	);
 }

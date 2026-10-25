@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireUserId } from "#/features/auth/session.server";
+import { translate as t } from "#/i18n/translate";
 import { addressSchema } from "./address.schema";
 import { AddressError, addresses } from "./address.server";
 
@@ -18,7 +19,7 @@ async function run<T>(task: (userId: string) => Promise<T>) {
 	} catch (error) {
 		if (error instanceof AddressError) throw error;
 		console.error("Address request failed:", error);
-		throw new Error("Something went wrong. Please try again.");
+		throw new Error(t("Something went wrong. Please try again."));
 	}
 }
 

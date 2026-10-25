@@ -34,7 +34,8 @@ export type ShippingAddress = {
 	line1: string;
 	line2?: string;
 	city: string;
-	postalCode?: string;
+	state: string;
+	postalCode: string;
 	country: string;
 };
 
@@ -153,8 +154,9 @@ export const address = pgTable(
 		line1: text("line1").notNull(),
 		line2: text("line2"),
 		city: text("city").notNull(),
-		postalCode: text("postal_code"),
-		country: text("country").notNull().default(site.delivery.region),
+		state: text("state").notNull(),
+		postalCode: text("postal_code").notNull(),
+		country: text("country").notNull(),
 		isPrimary: boolean("is_primary").notNull().default(false),
 		...timestamps,
 	},

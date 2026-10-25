@@ -7,7 +7,9 @@ const valid = {
 	line1: "12 Rustaveli Ave",
 	line2: "",
 	city: "Tbilisi",
-	postalCode: "",
+	state: "DE",
+	postalCode: "19804",
+	country: "United States",
 	isPrimary: false,
 };
 
@@ -24,28 +26,45 @@ describe("addressSchema", () => {
 			...valid,
 			fullName: "  Nino Beridze ",
 			city: " Tbilisi  ",
+			state: " DE ",
+			country: " United States ",
+			postalCode: " 19804 ",
 			line2: "  Apt 4 ",
 		});
 		expect(parsed).toMatchObject({
 			fullName: "Nino Beridze",
 			city: "Tbilisi",
 			line2: "Apt 4",
+			state: "DE",
+			country: "United States",
+			postalCode: "19804",
 		});
 	});
 
 	it("requires a name, street and city, with a message that says which", () => {
 		expect(messages({ ...valid, fullName: "  " })).toEqual([
-			"Enter the recipient's name",
+			"შეიყვანეთ მიმღების სახელი",
 		]);
 		expect(messages({ ...valid, line1: "" })).toEqual([
-			"Enter a street address",
+			"შეიყვანეთ ქუჩის მისამართი",
 		]);
-		expect(messages({ ...valid, city: "" })).toEqual(["Enter a city"]);
+		expect(messages({ ...valid, city: "" })).toEqual(["შეიყვანეთ ქალაქი"]);
+	});
+
+	it("requires state, ZIP, and country", () => {
+		for (const [field, message] of [
+			["state", "შეიყვანეთ შტატი ან რეგიონი"],
+			["postalCode", "შეიყვანეთ საფოსტო ინდექსი"],
+			["country", "შეიყვანეთ ქვეყანა"],
+		] as const) {
+			expect(messages({ ...valid, [field]: "  " })).toEqual([message]);
+		}
 	});
 
 	it("accepts common phone formats and rejects the rest", () => {
 		for (const phone of [
 			"555123456",
+			"+1 (302) 691 0017",
 			"+995 (555) 12-34-56",
 			"032 2 12 34 56",
 		]) {
@@ -53,7 +72,7 @@ describe("addressSchema", () => {
 		}
 		for (const phone of ["", "abc", "12345", "+(((  )))", "5".repeat(31)]) {
 			expect(messages({ ...valid, phone })).toEqual([
-				"Enter a valid phone number",
+				"შეიყვანეთ ტელეფონის სწორი ნომერი",
 			]);
 		}
 	});

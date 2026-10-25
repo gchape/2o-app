@@ -13,19 +13,14 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "#/components/ui/empty";
-import {
-	Item,
-	ItemContent,
-	ItemGroup,
-	ItemMedia,
-	ItemSeparator,
-} from "#/components/ui/item";
-import { Skeleton } from "#/components/ui/skeleton";
+import { ItemGroup, ItemSeparator } from "#/components/ui/item";
+import { ItemSkeleton } from "#/components/ui/item-skeleton";
+import { useTranslation } from "#/i18n/translate";
 import { cn } from "#/lib/utils";
 import { addressesQuery } from "../address.queries";
 import { MAX_ADDRESSES } from "../address.schema";
+import { AddressDialog } from "./address-dialog";
 import { AddressRow } from "./address-row";
-import { AddressSheet } from "./address-sheet";
 
 export type AddressBookProps = {
 	className?: string;
@@ -33,6 +28,7 @@ export type AddressBookProps = {
 
 /** Saved delivery addresses in account settings. */
 export function AddressBook({ className }: AddressBookProps) {
+	const t = useTranslation();
 	const { authClient } = useAuth();
 	const { data: session } = useSession(authClient);
 	const {
@@ -50,7 +46,7 @@ export function AddressBook({ className }: AddressBookProps) {
 	return (
 		<div>
 			<div className="mb-3 flex items-center justify-between gap-2">
-				<h2 className="text-sm font-semibold">Addresses</h2>
+				<h2 className="text-sm font-semibold">{t("Addresses")}</h2>
 
 				{count > 0 && (
 					<Button
@@ -60,7 +56,7 @@ export function AddressBook({ className }: AddressBookProps) {
 						onClick={() => setAdding(true)}
 					>
 						<HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
-						Add address
+						{t("Add address")}
 					</Button>
 				)}
 			</div>
@@ -68,11 +64,11 @@ export function AddressBook({ className }: AddressBookProps) {
 			<Card className={cn("gap-0 p-0", className)}>
 				<CardContent className="p-0">
 					{isPending ? (
-						<AddressRowSkeleton />
+						<ItemSkeleton address />
 					) : isError ? (
 						<div className="flex flex-col items-start gap-3 p-4">
 							<p role="alert" className="text-destructive text-sm">
-								Couldn't load your addresses.
+								{t("Couldn't load your addresses.")}
 							</p>
 							<Button
 								variant="outline"
@@ -80,7 +76,7 @@ export function AddressBook({ className }: AddressBookProps) {
 								disabled={isFetching}
 								onClick={() => refetch()}
 							>
-								{isFetching ? "Trying again…" : "Try again"}
+								{isFetching ? t("Trying again…") : t("Try again")}
 							</Button>
 						</div>
 					) : addresses.length === 0 ? (
@@ -89,15 +85,15 @@ export function AddressBook({ className }: AddressBookProps) {
 								<EmptyMedia variant="icon">
 									<HugeiconsIcon icon={Location01Icon} />
 								</EmptyMedia>
-								<EmptyTitle>No saved addresses</EmptyTitle>
+								<EmptyTitle>{t("No saved addresses")}</EmptyTitle>
 								<EmptyDescription>
-									Save and manage your delivery addresses.
+									{t("Save and manage your delivery addresses.")}
 								</EmptyDescription>
 							</EmptyHeader>
 							<EmptyContent>
 								<Button size="sm" onClick={() => setAdding(true)}>
 									<HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
-									Add address
+									{t("Add address")}
 								</Button>
 							</EmptyContent>
 						</Empty>
@@ -119,32 +115,20 @@ export function AddressBook({ className }: AddressBookProps) {
 				{count > 0 && (
 					<p className="border-t p-4 text-muted-foreground text-xs">
 						{atLimit
-							? `You've saved the most addresses allowed (${MAX_ADDRESSES}). Delete one to add another.`
-							: "Your primary address is your default delivery address."}
+							? t(
+									"You've saved the most addresses allowed ({{max}}). Delete one to add another.",
+									{ max: MAX_ADDRESSES },
+								)
+							: t("Your primary address is your default delivery address.")}
 					</p>
 				)}
 			</Card>
 
-			<AddressSheet
+			<AddressDialog
 				open={adding}
 				onOpenChange={setAdding}
 				firstAddress={count === 0}
 			/>
 		</div>
-	);
-}
-
-function AddressRowSkeleton() {
-	return (
-		<Item>
-			<ItemMedia>
-				<Skeleton className="size-4 rounded-md" />
-			</ItemMedia>
-			<ItemContent>
-				<Skeleton className="h-4 w-32" />
-				<Skeleton className="h-3 w-48" />
-				<Skeleton className="h-3 w-24" />
-			</ItemContent>
-		</Item>
 	);
 }

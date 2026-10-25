@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "098aa5fd-92eb-437d-855e-77ccef101d0c",
+  "id": "a7c1b8fa-2992-47bb-adaf-943d8e0eac24",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -173,7 +173,20 @@
     {
       "type": "text",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "state",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "address"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
@@ -188,7 +201,7 @@
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": "'Georgia'",
+      "default": null,
       "generated": null,
       "identity": null,
       "name": "country",

@@ -35,10 +35,11 @@ import {
 	ItemTitle,
 } from "#/components/ui/item";
 import { Spinner } from "#/components/ui/spinner";
+import { useTranslation } from "#/i18n/translate";
 import { formatAddress } from "../address.format";
 import type { Address } from "../address.functions";
 import { useMakePrimaryAddress, useRemoveAddress } from "../use-addresses";
-import { AddressSheet } from "./address-sheet";
+import { AddressDialog } from "./address-dialog";
 
 type AddressRowProps = {
 	address: Address;
@@ -48,6 +49,7 @@ type AddressRowProps = {
 
 /** One saved address with its actions. The row owns its edit sheet and delete prompt. */
 export function AddressRow({ address, isOnly }: AddressRowProps) {
+	const t = useTranslation();
 	const makePrimary = useMakePrimaryAddress();
 	const remove = useRemoveAddress();
 	const [editing, setEditing] = useState(false);
@@ -64,7 +66,9 @@ export function AddressRow({ address, isOnly }: AddressRowProps) {
 			<ItemContent>
 				<ItemTitle>
 					{address.fullName}
-					{address.isPrimary && <Badge variant="secondary">Primary</Badge>}
+					{address.isPrimary && (
+						<Badge variant="secondary">{t("Primary")}</Badge>
+					)}
 				</ItemTitle>
 				<ItemDescription>{street}</ItemDescription>
 				<ItemDescription>{locality}</ItemDescription>
@@ -78,7 +82,10 @@ export function AddressRow({ address, isOnly }: AddressRowProps) {
 							<Button
 								variant="ghost"
 								size="icon-sm"
-								aria-label={`Actions for ${address.fullName}, ${street}`}
+								aria-label={t("Actions for {{name}}, {{street}}", {
+									name: address.fullName,
+									street,
+								})}
 							/>
 						}
 					>
@@ -91,12 +98,12 @@ export function AddressRow({ address, isOnly }: AddressRowProps) {
 								onClick={() => makePrimary.mutate(address.id)}
 							>
 								<HugeiconsIcon icon={StarIcon} />
-								Make primary
+								{t("Make primary")}
 							</DropdownMenuItem>
 						)}
 						<DropdownMenuItem onClick={() => setEditing(true)}>
 							<HugeiconsIcon icon={Edit02Icon} />
-							Edit
+							{t("Edit")}
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
@@ -104,13 +111,13 @@ export function AddressRow({ address, isOnly }: AddressRowProps) {
 							onClick={() => setConfirmingDelete(true)}
 						>
 							<HugeiconsIcon icon={Delete02Icon} />
-							Delete
+							{t("Delete")}
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</ItemActions>
 
-			<AddressSheet
+			<AddressDialog
 				open={editing}
 				onOpenChange={setEditing}
 				address={address}
@@ -125,17 +132,20 @@ export function AddressRow({ address, isOnly }: AddressRowProps) {
 						<AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
 							<HugeiconsIcon icon={Delete02Icon} />
 						</AlertDialogMedia>
-						<AlertDialogTitle>Delete this address?</AlertDialogTitle>
+						<AlertDialogTitle>{t("Delete this address?")}</AlertDialogTitle>
 						<AlertDialogDescription>
-							{street}, {locality} will be removed from your account.
+							{t(
+								"{{street}}, {{locality}} will be removed from your account.",
+								{ street, locality },
+							)}
 							{address.isPrimary &&
 								!isOnly &&
-								" Your oldest remaining address becomes the primary one."}
+								t(" Your oldest remaining address becomes the primary one.")}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel disabled={remove.isPending}>
-							Cancel
+							{t("Cancel")}
 						</AlertDialogCancel>
 						<Button
 							type="button"
@@ -144,7 +154,7 @@ export function AddressRow({ address, isOnly }: AddressRowProps) {
 							onClick={() => remove.mutate(address.id)}
 						>
 							{remove.isPending && <Spinner />}
-							Delete address
+							{t("Delete address")}
 						</Button>
 					</AlertDialogFooter>
 				</AlertDialogContent>

@@ -1,6 +1,7 @@
 import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "#/db";
 import { address, user } from "#/db/schema";
+import { translate as t } from "#/i18n/translate";
 import { type AddressInput, MAX_ADDRESSES } from "./address.schema";
 
 /** An error whose message is meant for the shopper; anything else is hidden behind a generic one. */
@@ -20,6 +21,7 @@ const publicColumns = {
 	line1: address.line1,
 	line2: address.line2,
 	city: address.city,
+	state: address.state,
 	postalCode: address.postalCode,
 	country: address.country,
 	isPrimary: address.isPrimary,
@@ -31,7 +33,6 @@ type AddressFields = Omit<AddressInput, "isPrimary">;
 const toRow = (fields: AddressFields) => ({
 	...fields,
 	line2: fields.line2 || null,
-	postalCode: fields.postalCode || null,
 });
 
 const mine = (userId: string, id: string) =>
@@ -80,7 +81,7 @@ export const addresses = {
 				.where(eq(address.userId, userId));
 			ensure(
 				existing.length < MAX_ADDRESSES,
-				`You can save up to ${MAX_ADDRESSES} addresses.`,
+				t("You can save up to {{max}} addresses.", { max: MAX_ADDRESSES }),
 			);
 
 			// The first address is primary automatically.
@@ -105,7 +106,7 @@ export const addresses = {
 				.select({ isPrimary: address.isPrimary })
 				.from(address)
 				.where(mine(userId, id));
-			ensure(current, "That address no longer exists.");
+			ensure(current, t("That address no longer exists."));
 
 			// An account always keeps a primary address, so unticking it here does
 			// nothing; picking another address as primary is how it moves.
@@ -127,7 +128,7 @@ export const addresses = {
 				.select({ isPrimary: address.isPrimary })
 				.from(address)
 				.where(mine(userId, id));
-			ensure(target, "That address no longer exists.");
+			ensure(target, t("That address no longer exists."));
 			if (target.isPrimary) return;
 
 			await demotePrimary(tx, userId);
