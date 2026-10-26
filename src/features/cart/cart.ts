@@ -31,8 +31,10 @@ type CartSummary = ReturnType<typeof summarizeCart>;
 export const EMPTY_CART: CartSummary = summarizeCart([]);
 
 /** The subtotal is one number, so a cart holds a single currency. */
-export const hasCurrencyConflict = (items: CartItem[], currency: string) =>
-	items.some((item) => item.currency !== currency);
+export const hasCurrencyConflict = (
+	items: { currency: string }[],
+	currency: string,
+) => items.some((item) => item.currency !== currency);
 
 export type LineChange = { sku: string; quantity: number };
 

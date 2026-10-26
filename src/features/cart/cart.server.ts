@@ -1,19 +1,14 @@
 import { getCookie, setCookie } from "@tanstack/react-start/server";
 import { and, eq, inArray, sql } from "drizzle-orm";
-import { compact, invariant, keyBy } from "es-toolkit";
+import { compact, keyBy } from "es-toolkit";
 import { z } from "zod";
 import { db } from "#/db";
 import { product, skus } from "#/db/schema";
 import { getRedis } from "#/server/redis.server";
-import {
-	type CartItem,
-	hasCurrencyConflict,
-	MAX_CART_LINES,
-	MAX_QUANTITY,
-} from "./cart";
+import { type CartItem, MAX_QUANTITY } from "./cart";
+import { CART_TTL_SECONDS, createCartStore } from "./cart-store.server";
 
 const CART_COOKIE = "cartId";
-const CART_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
 const cookieId = () => z.uuid().safeParse(getCookie(CART_COOKIE)).data;
 const keyFor = (id: string) => `cart:${id}`;
@@ -44,6 +39,8 @@ const findAvailableSkus = (ids: string[]) =>
 		.from(skus)
 		.innerJoin(product, eq(skus.productId, product.id))
 		.where(and(inArray(skus.id, ids), eq(skus.inStock, true)));
+
+const store = async () => createCartStore(await getRedis(), findAvailableSkus);
 
 async function getCart(strict = false): Promise<CartItem[]> {
 	const id = cookieId();
@@ -83,71 +80,18 @@ export const cart = {
 	get: getCart,
 	getForCheckout: () => getCart(true),
 
-	/** Remove only purchased quantities; keep items added in another tab. */
 	async removePurchased(items: { id: string; quantity: number }[]) {
 		const id = cookieId();
-		if (!id) return;
-		await (await getRedis()).eval(
-			`
-			for i = 1, #ARGV, 2 do
-				local quantity = tonumber(redis.call('HGET', KEYS[1], ARGV[i]) or '0')
-				local remaining = quantity - tonumber(ARGV[i + 1])
-				if remaining > 0 then redis.call('HSET', KEYS[1], ARGV[i], remaining)
-				else redis.call('HDEL', KEYS[1], ARGV[i]) end
-			end
-			return 1
-		`,
-			{
-				keys: [keyFor(id)],
-				arguments: items.flatMap((item) => [item.id, String(item.quantity)]),
-			},
-		);
+		if (id) await (await store()).removePurchased(keyFor(id), items);
 	},
 
 	async add(skuId: string) {
-		const [sku] = await findAvailableSkus([skuId]);
-		invariant(sku, "Unavailable");
-		invariant(
-			!hasCurrencyConflict(await getCart(), sku.currency),
-			"A cart can only hold one currency",
-		);
-
-		const redis = await getRedis();
-		const key = cartKey();
-
-		if (!(await redis.hExists(key, skuId))) {
-			invariant((await redis.hLen(key)) < MAX_CART_LINES, "Cart is full");
-		}
-
-		const [quantity] = await redis
-			.multi()
-			.hIncrBy(key, skuId, 1)
-			.expire(key, CART_TTL_SECONDS)
-			.exec();
-
-		if (Number(quantity) > MAX_QUANTITY) {
-			await redis.hIncrBy(key, skuId, -1);
-			throw new Error("Maximum quantity reached");
-		}
+		await (await store()).add(cartKey(), skuId);
 	},
 
-	/**
-	 * Changes a line that is already in the cart; a quantity of 0 removes it.
-	 * New lines only enter through `add`, which checks the SKU is real.
-	 */
 	async setQuantity(skuId: string, quantity: number) {
 		const id = cookieId();
-		if (!id) return;
-
-		const redis = await getRedis();
-		const key = keyFor(id);
-		if (!(await redis.hExists(key, skuId))) return;
-
-		const batch = redis.multi();
-		if (quantity === 0) batch.hDel(key, skuId);
-		else batch.hSet(key, skuId, String(quantity));
-
-		await batch.expire(key, CART_TTL_SECONDS).exec();
+		if (id) await (await store()).setQuantity(keyFor(id), skuId, quantity);
 	},
 
 	/** Empties the cart (for checkout to call once an order is placed). */
