@@ -7,8 +7,8 @@ import { cn } from "#/lib/utils";
 type ProductImageProps = {
 	src: string | null;
 	alt: string;
-	/** Pass `"lazy"` for images that are usually below the fold. */
 	loading?: "lazy" | "eager";
+	compact?: boolean;
 	fetchPriority?: ComponentProps<"img">["fetchPriority"];
 } & Omit<ComponentProps<"div">, "children">;
 
@@ -18,6 +18,7 @@ export function ProductImage({
 	alt,
 	loading,
 	fetchPriority,
+	compact = false,
 	className,
 	...props
 }: ProductImageProps) {
@@ -48,8 +49,15 @@ export function ProductImage({
 					aria-hidden={alt ? undefined : true}
 					className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-3 text-center text-muted-foreground"
 				>
-					<HugeiconsIcon icon={Image01Icon} size={28} aria-hidden="true" />
-					<span className="text-xs">{t("Image unavailable")}</span>
+					<HugeiconsIcon
+						icon={Image01Icon}
+						size={compact ? 20 : 28}
+						className="shrink-0"
+						aria-hidden="true"
+					/>
+					{!compact && (
+						<span className="text-xs">{t("Image unavailable")}</span>
+					)}
 				</div>
 			)}
 		</div>

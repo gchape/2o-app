@@ -125,6 +125,7 @@ function CartLines({ items }: { items: CartItem[] }) {
 			{items.map((item) => (
 				<li key={item.id} className="flex gap-4 py-6">
 					<ProductImage
+						compact
 						src={item.image}
 						alt={item.name}
 						className="size-16 shrink-0 rounded-lg sm:size-24"
