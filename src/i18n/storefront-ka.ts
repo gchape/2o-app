@@ -1,5 +1,37 @@
 /** English source strings are also the English catalog. Keep placeholders unchanged. */
 export const storefrontKa = {
+	Discover: "გაგვიცანით",
+	"See how we choose": "ნახეთ, როგორ ვარჩევთ",
+	"Our process": "როგორ ვმუშაობთ",
+	"From the source to your shortlist.": "როგორ ვარჩევთ შეთავაზებებს თქვენთვის.",
+	"You make the final call": "საბოლოო არჩევანი თქვენზეა",
+
+	"About us": "ჩვენ შესახებ",
+	"Good finds. Less searching.": "კარგი შეთავაზებები. ნაკლები ძებნა.",
+	"We select US stores, filter their listings, and bring worthwhile finds together so you can spend less time searching.":
+		"ვარჩევთ მაღაზიებს აშშ-ში, ვფილტრავთ მათ შეთავაზებებს და თქვენთვის საინტერესო ნივთებს ერთ სივრცეში ვუყრით თავს, რომ ძებნაში ნაკლები დრო დახარჯოთ.",
+	"Select stores": "მაღაზიების შერჩევა",
+	"Good finds start at the source.":
+		"ჯერ მაღაზიას ვარჩევთ, შემდეგ — შეთავაზებებს.",
+	"We look for reputable US warehouses and discount stores, choosing sources with original products and quality in mind.":
+		"აშშ-ში ვეძებთ კარგი რეპუტაციის მქონე საწყობებსა და მაღაზიებს, სადაც ნივთები ფასდაკლებით იყიდება. შერჩევისას ყურადღებას პროდუქციის ორიგინალობასა და ხარისხს ვაქცევთ.",
+	"Selected US stores": "შერჩეული მაღაზიები აშშ-ში",
+	"Filter & compare": "შეთავაზებების შედარება",
+	"A little more care. A lot less noise.": "ჩვენ ვარჩევთ, თქვენ დროს ზოგავთ.",
+	"We organise product listings and compare available prices, discounts and product details to help surface worthwhile deals.":
+		"ვაწესრიგებთ პროდუქციის შესახებ ინფორმაციას, ვადარებთ ფასებს, ფასდაკლებებსა და ნივთების მახასიათებლებს, რომ თქვენთვის საინტერესო შეთავაზებები შევარჩიოთ.",
+	"A considered selection": "შერჩეული შეთავაზებები",
+	"Discover your find": "იპოვეთ სასურველი ნივთი",
+	"Your next find, in one place.": "სასურველი ნივთის პოვნა უფრო მარტივია.",
+	"Explore shoes and clothing by brand, size, colour and budget. We bring the selection together; you decide what works for you.":
+		"შეარჩიეთ ფეხსაცმელი და ტანსაცმელი ბრენდის, ზომის, ფერისა და თქვენთვის მისაღები ფასის მიხედვით. ჩვენ შეთავაზებებს ერთ სივრცეში ვუყრით თავს, თქვენ კი სასურველ ნივთს ირჩევთ.",
+	"Ready to explore": "თქვენი არჩევანი",
+	"Explore our process": "გაიგეთ, როგორ ვმუშაობთ",
+	"Better informed. Your choice.": "შეადარეთ და აირჩიეთ თქვენთვის სასურველი.",
+	"We show recorded prices and when they were checked. Prices and availability can change, so review the product details and your final total before ordering.":
+		"ფასებთან ერთად მათი ბოლო შემოწმების დროსაც ვუთითებთ. ფასი და მარაგი შეიძლება შეიცვალოს, ამიტომ შეკვეთის გაფორმებამდე გადაამოწმეთ ნივთის შესახებ ინფორმაცია და გადასახდელი თანხა.",
+	"Explore deals": "ნახეთ შეთავაზებები",
+
 	"One step closer to your next find": "კიდევ ერთი ნაბიჯი სასურველ ნივთამდე",
 	"Copy {{label}}": "კოპირება: {{label}}",
 	"Add a U.S. address to get started. You can use your forwarding address.":

@@ -395,3 +395,58 @@
 		scroll-behavior: auto;
 	}
 }
+
+.about-visual {
+	background: radial-gradient(
+		ellipse at 50% 35%,
+		var(--brand) -180%,
+		var(--background) 75%
+	);
+}
+
+/* The sourcing layers form a small CSS 3D scene; no canvas or asset download. */
+.about-scene {
+	perspective: 900px;
+	height: 360px;
+	display: grid;
+	place-items: center;
+}
+.about-stack {
+	position: relative;
+	width: 240px;
+	height: 190px;
+	transform-style: preserve-3d;
+	transform: translateY(55px) rotateX(52deg) rotateZ(-28deg);
+}
+.about-layer {
+	position: absolute;
+	inset: 0;
+	padding: 20px;
+	border: 1px solid #ffffff55;
+	border-radius: 16px;
+	background: #292929;
+	color: #ffffffaa;
+	box-shadow:
+		-8px 10px 0 #171717,
+		-12px 20px 28px #0005;
+	transition:
+		background 350ms,
+		color 350ms,
+		border-color 350ms;
+}
+.about-layer[data-active="true"] {
+	background: var(--brand);
+	color: var(--brand-foreground);
+	border-color: #ffe88b;
+}
+.about-tile {
+	height: 24px;
+	border: 1px solid currentColor;
+	border-radius: 5px;
+	opacity: 0.5;
+}
+@media (prefers-reduced-motion: reduce) {
+	.about-layer {
+		transition: none;
+	}
+}

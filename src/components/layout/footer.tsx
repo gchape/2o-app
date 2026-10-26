@@ -7,12 +7,6 @@ import { useTranslation } from "#/i18n/translate";
 import { Container } from "./container";
 import { Logo } from "./logo";
 
-const info = [
-	"Price-check times shown",
-	"Deals on shoes and clothing",
-	"Men, women and kids",
-];
-
 function FooterHeading({ children }: { children: string }) {
 	return (
 		<h3 className="font-semibold text-brand text-xs uppercase tracking-[0.16em]">
@@ -79,11 +73,13 @@ export function Footer() {
 				</div>
 
 				<div>
-					<FooterHeading>{t("Good to know")}</FooterHeading>
+					<FooterHeading>{t("Discover")}</FooterHeading>
 					<ul className="mt-5 space-y-3 text-sm text-white/70">
-						{info.map((item) => (
-							<li key={item}>{t(item)}</li>
-						))}
+						<li>
+							<Link to="/about" className="transition-colors hover:text-white">
+								{t("About us")}
+							</Link>
+						</li>
 					</ul>
 				</div>
 			</Container>

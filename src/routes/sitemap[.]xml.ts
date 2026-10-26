@@ -12,6 +12,7 @@ const MAX_SITEMAP_URLS = 50_000;
 const staticPaths = [
 	"/",
 	"/deals",
+	"/about",
 	...departmentSlugs.flatMap((department) => [
 		`/${department}`,
 		...categorySlugs.map((category) => `/${department}/${category}`),
