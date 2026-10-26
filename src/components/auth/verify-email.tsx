@@ -15,7 +15,7 @@ import { useStoredEmail } from "./use-stored-email";
 export type VerifyEmailProps = { className?: string };
 
 export function VerifyEmail({ className }: VerifyEmailProps) {
-	const { basePaths, viewPaths, navigate, Link } = useAuth();
+	const { basePaths, viewPaths, navigate } = useAuth();
 	const messages = useMessages();
 	const email = useStoredEmail(VERIFY_EMAIL_STORAGE_KEY);
 	const verify = useVerifyEmailOtp(authClient, {
@@ -87,14 +87,6 @@ export function VerifyEmail({ className }: VerifyEmailProps) {
 				) : (
 					<FieldDescription>{messages.verifyEmail.noEmail}</FieldDescription>
 				)}
-				<FieldDescription className="mt-4 text-center">
-					<Link
-						href={`${basePaths.auth}/${viewPaths.auth.signIn}`}
-						className="underline underline-offset-4"
-					>
-						{messages.verifyEmail.backToSignIn}
-					</Link>
-				</FieldDescription>
 			</CardContent>
 		</Card>
 	);
