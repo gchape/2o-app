@@ -17,6 +17,19 @@ CREATE TABLE "address" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "checkout_session" (
+	"id" uuid PRIMARY KEY,
+	"user_id" text NOT NULL,
+	"quote" jsonb NOT NULL,
+	"shipping_address" jsonb NOT NULL,
+	"expires_at" timestamp NOT NULL,
+	"proof_base64" text,
+	"proof_type" text,
+	"submitted_at" timestamp,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "order_item" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"order_id" uuid NOT NULL,
@@ -29,12 +42,25 @@ CREATE TABLE "order_item" (
 	"image_url" text
 );
 --> statement-breakpoint
+CREATE TABLE "order_notification" (
+	"order_id" uuid PRIMARY KEY,
+	"next_message" integer DEFAULT 0 NOT NULL,
+	"proof_sent" boolean DEFAULT false NOT NULL,
+	"attempts" integer DEFAULT 0 NOT NULL,
+	"next_attempt_at" timestamp DEFAULT now() NOT NULL,
+	"lease_until" timestamp,
+	"sent_at" timestamp
+);
+--> statement-breakpoint
 CREATE TABLE "orders" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" text NOT NULL,
 	"status" "order_status" DEFAULT 'pending'::"order_status" NOT NULL,
 	"total" integer NOT NULL,
 	"currency" text NOT NULL,
+	"checkout_quote" jsonb,
+	"customer_name" text,
+	"customer_email" text,
 	"shipping_address" jsonb NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -103,15 +129,19 @@ CREATE TABLE "user" (
 --> statement-breakpoint
 CREATE INDEX "address_user_idx" ON "address" ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "address_primary_uq" ON "address" ("user_id") WHERE "is_primary";--> statement-breakpoint
+CREATE INDEX "checkout_session_user_idx" ON "checkout_session" ("user_id");--> statement-breakpoint
 CREATE INDEX "order_item_order_idx" ON "order_item" ("order_id");--> statement-breakpoint
+CREATE INDEX "order_notification_due_idx" ON "order_notification" ("next_attempt_at");--> statement-breakpoint
 CREATE INDEX "orders_user_idx" ON "orders" ("user_id");--> statement-breakpoint
 CREATE INDEX "product_listing_idx" ON "product" ("department","category");--> statement-breakpoint
 CREATE INDEX "skus_product_price_idx" ON "skus" ("product_id","price");--> statement-breakpoint
 CREATE INDEX "skus_deals_idx" ON "skus" ("product_id","discount" DESC NULLS LAST,"id") WHERE "in_stock" and "discount" > 0;--> statement-breakpoint
 CREATE INDEX "account_userId_idx" ON "account" ("user_id");--> statement-breakpoint
 ALTER TABLE "address" ADD CONSTRAINT "address_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "checkout_session" ADD CONSTRAINT "checkout_session_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "order_item" ADD CONSTRAINT "order_item_order_id_orders_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "order_item" ADD CONSTRAINT "order_item_sku_id_skus_id_fkey" FOREIGN KEY ("sku_id") REFERENCES "skus"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "order_notification" ADD CONSTRAINT "order_notification_order_id_orders_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "skus" ADD CONSTRAINT "skus_product_id_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "product"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;

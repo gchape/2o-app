@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "a7c1b8fa-2992-47bb-adaf-943d8e0eac24",
+  "id": "aa521d36-c2df-462d-8fb6-1fb76ae5a445",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -45,7 +45,19 @@
     },
     {
       "isRlsEnabled": false,
+      "name": "checkout_session",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
       "name": "order_item",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "order_notification",
       "entityType": "tables",
       "schema": "public"
     },
@@ -253,6 +265,136 @@
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "quote",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "shipping_address",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expires_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "proof_base64",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "proof_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "submitted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
       "default": "gen_random_uuid()",
       "generated": null,
       "identity": null,
@@ -370,6 +512,97 @@
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "order_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "order_notification"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "next_message",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "order_notification"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "proof_sent",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "order_notification"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "attempts",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "order_notification"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "next_attempt_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "order_notification"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lease_until",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "order_notification"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "sent_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "order_notification"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
       "default": "gen_random_uuid()",
       "generated": null,
       "identity": null,
@@ -426,6 +659,45 @@
       "generated": null,
       "identity": null,
       "name": "currency",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "orders"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "checkout_quote",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "orders"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "customer_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "orders"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "customer_email",
       "entityType": "columns",
       "schema": "public",
       "table": "orders"
@@ -1093,6 +1365,27 @@
       "nameExplicit": true,
       "columns": [
         {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "checkout_session_user_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
           "value": "order_id",
           "isExpression": false,
           "asc": true,
@@ -1109,6 +1402,27 @@
       "entityType": "indexes",
       "schema": "public",
       "table": "order_item"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "next_attempt_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "order_notification_due_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "order_notification"
     },
     {
       "nameExplicit": true,
@@ -1263,6 +1577,23 @@
     {
       "nameExplicit": false,
       "columns": [
+        "user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "user",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "checkout_session_user_id_user_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "checkout_session"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
         "order_id"
       ],
       "schemaTo": "public",
@@ -1293,6 +1624,23 @@
       "entityType": "fks",
       "schema": "public",
       "table": "order_item"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "order_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "orders",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "order_notification_order_id_orders_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "order_notification"
     },
     {
       "nameExplicit": false,
@@ -1360,9 +1708,29 @@
         "id"
       ],
       "nameExplicit": false,
+      "name": "checkout_session_pkey",
+      "schema": "public",
+      "table": "checkout_session",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
       "name": "order_item_pkey",
       "schema": "public",
       "table": "order_item",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "order_id"
+      ],
+      "nameExplicit": false,
+      "name": "order_notification_pkey",
+      "schema": "public",
+      "table": "order_notification",
       "entityType": "pks"
     },
     {

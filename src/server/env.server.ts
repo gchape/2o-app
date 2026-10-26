@@ -33,6 +33,17 @@ const envSchema = z
 
 		/** Tawk.to embed URL; the chat widget is hidden when unset. */
 		CHAT_EMBED_URL: optionalUrl,
+
+		// Checkout remains unavailable until all payment and pricing settings are valid.
+		CHECKOUT_IBAN: optionalString,
+		CHECKOUT_BENEFICIARY: optionalString,
+		CHECKOUT_PAYMENT_CURRENCY: optionalString,
+		CHECKOUT_GEL_PER_USD: optionalString,
+		CHECKOUT_RATE_UPDATED_AT: optionalString,
+		CHECKOUT_SERVICE_FEE_BPS: optionalString,
+		CHECKOUT_SHIPPING_USD_CENTS: optionalString,
+		TELEGRAM_BOT_TOKEN: optionalString,
+		TELEGRAM_CHAT_ID: optionalString,
 	})
 	.refine(
 		(e) => Boolean(e.GOOGLE_CLIENT_ID) === Boolean(e.GOOGLE_CLIENT_SECRET),

@@ -71,10 +71,14 @@ export function CartDrawer() {
 								className="flex flex-wrap items-center justify-between gap-2 font-semibold text-lg"
 							>
 								<span>{t("Subtotal")}</span>
-								<span>{formatPrice(subtotal, currency)}</span>
+								<span className="text-price">
+									{formatPrice(subtotal, currency)}
+								</span>
 							</div>
 							<p className="text-muted-foreground text-xs">
-								{t("Shipping and taxes are calculated at checkout.")}
+								{t(
+									"U.S. shipping and the service fee are calculated at checkout.",
+								)}
 							</p>
 							<LinkButton
 								to="/checkout"
@@ -131,7 +135,7 @@ function CartLines({ items }: { items: CartItem[] }) {
 							<p className="line-clamp-2 text-sm font-medium leading-snug">
 								{item.name}
 							</p>
-							<p className="shrink-0 text-sm font-semibold tabular-nums">
+							<p className="shrink-0 text-sm font-semibold text-price tabular-nums">
 								{formatPrice(item.price * item.quantity, item.currency)}
 							</p>
 						</div>

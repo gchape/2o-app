@@ -61,14 +61,14 @@ export function DealCard({ deal, loading, className }: DealCardProps) {
 				</h3>
 				<p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 pt-1">
 					<span className="text-muted-foreground text-xs">{t("From")}</span>
-					<span className="type-num text-lg sm:text-xl">
+					<span className="type-num text-lg text-price sm:text-xl">
 						{formatPriceCompact(price, currency)}
 					</span>
-					<span className="text-muted-foreground text-sm line-through">
+					<span className="text-price-original text-sm line-through">
 						{formatPriceCompact(originalPrice, currency)}
 					</span>
 				</p>
-				<p className="font-medium text-foreground/75 text-xs sm:text-sm">
+				<p className="w-fit rounded-md bg-price-savings px-2 py-1 font-medium text-price text-xs sm:text-sm">
 					{t("You save {{price}}", {
 						price: formatPriceCompact(originalPrice - price, currency),
 					})}

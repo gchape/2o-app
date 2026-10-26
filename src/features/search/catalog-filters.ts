@@ -18,7 +18,7 @@ export type CatalogSort = (typeof sorts)[number];
 
 export const sortLabels = {
 	relevance: "Best match",
-	name: "Name",
+	name: "Product name",
 	"price-asc": "Price: low to high",
 	"price-desc": "Price: high to low",
 	discount: "Biggest discount",

@@ -11,8 +11,7 @@ export const georgianAuthLocale = defineAuthLocale({
 			invalidCode: "კოდი არასწორია ან ვადა გაუვიდა. მოითხოვეთ ახალი კოდი.",
 			sessionExpired: "გასაგრძელებლად ხელახლა შედით ანგარიშში.",
 			permissionDenied: "ამ მოქმედების შესრულების უფლება არ გაქვთ.",
-			rateLimited:
-				"მცდელობების რაოდენობა დასაშვებ ზღვარს აჭარბებს. ცოტა ხანში სცადეთ ხელახლა.",
+			rateLimited: "მცდელობების ლიმიტს გადააჭარბეთ. ცოტა ხანში სცადეთ ხელახლა.",
 			passwordTooShort: "პაროლი ძალიან მოკლეა.",
 			passwordTooLong: "პაროლი ძალიან გრძელია.",
 			accountExists: "ამ მონაცემებით ანგარიში უკვე არსებობს. სცადეთ შესვლა.",
@@ -74,7 +73,8 @@ export const georgianAuthLocale = defineAuthLocale({
 			alreadyVerifiedYourEmail: "უკვე დაადასტურეთ ელფოსტა?",
 			confirmPassword: "პაროლის დადასტურება",
 			confirmPasswordPlaceholder: "გაიმეორეთ პაროლი",
-			checkYourEmail: "დადასტურების შეტყობინებისთვის შეამოწმეთ ელფოსტა",
+			checkYourEmail:
+				"შეამოწმეთ ელფოსტა — დადასტურების შეტყობინება გამოგიგზავნეთ",
 			checkYourEmailTitle: "შეამოწმეთ ელფოსტა",
 			continueWith: "გაგრძელება {{provider}}-ით",
 			email: "ელფოსტა",
@@ -120,7 +120,7 @@ export const georgianAuthLocale = defineAuthLocale({
 			resetPassword: "პაროლის აღდგენა",
 			sendResetLink: "აღდგენის ბმულის გაგზავნა",
 			scanToOpenEmailProvider:
-				"დაასკანერეთ ტელეფონზე {{provider}}-ის გასახსნელად",
+				"ტელეფონით დაასკანერეთ კოდი, რომ გახსნათ {{provider}}",
 			showPassword: "პაროლის ჩვენება",
 			signIn: "შესვლა",
 			signOut: "გასვლა",
@@ -146,8 +146,8 @@ export const georgianAuthLocale = defineAuthLocale({
 			link: "დაკავშირება",
 			linkedAccounts: "დაკავშირებული ანგარიშები",
 			lastAccountUnlinkingDisabled:
-				"ამ ანგარიშის კავშირის გაუქმებამდე დაამატეთ შესვლის სხვა მეთოდი.",
-			linkProvider: "დააკავშირეთ თქვენი {{provider}}-ის ანგარიში",
+				"ამ ანგარიშთან კავშირის გაუქმებამდე დაამატეთ შესვლის სხვა მეთოდი.",
+			linkProvider: "დააკავშირეთ თქვენი ანგარიში {{provider}}-ზე",
 			cancel: "გაუქმება",
 			copyToClipboard: "კოპირება",
 			copiedToClipboard: "დაკოპირებულია",

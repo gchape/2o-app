@@ -28,10 +28,8 @@ export function priceCheckNote(
 ) {
 	if (!checkedAt) {
 		return translate(
-			"New prices land every morning at {{time}}.",
-			{
-				time: site.priceCheckTime,
-			},
+			"Price-check history will appear with the first update.",
+			{},
 			locale,
 		);
 	}

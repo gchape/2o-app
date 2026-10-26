@@ -45,7 +45,7 @@ const findAvailableSkus = (ids: string[]) =>
 		.innerJoin(product, eq(skus.productId, product.id))
 		.where(and(inArray(skus.id, ids), eq(skus.inStock, true)));
 
-async function getCart(): Promise<CartItem[]> {
+async function getCart(strict = false): Promise<CartItem[]> {
 	const id = cookieId();
 	const entries = id
 		? Object.entries(await (await getRedis()).hGetAll(keyFor(id)))
@@ -56,6 +56,20 @@ async function getCart(): Promise<CartItem[]> {
 		await findAvailableSkus(entries.map(([field]) => field)),
 		(sku) => sku.id,
 	);
+	if (
+		strict &&
+		entries.some(
+			([id, quantity]) =>
+				!available[id] ||
+				!Number.isInteger(Number(quantity)) ||
+				Number(quantity) < 1 ||
+				Number(quantity) > MAX_QUANTITY,
+		)
+	) {
+		throw new Error(
+			"Some cart items are no longer available. Please review your cart.",
+		);
+	}
 
 	return compact(
 		entries.map(([field, value]) => {
@@ -67,6 +81,28 @@ async function getCart(): Promise<CartItem[]> {
 
 export const cart = {
 	get: getCart,
+	getForCheckout: () => getCart(true),
+
+	/** Remove only purchased quantities; keep items added in another tab. */
+	async removePurchased(items: { id: string; quantity: number }[]) {
+		const id = cookieId();
+		if (!id) return;
+		await (await getRedis()).eval(
+			`
+			for i = 1, #ARGV, 2 do
+				local quantity = tonumber(redis.call('HGET', KEYS[1], ARGV[i]) or '0')
+				local remaining = quantity - tonumber(ARGV[i + 1])
+				if remaining > 0 then redis.call('HSET', KEYS[1], ARGV[i], remaining)
+				else redis.call('HDEL', KEYS[1], ARGV[i]) end
+			end
+			return 1
+		`,
+			{
+				keys: [keyFor(id)],
+				arguments: items.flatMap((item) => [item.id, String(item.quantity)]),
+			},
+		);
+	},
 
 	async add(skuId: string) {
 		const [sku] = await findAvailableSkus([skuId]);

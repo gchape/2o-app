@@ -9,6 +9,7 @@
 		"dev": "vite dev --port 3000",
 		"build": "vite build",
 		"preview": "vite preview",
+		"checkout:notifications": "node --env-file-if-exists=.env.${NODE_ENV:-development} --import tsx scripts/checkout-notifications.ts",
 		"db:generate": "node --env-file-if-exists=.env.${NODE_ENV:-development} node_modules/drizzle-kit/bin.cjs generate",
 		"db:migrate": "node --env-file-if-exists=.env.${NODE_ENV:-development} node_modules/drizzle-kit/bin.cjs migrate",
 		"db:push": "node --env-file-if-exists=.env.${NODE_ENV:-development} node_modules/drizzle-kit/bin.cjs push",

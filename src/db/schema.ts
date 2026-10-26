@@ -15,6 +15,10 @@ import {
 import { categorySlugs, departmentSlugs } from "#/data/catalog";
 import { site } from "#/data/site";
 import { account, user } from "#/db/auth-schema";
+import type {
+	CheckoutAddress,
+	CheckoutQuote,
+} from "#/features/checkout/checkout";
 
 export * from "./auth-schema";
 
@@ -114,12 +118,55 @@ export const orders = pgTable(
 		status: orderStatusEnum("status").notNull().default("pending"),
 		total: integer("total").notNull(),
 		currency: text("currency").notNull(),
+		// Historical pricing and bank instructions remain immutable after submission.
+		checkoutQuote: jsonb("checkout_quote").$type<CheckoutQuote>(),
+		customerName: text("customer_name"),
+		customerEmail: text("customer_email"),
 		shippingAddress: jsonb("shipping_address")
 			.$type<ShippingAddress>()
 			.notNull(),
 		...timestamps,
 	},
 	(t) => [index("orders_user_idx").on(t.userId)],
+);
+
+/** Private, server-owned checkout draft. Its UUID becomes the final order ID. */
+export const checkoutSession = pgTable(
+	"checkout_session",
+	{
+		id: uuid("id").primaryKey(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "restrict" }),
+		quote: jsonb("quote").$type<CheckoutQuote>().notNull(),
+		shippingAddress: jsonb("shipping_address")
+			.$type<CheckoutAddress>()
+			.notNull(),
+		expiresAt: timestamp("expires_at").notNull(),
+		// Kept in the private database, never exposed as a public file URL.
+		proofBase64: text("proof_base64"),
+		proofType: text("proof_type"),
+		submittedAt: timestamp("submitted_at"),
+		...timestamps,
+	},
+	(t) => [index("checkout_session_user_idx").on(t.userId)],
+);
+
+/** Transactional notification queue; a worker retries Telegram independently of checkout. */
+export const orderNotification = pgTable(
+	"order_notification",
+	{
+		orderId: uuid("order_id")
+			.primaryKey()
+			.references(() => orders.id, { onDelete: "cascade" }),
+		nextMessage: integer("next_message").notNull().default(0),
+		proofSent: boolean("proof_sent").notNull().default(false),
+		attempts: integer("attempts").notNull().default(0),
+		nextAttemptAt: timestamp("next_attempt_at").defaultNow().notNull(),
+		leaseUntil: timestamp("lease_until"),
+		sentAt: timestamp("sent_at"),
+	},
+	(t) => [index("order_notification_due_idx").on(t.nextAttemptAt)],
 );
 
 export const orderItem = pgTable(

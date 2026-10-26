@@ -55,10 +55,7 @@ function DealsPage() {
 				}
 				empty={
 					<p className="py-10 text-muted-foreground">
-						{t(
-							"No deals right now. New prices land every morning at {{time}}.",
-							{ time: site.priceCheckTime },
-						)}
+						{t("No deals right now. Check back later.")}
 					</p>
 				}
 			/>

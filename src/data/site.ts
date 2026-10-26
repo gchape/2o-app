@@ -8,13 +8,11 @@ export const site = {
 	/** IANA zone the store operates in; times shown to shoppers use it. */
 	timezone: "Asia/Tbilisi",
 
-	/** When the daily price check is scheduled, in `site.timezone`. Copy only; the last real run comes from the stats. */
-	priceCheckTime: "08:00",
-
 	delivery: {
-		region: "Georgia",
-		/** Free-delivery threshold in minor units (tetri), in `site.currency`. */
-		freeFrom: 10_000,
+		region: "United States",
+		currency: "USD",
+		/** Free U.S. delivery from this merchandise subtotal, in USD cents. */
+		freeFrom: 9_900,
 	},
 
 	tagline: "Big brands. Small prices.",

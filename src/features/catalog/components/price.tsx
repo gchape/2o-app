@@ -10,9 +10,9 @@ export function Price({ price, originalPrice, currency }: PriceProps) {
 	const { formatPrice } = usePriceFormatter();
 	return (
 		<>
-			{formatPrice(price, currency)}
+			<span className="text-price">{formatPrice(price, currency)}</span>
 			{isOnSale(price, originalPrice) && (
-				<span className="ml-2 text-[0.8em] font-normal text-muted-foreground line-through">
+				<span className="ml-2 text-[0.8em] font-normal text-price-original line-through">
 					{formatPrice(originalPrice, currency)}
 				</span>
 			)}

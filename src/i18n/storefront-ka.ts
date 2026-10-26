@@ -1,5 +1,89 @@
 /** English source strings are also the English catalog. Keep placeholders unchanged. */
 export const storefrontKa = {
+	"U.S. shipping and the service fee are calculated at checkout.":
+		"აშშ-ში მიწოდებისა და მომსახურების საფასური შეკვეთის გაფორმებისას გამოითვლება.",
+	"Sign in to save your delivery address and place an order.":
+		"მისამართის შესანახად და შეკვეთის გასაფორმებლად შედით ანგარიშში.",
+	"Order received": "შეკვეთა მიღებულია",
+	"Payment awaiting verification": "გადახდა მოწმდება",
+	"We received your order and payment screenshot. We will verify the bank transfer before processing your order.":
+		"თქვენი შეკვეთა და გადახდის სურათი მიღებულია. შეკვეთის დამუშავებას თანხის ჩარიცხვის დადასტურების შემდეგ დავიწყებთ.",
+	"Order ID": "შეკვეთის ნომერი",
+	"U.S. delivery · Bank transfer": "მიწოდება აშშ-ში · საბანკო გადარიცხვა",
+	"We deliver only to your U.S. address. Delivery to Georgia is not included or available.":
+		"შეკვეთას მხოლოდ აშშ-ის მისამართზე ვაგზავნით. საქართველოში მიწოდებას არ ვახორციელებთ.",
+	"Checkout steps": "შეკვეთის გაფორმების ეტაპები",
+	"Delivery address": "მიწოდების მისამართი",
+	"Bank transfer": "საბანკო გადარიცხვა",
+	"Payment proof": "გადახდის დასტური",
+	"Choose your U.S. delivery address": "აირჩიეთ მიწოდების მისამართი აშშ-ში",
+	"Checkout is temporarily unavailable. Please try again later.":
+		"შეკვეთის გაფორმება დროებით შეუძლებელია. სცადეთ მოგვიანებით.",
+	"A U.S. forwarding address is welcome. Include your apartment or forwarding account number.":
+		"შეგიძლიათ მიუთითოთ გადამზიდის მისამართი აშშ-ში. არ გამოგრჩეთ ბინის ან გადამზიდთან მინიჭებული ოთახის ნომერი.",
+	"Preparing checkout…": "შეკვეთა მზადდება…",
+	"Review total and continue": "ჯამური თანხის ნახვა და გაგრძელება",
+	"Transfer the exact amount": "გადარიცხეთ მითითებული თანხა",
+	"Review the order total, then send a bank transfer using the details below. Include the payment reference.":
+		"შეამოწმეთ ჯამური თანხა და გადარიცხეთ ქვემოთ მოცემულ ანგარიშზე. დანიშნულებაში მიუთითეთ გადახდის კოდი.",
+	"These payment instructions have expired. Do not make a new transfer. If you already paid, upload your proof; otherwise start a new checkout.":
+		"ამ რეკვიზიტებით გადახდის ვადა ამოიწურა. თანხა აღარ გადარიცხოთ. თუ უკვე გადაიხადეთ, ატვირთეთ დასტური; სხვა შემთხვევაში შეკვეთა თავიდან გააფორმეთ.",
+	"Amount to transfer": "გადასარიცხი თანხა",
+	Beneficiary: "მიმღები",
+	IBAN: "ანგარიშის ნომერი (IBAN)",
+	"Payment reference": "გადახდის კოდი",
+	Copy: "კოპირება",
+	Copied: "დაკოპირებულია",
+	"Couldn't copy. Select and copy the text manually.":
+		"კოპირება ვერ მოხერხდა. მონიშნეთ ტექსტი და თავად დააკოპირეთ.",
+	"Payment instructions valid until {{time}}":
+		"ამ თანხის გადახდა შესაძლებელია {{time}}-მდე",
+	"Send the amount in the currency shown. Any bank transfer charges are paid separately to your bank.":
+		"თანხა გადარიცხეთ მითითებულ ვალუტაში. ბანკის საკომისიოს, ასეთის არსებობის შემთხვევაში, ცალკე იხდით.",
+	"I have transferred — upload proof": "გადავრიცხე — დასტურის ატვირთვა",
+	"Start a new checkout": "შეკვეთის თავიდან გაფორმება",
+	"Upload your payment screenshot": "ატვირთეთ გადახდის სურათი",
+	"The screenshot should show the amount, recipient and transfer reference. Hide unrelated balances or transactions.":
+		"სურათზე უნდა ჩანდეს თანხა, მიმღები და გადარიცხვის დანიშნულება. დაფარეთ ანგარიშის ნაშთი და სხვა ოპერაციები.",
+	"Payment screenshot": "გადახდის სურათი",
+	"Use a PNG, JPEG or WebP image up to 2 MB.":
+		"ატვირთეთ PNG, JPEG ან WebP სურათი, არაუმეტეს 2 მბ.",
+	"Uploading…": "იტვირთება…",
+	"Payment screenshot uploaded successfully.":
+		"გადახდის სურათი წარმატებით აიტვირთა.",
+	"Upload a screenshot to enable Place order.":
+		"შეკვეთის გასაფორმებლად ჯერ ატვირთეთ გადახდის სურათი.",
+	"Your order details and payment proof will be sent to our order team via Telegram for verification.":
+		"შეკვეთის მონაცემები და გადახდის დასტური გადამოწმებისთვის ჩვენს გუნდს Telegram-ით გაეგზავნება.",
+	"Placing order…": "შეკვეთა ფორმდება…",
+	"Place order": "შეკვეთის გაფორმება",
+	"Back to payment details": "გადახდის რეკვიზიტებზე დაბრუნება",
+	"Order summary": "შეკვეთის შეჯამება",
+	"Your USD total, exchange rate, service fee and shipping will be shown before you transfer any money.":
+		"გადარიცხვამდე ნახავთ ჯამურ თანხას აშშ დოლარში, გაცვლით კურსს, მომსახურებისა და მიწოდების საფასურს.",
+	"United States": "ამერიკის შეერთებული შტატები",
+	"Items (GEL)": "ნივთების ღირებულება (₾)",
+	"Items (USD)": "ნივთების ღირებულება ($)",
+	"Service fee ({{percent}}%)": "მომსახურების საფასური ({{percent}}%)",
+	"U.S. shipping": "მიწოდება აშშ-ში",
+	Free: "უფასო",
+	"Total (USD)": "სულ (აშშ დოლარი)",
+	"Exchange rate: 1 USD = {{rate}} GEL":
+		"გაცვლითი კურსი: 1 აშშ დოლარი = {{rate}} ლარი",
+	"USD item prices are rounded to cents before quantities are applied.":
+		"თითოეული ნივთის ფასი დოლარში ცენტამდე მრგვალდება, შემდეგ კი რაოდენობაზე მრავლდება.",
+	"The service fee applies to items only. U.S. shipping is free when the item subtotal reaches US$99, before fees.":
+		"მომსახურების საფასური მხოლოდ ნივთების ღირებულებაზე ითვლება. აშშ-ში მიწოდება უფასოა, თუ ნივთების ღირებულება, დამატებითი საფასურის გარეშე, მინიმუმ 99 აშშ დოლარია.",
+	"Checkout not found.": "შეკვეთა ვერ მოიძებნა.",
+	"Too many checkout attempts. Please try again later.":
+		"შეკვეთის გაფორმება მეტისმეტად ბევრჯერ სცადეთ. სცადეთ მოგვიანებით.",
+	"Select a valid U.S. delivery address with a ZIP code.":
+		"აირჩიეთ აშშ-ის სწორი მისამართი საფოსტო ინდექსით.",
+	"Some cart items are no longer available. Please review your cart.":
+		"კალათაში ზოგიერთი ნივთი აღარ არის ხელმისაწვდომი. გთხოვთ, გადაამოწმოთ კალათა.",
+	"This order has already been submitted.": "ეს შეკვეთა უკვე გაფორმებულია.",
+	"Upload your payment screenshot before placing the order.":
+		"შეკვეთის გაფორმებამდე ატვირთეთ გადახდის სურათი.",
 	"Image unavailable": "სურათი მიუწვდომელია",
 	"Updating your cart…": "კალათა ახლდება…",
 	Language: "ენა",
@@ -39,20 +123,20 @@ export const storefrontKa = {
 	Select: "შეარჩიეთ",
 	"Less to sift through.": "იპოვეთ სასურველი მარტივად.",
 	"Start with in-stock deals ranked by discount. Narrow the selection by brand, size, colour or budget.":
-		"ჯერ ყველაზე დიდი ფასდაკლებით ხელმისაწვდომ ნივთებს ნახავთ. შეარჩიეთ ბრენდის, ზომის, ფერის ან ბიუჯეტის მიხედვით.",
+		"პირველ რიგში ნახავთ მარაგში არსებულ ნივთებს ყველაზე დიდი ფასდაკლებით. შეარჩიეთ ბრენდის, ზომის, ფერის ან ბიუჯეტის მიხედვით.",
 	Refresh: "შეამოწმეთ",
 	"Keep an eye on prices.": "თვალი ადევნეთ ფასებს.",
 	"Check the latest recorded prices and availability. We show when prices were last checked, so you know how recent they are.":
-		"ნახეთ ბოლოს გადამოწმებული ფასები და მარაგი. შემოწმების დრო თითოეულ განახლებას ახლავს, რათა იცოდეთ, რამდენად ახალია ინფორმაცია.",
+		"ნახეთ ბოლო მონაცემები ფასებისა და მარაგის შესახებ. ფასების შემოწმების დროც მითითებულია, რათა იცოდეთ, რამდენად განახლებულია ინფორმაცია.",
 	"How it works": "როგორ მუშაობს",
-	"More finding. Less searching.": "იპოვეთ მეტი. ეძებეთ ნაკლები.",
+	"More finding. Less searching.": "ნაკლები ძებნა. მეტი არჩევანი.",
 	"From a wider selection to a shorter shortlist. A simpler way to discover your next pair or everyday favourite.":
 		"ფართო არჩევანიდან მარტივად შეარჩიეთ სასურველი ფეხსაცმელი ან ყოველდღიური სამოსი.",
 	"Price-check history will appear with the first update.":
 		"ფასების შემოწმების ისტორია პირველი განახლების შემდეგ გამოჩნდება.",
 	"store in the current selection": "მაღაზია წარმოდგენილ შეთავაზებებში",
 	"stores in the current selection": "მაღაზია წარმოდგენილ შეთავაზებებში",
-	"Shop by department": "აირჩიეთ, ვისთვის ეძებთ",
+	"Shop by department": "ვისთვის არჩევთ?",
 	"Shoes and clothing for the whole family.":
 		"ფეხსაცმელი და ტანსაცმელი მთელი ოჯახისთვის.",
 	"Today's biggest drops": "დღევანდელი საუკეთესო ფასდაკლებები",
@@ -61,14 +145,11 @@ export const storefrontKa = {
 	"Next deals": "შემდეგი შეთავაზებები",
 	"Sign in": "შესვლა",
 	Announcements: "განცხადებები",
-	"Prices refreshed every morning at {{time}}":
-		"ფასები ახლდება ყოველ დილით, {{time}} საათზე",
 	"Questions about sizes?": "ზომის შერჩევაში დახმარება გჭირდებათ?",
 	"Chat with us": "მოგვწერეთ",
-	"Free delivery in Georgia over {{price}}":
-		"უფასო მიწოდება საქართველოში, თუ შეკვეთის ღირებულება {{price}}-ს აღემატება",
-	"Delivery in Georgia; free over {{price}}.":
-		"მიწოდება საქართველოში უფასოა, თუ შეკვეთის ღირებულება {{price}}-ს აღემატება.",
+	"Free U.S. shipping from {{price}}": "უფასო მიწოდება აშშ-ში {{price}}-დან",
+	"U.S. delivery only; free from {{price}}. We do not ship to Georgia.":
+		"მიწოდება მხოლოდ აშშ-ში — უფასოდ {{price}}-დან. საქართველოში არ ვაგზავნით.",
 	"Price-check times shown": "მითითებულია ფასების შემოწმების დრო",
 	"Deals on shoes and clothing": "შეთავაზებები ფეხსაცმელსა და ტანსაცმელზე",
 	"Men, women and kids": "მამაკაცებისთვის, ქალებისთვის და ბავშვებისთვის",
@@ -101,8 +182,8 @@ export const storefrontKa = {
 	Deals: "შეთავაზებები",
 	"All deals": "ყველა შეთავაზება",
 	"Everything on sale right now.": "ყველაფერი, რაც ახლა ფასდაკლებით იყიდება.",
-	"No deals right now. New prices land every morning at {{time}}.":
-		"ამჟამად შეთავაზებები არ არის. ახალი ფასები ყოველ დილით, {{time}} საათზე გამოჩნდება.",
+	"No deals right now. Check back later.":
+		"ამჟამად შეთავაზებები არ არის. შემოგვიარეთ მოგვიანებით.",
 	Settings: "პარამეტრები",
 	"Your cart": "თქვენი კალათა",
 	"Loading your cart…": "კალათა იტვირთება…",
@@ -130,7 +211,7 @@ export const storefrontKa = {
 	"Color:": "ფერი:",
 	Size: "ზომა",
 	"Size {{size}}": "ზომა {{size}}",
-	"Size {{size}}, sold out": "ზომა {{size}}, ამოწურულია",
+	"Size {{size}}, sold out": "ზომა {{size}} — მარაგში აღარ არის",
 	"In stock and ready to order.": "მარაგშია — შეგიძლიათ შეუკვეთოთ.",
 	"This size is currently sold out.": "ეს ზომა ამჟამად მარაგში არ არის.",
 	"Select a size to check availability.": "მარაგის შესამოწმებლად აირჩიეთ ზომა.",
@@ -139,10 +220,10 @@ export const storefrontKa = {
 	"Nothing matches these filters.": "არჩეული ფილტრებით ნივთები ვერ მოიძებნა.",
 	"Try a shorter search or remove a filter.":
 		"შეამოკლეთ საძიებო ფრაზა ან მოხსენით რომელიმე ფილტრი.",
-	"Clear filters": "ფილტრების გასუფთავება",
+	"Clear filters": "ფილტრების მოხსნა",
 	"No products yet.": "პროდუქტები ჯერ არ არის.",
 	"Check back after the next price refresh.":
-		"დაბრუნდით ფასების შემდეგი განახლების შემდეგ.",
+		"შემოგვიარეთ, როცა ფასები განახლდება.",
 	result: "შედეგი",
 	results: "შედეგი",
 	"Sort by": "დალაგება",
@@ -155,23 +236,24 @@ export const storefrontKa = {
 	"From {{price}}": "{{price}}-დან",
 	"Up to {{price}}": "{{price}}-მდე",
 	"Active filters": "აქტიური ფილტრები",
-	"Remove filter: {{label}}": "ფილტრის წაშლა: {{label}}",
+	"Remove filter: {{label}}": "ფილტრის მოხსნა: {{label}}",
 	"Clear all": "ყველა ფილტრის მოხსნა",
 	"Search shoes and clothing": "მოძებნეთ ფეხსაცმელი და ტანსაცმელი",
 	"Search products": "პროდუქტების ძებნა",
 	"Clear search": "ძებნის გასუფთავება",
 	Price: "ფასი",
 	"Price range": "ფასის დიაპაზონი",
-	"Clear {{label}}": "გასუფთავება: {{label}}",
+	"Clear {{label}}": "ფილტრის მოხსნა: {{label}}",
 	"Best match": "შესაბამისობის მიხედვით",
 	Name: "სახელი",
-	"Price: low to high": "ფასი: ზრდადობით",
-	"Price: high to low": "ფასი: კლებადობით",
-	"Biggest discount": "დიდი ფასდაკლება",
+	"Product name": "დასახელება",
+	"Price: low to high": "ფასი: დაბლიდან მაღლისკენ",
+	"Price: high to low": "ფასი: მაღლიდან დაბლისკენ",
+	"Biggest discount": "ყველაზე დიდი ფასდაკლება",
 	"Address 1": "ქუჩა და სახლის ნომერი",
 	"Address 2": "მისამართის დამატებითი ინფორმაცია",
 	"Apartment, suite, or forwarding account number (optional).":
-		"ბინის, ოფისის ან გადამზიდთან მინიჭებული ოთახის ნომერი (არასავალდებულო).",
+		"ბინის, ოფისის ან გადამზიდის მიერ მინიჭებული ოთახის ნომერი (არასავალდებულო).",
 	City: "ქალაქი",
 	State: "შტატი / რეგიონი",
 	ZIP: "საფოსტო ინდექსი",
@@ -182,7 +264,7 @@ export const storefrontKa = {
 	"Enter the recipient and delivery address details.":
 		"შეიყვანეთ მიმღების მონაცემები და მიწოდების მისამართი.",
 	"This is your primary address. Make another address primary to change it.":
-		"ეს თქვენი ძირითადი მისამართია. მის ნაცვლად შეგიძლიათ ძირითად მისამართად სხვა აირჩიოთ.",
+		"ეს თქვენი ძირითადი მისამართია. მის შესაცვლელად ძირითად მისამართად სხვა აირჩიეთ.",
 	"Your first address is primary automatically.":
 		"თქვენი პირველი მისამართი ავტომატურად ხდება ძირითადი.",
 	"Make this your default delivery address.":
@@ -220,14 +302,12 @@ export const storefrontKa = {
 	"Use {{max}} characters or fewer": "გამოიყენეთ მაქსიმუმ {{max}} სიმბოლო",
 	"Enter a valid phone number": "შეიყვანეთ ტელეფონის სწორი ნომერი",
 	"Enter the recipient's name": "შეიყვანეთ მიმღების სახელი",
-	"Enter a street address": "შეიყვანეთ ქუჩის მისამართი",
+	"Enter a street address": "შეიყვანეთ ქუჩა და სახლის ნომერი",
 	"Enter a city": "შეიყვანეთ ქალაქი",
 	"Enter a state": "შეიყვანეთ შტატი ან რეგიონი",
 	"Enter a ZIP code": "შეიყვანეთ საფოსტო ინდექსი",
 	"Enter a country": "შეიყვანეთ ქვეყანა",
 	Close: "დახურვა",
-	"New prices land every morning at {{time}}.":
-		"ახალი ფასები ყოველ დილით, {{time}} საათზე გამოჩნდება.",
 	"Prices last checked today at {{time}}.":
 		"ფასები ბოლოს შემოწმდა დღეს, {{time}} საათზე.",
 	"Prices last checked on {{date}} at {{time}}.":

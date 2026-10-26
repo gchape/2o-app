@@ -93,7 +93,7 @@ export function DealsSection({ deals, total, checkedAt }: DealsSectionProps) {
 
 			<ul
 				ref={scroller}
-				className="mt-8 flex snap-x snap-mandatory gap-5 md:mt-10 md:gap-6 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+				className="mt-8 flex snap-x snap-mandatory gap-5 md:mt-10 md:gap-6 overflow-x-auto pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden"
 			>
 				{deals.map((deal, i) => (
 					<li

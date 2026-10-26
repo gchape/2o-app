@@ -76,12 +76,12 @@ export function FilterBar({
 			}}
 		>
 			<SelectTrigger
-				className="h-11 w-full min-w-0 rounded-lg md:w-48"
+				className="h-11 w-full min-w-0 rounded-lg max-md:data-[size=default]:h-11 md:w-48"
 				aria-label={t("Sort by")}
 			>
 				<SelectValue />
 			</SelectTrigger>
-			<SelectContent>
+			<SelectContent className="w-max min-w-(--anchor-width) max-w-(--available-width)">
 				{sortChoices.map((choice) => (
 					<SelectItem key={choice.value} value={choice.value}>
 						{choice.label}
@@ -146,7 +146,7 @@ export function FilterBar({
 				<div className="hidden md:block">{resultCount}</div>
 				<div className="hidden md:block">{sortControl}</div>
 				<div className="md:hidden">{resultCount}</div>
-				<div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-2 md:hidden">
+				<div className="grid min-w-0 grid-cols-1 gap-2 md:hidden">
 					<Button
 						variant="outline"
 						className="h-11 rounded-lg px-4"

@@ -1,491 +1,315 @@
 # 2o
 
-A Georgian and English storefront for browsing wholesale clothing and footwear,
-comparing deals, and saving products to a cart. Includes catalog search and
-filters, email/password sign-in, email-code verification and password reset,
-optional social sign-in, and an address book. Georgian is the default language.
+A Georgian and English storefront for browsing wholesale clothing and footwear, comparing deals, and saving products to a cart. Includes catalog search and filters, email/password sign-in, email-code verification and password reset, optional social sign-in, and an address book. Georgian is the default language.
 
-Built with React 19, TanStack Start and Router, TypeScript, Tailwind CSS, Better
-Auth, and Drizzle ORM. PostgreSQL stores application data; Redis provides catalog
-search and caching. Nginx handles the public HTTP/HTTPS endpoint.
-
-**Project status:** browsing, accounts, addresses, and carts are implemented.
-Checkout is a placeholder; payments and order fulfillment are not implemented.
-See [known limitations](#known-limitations) before treating this as a complete
-commerce application.
+**Status:** browsing, accounts, addresses, and carts work. Checkout is a placeholder; payments and fulfillment are not implemented. See [Known limitations](#known-limitations).
 
 ## Contents
 
 - [Quick start](#quick-start)
-- [Technology stack](#technology-stack)
+- [Stack](#stack)
 - [Architecture](#architecture)
-- [Features and data flows](#features-and-data-flows)
-- [UI and design system](#ui-and-design-system)
-- [Localization](#localization)
-- [Everyday development](#everyday-development)
+- [Features](#features)
+- [UI and localization](#ui-and-localization)
+- [Development](#development)
 - [Configuration](#configuration)
 - [Commands](#commands)
 - [Production](#production)
 - [Repository layout](#repository-layout)
-- [Testing and quality checks](#testing-and-quality-checks)
-- [Extending the application](#extending-the-application)
+- [Testing](#testing)
+- [Extending](#extending)
 - [Troubleshooting](#troubleshooting)
 - [Known limitations](#known-limitations)
 
 ## Quick start
 
-Install Docker with the Compose plugin. The development stack includes the app,
-PostgreSQL, Redis, and Nginx; host Node.js and pnpm installations are optional.
+Requires Docker with the Compose plugin. The dev stack runs the app, PostgreSQL, Redis, and Nginx; host Node.js and pnpm are optional.
+1. Create `.env.development` in the repo root (see [Configuration](#configuration)). Set DB credentials and `BETTER_AUTH_SECRET` (`openssl rand -hex 32`). Env files are git- and Docker-ignored; no examples are included.
+2. Start the stack:
 
-Copy the development template and set your database password and auth secret:
+   ```sh
+   docker compose --env-file .env.development -f docker-compose.dev.yaml up --build
+   ```
 
-```sh
-cp .env.development.example .env.development
-```
+3. Open **http://localhost:3000**. Migrations run before the app starts; Nginx proxies requests and hot-reload WebSockets to Vite. Dev uses plain HTTP and no database TLS, so no certificates are needed.
+4. Optionally seed the catalog:
 
-Generate your own authentication secret with `openssl rand -hex 32`. Both
-`.env.development` and `.env.production` are ignored by Git and Docker builds.
+   ```sh
+   docker compose --env-file .env.development -f docker-compose.dev.yaml exec app pnpm db:seed
+   ```
 
-Start the stack:
+   Seeding creates sample products and SKUs, then tries to refresh the search index and stats. Re-running replaces products under the reserved `.example` warehouse domains. It refuses to run with `NODE_ENV=production`.
 
-```sh
-docker compose --env-file .env.development -f docker-compose.dev.yaml up --build
-```
-
-Open **http://localhost:3000**. Database migrations run before the app starts.
-Nginx forwards requests and hot-reload WebSockets to Vite. Source files are
-bind-mounted; container dependencies live in their own volume. Development uses
-HTTP and disables database TLS, so certificates are unnecessary.
-
-In another terminal, optionally populate the catalog:
-
-```sh
-docker compose --env-file .env.development -f docker-compose.dev.yaml exec app pnpm db:seed
-```
-
-The seed script creates sample products and SKUs, then attempts to refresh the
-search index and statistics. Re-running it replaces products under the reserved
-`.example` warehouse domains. It refuses to run with `NODE_ENV=production`.
-
-Without a Resend API key, development emails and verification codes appear in
-application logs:
+Without a Resend key, dev emails and verification codes appear in the app logs:
 
 ```sh
 docker compose --env-file .env.development -f docker-compose.dev.yaml logs -f app
 ```
 
-## Technology stack
+**SELinux hosts (Fedora, RHEL):** bind mounts in the Compose files use `:z` / `selinux: z` so containers can read them. Without it you get `Permission denied` on project files.
 
-The versions below describe the repository's current major versions. Exact
-dependency ranges live in [package.json](package.json); resolved versions live in
-[pnpm-lock.yaml](pnpm-lock.yaml). Install with the frozen lockfile for reproducible
-builds.
+## Stack
 
-| Layer                        | Technology                                                   | Role                                                                      |
-| ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| Runtime and packages         | Node.js 26, pnpm 12                                          | Application server, tooling, dependency management.                       |
-| Language                     | TypeScript 7                                                 | Strict types, including unchecked-index access checks.                    |
-| Rendering and routing        | React 19, TanStack Start and Router                          | Server rendering, typed file routes, server functions, navigation.        |
-| Server state                 | TanStack Query 5                                             | Shared query options, hydration, caching, mutations, pagination.          |
-| Forms and local state        | TanStack Form, TanStack Store, Zod 4                         | Form state, cart drawer visibility, input validation.                     |
-| UI                           | Tailwind CSS 4, Base UI, copied shadcn components, Hugeicons | Design tokens, accessible interaction primitives, shared controls, icons. |
-| Authentication               | Better Auth, Better Auth UI                                  | Accounts, sessions, verification, social sign-in, account settings.       |
-| Database                     | PostgreSQL 18, Drizzle ORM/Kit 1.0 RC                        | Relational data, typed queries, versioned SQL migrations.                 |
-| Search and transient storage | Redis 8 with Search and JSON                                 | Catalog index, carts, statistics cache, auth secondary storage.           |
-| Email                        | Resend                                                       | Verification, password-reset, and email-change messages.                  |
-| Build and hosting            | Vite 8, Nitro 3 beta, Docker Compose, Nginx                  | Client/server builds, Node runtime output, service orchestration, HTTPS.  |
-| Quality                      | Biome, Vitest, Knip, TypeScript diagnostics                  | Formatting, lint, unit tests, unused-code and deprecation checks.         |
+Exact ranges are in `package.json`; resolved versions in `pnpm-lock.yaml`. Always install with the frozen lockfile.
 
-Drizzle and Nitro are pinned prereleases. Review their migration notes and run
-the complete validation pipeline when changing versions.
+| Layer         | Technology                                                   |
+| ------------- | ------------------------------------------------------------ |
+| Runtime       | Node.js 26, pnpm 12, TypeScript 7                            |
+| App           | React 19, TanStack Start/Router/Query/Form/Store, Zod 4      |
+| UI            | Tailwind CSS 4, Base UI, copied shadcn components, Hugeicons |
+| Auth          | Better Auth, Better Auth UI                                  |
+| Data          | PostgreSQL 18, Drizzle ORM/Kit 1.0 RC                        |
+| Search/cache  | Redis 8 with Search and JSON                                 |
+| Email         | Resend                                                       |
+| Build/hosting | Vite 8, Nitro 3 beta, Docker Compose, Nginx                  |
+| Quality       | Biome, Vitest, Knip, TypeScript diagnostics                  |
+
+Drizzle and Nitro are pinned prereleases: review migration notes and run the full validation pipeline when changing them.
 
 ## Architecture
 
-The application is a single full-stack service organized by feature. PostgreSQL
-is the source of truth for products and account data. Redis serves derived
-catalog documents and transient state. The browser talks to TanStack Start
-server functions and Better Auth's HTTP endpoints.
+A single full-stack service organized by feature. PostgreSQL is the source of truth; Redis holds derived catalog documents and transient state.
 
 ```mermaid
 flowchart LR
-    Browser[Browser] --> Nginx[Nginx]
-    Nginx --> Assets[Built static assets]
+    Browser --> Nginx
+    Nginx --> Assets[Static assets]
     Nginx --> App[TanStack Start / Nitro]
-    App --> Routes[Route loaders and server functions]
-    App --> Auth[Better Auth endpoints]
-    Routes --> PG[(PostgreSQL)]
-    Routes --> Redis[(Redis Search / JSON / hashes)]
-    Auth --> PG
-    Auth --> Redis
-    Auth --> Email[Resend]
-    Sync[Catalog synchronization] --> PG
+    App --> PG[(PostgreSQL)]
+    App --> Redis[(Redis Search / JSON)]
+    App --> Email[Resend]
+    Sync[search:sync] --> PG
     Sync --> Redis
 ```
 
-In development, Nginx forwards asset requests and hot-reload connections to Vite.
-In production, it serves built assets directly and proxies application requests
-to the Node.js process. The app runs as the non-root `node` user in its runtime
-image. Database migrations run in a separate one-shot service before the app
-starts.
+In dev, Nginx forwards everything to Vite. In production it serves built assets directly and proxies the rest to Node. The runtime image runs as the non-root `node` user; migrations run in a separate one-shot service.
 
-### Application boundaries
+### Conventions
 
-| Location or convention            | Responsibility                                                                        |
-| --------------------------------- | ------------------------------------------------------------------------------------- |
-| `src/routes/`                     | Route parameters, validated URL search, loaders, page metadata, HTTP endpoints.       |
-| `src/features/<feature>/`         | Business logic, feature components, query options, schemas, and mutations.            |
-| `*.functions.ts`                  | Browser-callable server functions: validate untrusted input and enforce access.       |
-| `*.server.ts`                     | Server implementations that access databases, Redis, email, or private configuration. |
-| `*.queries.ts` / `*.mutations.ts` | Cache keys, query options, cancellation, and mutation coordination where applicable.  |
-| `src/components/`                 | Shared layout, forms, authentication views, home sections, and UI primitives.         |
-| `src/data/` / `src/i18n/`         | Store configuration, catalog taxonomy, shared types, and localized messages.          |
+| Location                          | Responsibility                                                              |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| `src/routes/`                     | Route params, validated search, loaders, metadata, HTTP endpoints.          |
+| `src/features/<feature>/`         | Business logic, components, query options, schemas, mutations.              |
+| `*.functions.ts`                  | Browser-callable server functions: validate input, enforce access.          |
+| `*.server.ts`                     | Server-only code (DB, Redis, email, secrets). Still validate and authorize. |
+| `*.queries.ts` / `*.mutations.ts` | Cache keys, query options, mutation coordination.                           |
+| `src/components/`                 | Shared layout, forms, auth views, home sections, UI primitives.             |
+| `src/data/`, `src/i18n/`          | Site config, catalog taxonomy, types, messages.                             |
 
-Route loaders participate in both server rendering and client navigation. Keep
-private operations behind server functions or server-route handlers; a loader
-is not itself a server-only boundary. A `.server.ts` filename communicates intent
-but does not replace input validation or authorization.
+Route loaders run on both server and client, so they are **not** a server-only boundary. Keep private work behind server functions.
 
-### Rendering and request lifecycle
+### Request lifecycle
 
-1. [`src/router.tsx`](src/router.tsx) creates a router and its QueryClient. Server
-   requests do not share a module-level QueryClient containing user data.
-2. The [root route](src/routes/__root.tsx) resolves the locale from a cookie and
-   loads the public configuration needed by the browser.
-3. Feature loaders populate Query's cache through shared query options. For
-   example, a catalog loader loads its first results page and facet counts.
-4. Router/Query SSR integration transfers the loaded state to the browser, where
-   components consume the same query keys.
-5. Client navigation validates route/search input, loads the next data, and
-   restores scroll position. Links use intent preloading.
-6. Mutations call server functions, then update or invalidate the relevant
-   cached data. Shared error, pending, and not-found components handle route
-   feedback.
-
-`Providers` supplies locale, messages, Better Auth UI configuration, and toast
-feedback. `SiteLayout` supplies the announcement bar, header, main landmark,
-footer, skip link, and cart drawer.
+1. `src/router.tsx` creates a router and a per-request QueryClient (no shared module-level client holding user data).
+2. The root route resolves locale from a cookie and loads public config.
+3. Loaders fill Query's cache via shared query options; SSR hydrates it in the browser.
+4. Navigation validates search input, preloads on intent, and restores scroll.
+5. Mutations call server functions, then update or invalidate affected queries.
 
 ### State ownership
 
-| State                                                                 | Owner                           | Reason                                                               |
-| --------------------------------------------------------------------- | ------------------------------- | -------------------------------------------------------------------- |
-| Catalog search, filters, sort                                         | Validated URL search parameters | Links can be shared and navigation can restore selections.           |
-| Product color and SKU choice                                          | URL search parameters           | A selected variant can be linked directly.                           |
-| Products, facets, statistics, cart, addresses                         | TanStack Query                  | Server data has one cache and an explicit refresh path.              |
-| Form values, validation, submission                                   | TanStack Form                   | Field and submission feedback stay with the form.                    |
-| Search text before its debounce commits, slider drafts, popover state | Component state                 | Temporary interaction state does not need global persistence.        |
-| Cart drawer open/closed                                               | TanStack Store                  | Navigation and mutation callbacks can open the same drawer.          |
-| Locale and visitor cart identity                                      | HTTP-only cookies               | The server can resolve them on initial rendering and later requests. |
+| State                                     | Owner                |
+| ----------------------------------------- | -------------------- |
+| Catalog search, filters, sort, SKU choice | Validated URL search |
+| Products, facets, stats, cart, addresses  | TanStack Query       |
+| Form values and validation                | TanStack Form        |
+| Debounce text, slider drafts, popovers    | Component state      |
+| Cart drawer open/closed                   | TanStack Store       |
+| Locale and visitor cart identity          | HTTP-only cookies    |
 
 ### Routes
 
-| URL                         | Purpose                                                                       |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| `/`                         | Hero, featured deals, department tiles, shopping explanation, closing CTA.    |
-| `/deals`                    | Searchable and filterable discounted products.                                |
-| `/$department/{-$category}` | Department listing with an optional category, such as `/women/shoes`.         |
-| `/product/$slug`            | Product details and SKU selection.                                            |
-| `/auth/$path`               | Supported Better Auth UI views, including sign-in and verification.           |
-| `/settings/$path`           | Account and security settings, including saved addresses in account settings. |
-| `/checkout`                 | Coming-soon page, excluded from search indexing.                              |
-| `/api/auth/*`               | Better Auth's HTTP handler.                                                   |
-| `/api/health`               | Process liveness response; does not test PostgreSQL or Redis.                 |
-| `/sitemap.xml`              | Public catalog URLs, including products with available SKUs.                  |
+| URL                         | Purpose                                                 |
+| --------------------------- | ------------------------------------------------------- |
+| `/`                         | Hero, featured deals, department tiles, closing CTA.    |
+| `/deals`                    | Searchable, filterable discounted products.             |
+| `/$department/{-$category}` | Department listing, optional category (`/women/shoes`). |
+| `/product/$slug`            | Product details and SKU selection.                      |
+| `/auth/$path`               | Better Auth UI views (sign-in, verification, ...).      |
+| `/settings/$path`           | Account and security settings, saved addresses.         |
+| `/checkout`                 | Coming-soon page, not indexed.                          |
+| `/api/auth/*`               | Better Auth handler.                                    |
+| `/api/health`               | Liveness only; does not check PostgreSQL or Redis.      |
+| `/sitemap.xml`              | Public catalog URLs with available SKUs.                |
 
-TanStack generates [`src/routeTree.gen.ts`](src/routeTree.gen.ts). Add or change
-route source files and let the Vite integration regenerate the tree; do not edit
-the generated file directly.
+`src/routeTree.gen.ts` is generated by the Vite integration. Don't edit it.
 
-## Features and data flows
+## Features
 
 ### Catalog and search
 
-[`src/data/catalog.ts`](src/data/catalog.ts) defines the shared department and
-category taxonomy. Products hold identity and descriptive information; SKUs
-hold color, size, image, price, original price, and stock availability. Monetary
-values use integer minor units, such as tetri, with an explicit currency code.
+`src/data/catalog.ts` defines the department/category taxonomy. Products hold identity and descriptions; SKUs hold color, size, image, price, original price, and stock. Money is stored as integer minor units (tetri) plus a currency code.
 
-PostgreSQL products and in-stock SKUs are transformed into Redis JSON search
-documents. Department listings show a product's cheapest available SKU; the
-Deals view shows its deepest-discounted SKU. Search supports text, brand, size,
-color, price bounds, sale status, and sorting. Result pages contain up to 48
-products, with automatic loading and a manual load-more/retry control.
-
-The index name includes a hash of its field schema. Initial catalog access
-creates the index when needed and synchronizes products if that index is new or
-empty. This initialization is memoized within the application process; it is
-not a scheduled import or continuous replication process. Run `pnpm search:sync`
-after catalog imports or updates. Synchronization also removes indexed products
-that no longer exist in the source catalog.
-
-Catalog results and facets have a one-minute client cache freshness window.
-Statistics have a five-minute client freshness window and a one-day Redis cache;
-the statistics cache falls back to PostgreSQL when Redis is empty or unavailable.
-Catalog search itself requires Redis Search and JSON and has no PostgreSQL search
-fallback.
-
-`search:sync` refreshes the search index only. An importer must also call
-`refreshStats()` from
-[`stats.server.ts`](src/features/stats/stats.server.ts) when it needs statistics
-updated immediately. The displayed `site.priceCheckTime` is copy; this repository
-does not implement the external warehouse importer or its daily scheduler.
+In-stock SKUs are transformed into Redis JSON documents. Department listings show each product's cheapest SKU; Deals shows the deepest-discounted one. Search supports text, brand, size, color, price range, sale status, and sorting, in pages of up to 48 with automatic and manual load-more.
+- The index name includes a hash of its schema. First catalog access creates the index and syncs if it is new or empty (memoized per process). This is **not** a scheduled import.
+- Run `pnpm search:sync` after catalog changes; it also removes indexed products missing from PostgreSQL.
+- `search:sync` does not refresh stats. Importers must also call `refreshStats()` from `src/features/stats/stats.server.ts`.
+- Client freshness: 1 min for results/facets, 5 min for stats. Stats also have a 1-day Redis cache that falls back to PostgreSQL.
+- Search needs Redis Search and JSON and has no PostgreSQL fallback.
+- The warehouse importer and scheduler are not in this repo; the storefront shows actual recorded price-check times.
 
 ### Cart
 
-The cart belongs to a visitor's `cartId` cookie, independently of account sign-in.
-Redis stores SKU IDs and quantities under `cart:<id>` with a 30-day expiry.
-Reads obtain current prices and availability from PostgreSQL instead of trusting
-amounts supplied by the browser; unavailable SKUs are omitted from the response.
-Cart identity is browser-specific and is not merged into an account on sign-in.
-
-The application limits a cart to 50 distinct lines, 10 units per SKU, and one
-currency. Client writes share a TanStack Query mutation scope, apply confirmed
-quantity changes, and refresh after the last queued write. Controls expose pending
-state while an update is in progress. This serializes writes within one client;
-it does not provide cross-client transactional enforcement of server limits.
+- The cart belongs to a visitor's `cartId` cookie, not an account, and is not merged on sign-in.
+- Redis stores SKU IDs and quantities at `cart:<id>` with a 30-day expiry. Prices and availability are re-read from PostgreSQL on every fetch; unavailable SKUs are omitted.
+- Limits: 50 lines, 10 units per SKU, one currency.
+- Client writes share a mutation scope (serialized per client) and refresh after the last queued write.
+- Server checks and the Redis write are separate operations, so concurrent clients can race (see limitations).
 
 ### Authentication and addresses
 
-Better Auth owns authentication under `/api/auth`. Email/password accounts require
-email verification; email codes support verification and password-reset flows.
-Google and Facebook sign-in appear only when the corresponding credentials are
-configured. Resend delivers email in production. Development without Resend logs
-messages and codes instead.
+- Better Auth lives under `/api/auth`, using PostgreSQL (Drizzle relations-v2 adapter) plus Redis secondary storage and rate limiting.
+- Email/password accounts require verification; email codes cover verification and password reset. Codes are stored hashed; resets revoke sessions.
+- Google and Facebook appear only when both credentials are configured.
+- Resend sends email in production; dev without a key logs it instead.
+- Address functions resolve the user from request headers and scope every operation to that owner. Max 10 addresses; mutations lock the owner row, and a partial unique index allows one primary. Removing the primary promotes the oldest remaining address.
 
-Better Auth uses PostgreSQL through the Drizzle relations-v2 adapter, plus Redis
-secondary storage and rate limiting. Stored verification codes are hashed, and
-password resets revoke sessions. The copied auth components in
-`src/components/auth/` use the shared Better Auth UI data layer and the app's
-QueryClient.
+### Persistence
 
-Address server functions resolve the signed-in user from request headers and
-scope every operation to that owner. An account can save up to 10 addresses.
-Address mutations take a PostgreSQL row lock on the owner, and a partial unique
-index enforces at most one primary address. Removing a primary address promotes
-the oldest remaining address. Unexpected storage errors are logged and replaced
-with a generic message for the shopper.
+| Storage                           | Data                                                       |
+| --------------------------------- | ---------------------------------------------------------- |
+| PostgreSQL `product`, `skus`      | Catalog, prices, images, availability.                     |
+| PostgreSQL auth tables            | Users, accounts, sessions, verification.                   |
+| PostgreSQL `address`              | Owned addresses, primary selection.                        |
+| PostgreSQL `orders`, `order_item` | Schema only; nothing writes orders yet.                    |
+| Redis                             | Search docs/indexes, carts, stats, auth secondary storage. |
 
-### Persistence model
+Schema: `src/db/schema.ts`, `src/db/auth-schema.ts`; migrations in `drizzle/`. Redis is not fully disposable: catalog documents rebuild, but wiping it also discards carts and auth secondary state.
 
-| Storage                              | Data                                                                                       |
-| ------------------------------------ | ------------------------------------------------------------------------------------------ |
-| PostgreSQL `product` and `skus`      | Source catalog, variant prices, images, availability, and timestamps.                      |
-| PostgreSQL auth tables               | Users, accounts, sessions, and verification schema managed through Better Auth.            |
-| PostgreSQL `address`                 | User-owned delivery addresses and primary-address selection.                               |
-| PostgreSQL `orders` and `order_item` | Schema for future ordering; no completed checkout workflow currently writes orders.        |
-| Redis                                | Derived catalog JSON/indexes, visitor cart hashes, statistics, and auth secondary storage. |
+## UI and localization
 
-PostgreSQL schema lives in [`src/db/schema.ts`](src/db/schema.ts) and
-[`src/db/auth-schema.ts`](src/db/auth-schema.ts). Versioned SQL and snapshots live
-in [`drizzle/`](drizzle/). Redis is not wholly disposable: catalog documents can
-be rebuilt, but deleting its data also discards carts and auth secondary state.
+**Design.** `src/styles.css` owns color, type, radius, and motion tokens: charcoal surfaces, yellow accent `#ffc800`, light content areas, and a separate `link` token for readable links. No theme switch. Fonts (Figtree, Archivo, Noto Sans Georgian) are bundled via Fontsource.
 
-## UI and design system
+| Utility           | Use                                  |
+| ----------------- | ------------------------------------ |
+| `type-display`    | Large promotional headlines.         |
+| `type-title`      | Page and section headings.           |
+| `type-card-title` | Product and card titles.             |
+| `type-body`       | Descriptive copy.                    |
+| `type-caption`    | Small supporting text.               |
+| `type-eyebrow`    | Short category/brand/section labels. |
+| `type-num`        | Prices, counts, numbers.             |
 
-### Visual language
+**Composition.** Use `Container`, `Section` (`src/components/layout/container.tsx`) and `SectionHeader` for layout. Reuse primitives in `src/components/ui/`; combine classes with `cn()`, define variants with class-variance-authority, and use Hugeicons. Product cards have one primary link; images reserve space and show a translated fallback.
 
-[`src/styles.css`](src/styles.css) owns the semantic color, typography, radius,
-and motion tokens. The storefront uses charcoal surfaces, a yellow brand accent
-(`#ffc800`), and light content areas. Yellow is used for prominent actions and
-promotional accents; ordinary links use a separate `link` token to stay readable
-on light backgrounds. Dark tokens support dark sections; there is no user-facing
-theme switch.
+**Responsive and accessible.** Check both languages from 320px up; Georgian strings run long, so let flex/grid children shrink and avoid fixed widths. The shell has a skip link and main landmark; keep labels, visible focus, pending/disabled states, status announcements, and reduced-motion support intact. Test loading, empty, error, and success states.
 
-Figtree is the main interface font, Archivo supplies the display face, and Noto
-Sans Georgian supports Georgian text. Fonts are bundled locally through
-Fontsource. Use the shared typography utilities instead of inventing a new scale
-for each component:
+**Localization.** `ka` (default) and `en`. The server reads the HTTP-only `2o-locale` cookie before rendering; the language selector saves via a server function and invalidates route data.
+- `src/i18n/storefront-ka.ts` maps English source strings to Georgian. Use `useTranslation()` in components and `translate()` (explicit locale) elsewhere.
+- `en.ts` / `ka.ts` hold typed messages for forms and custom auth flows; `auth-ka.ts` holds Better Auth UI's Georgian copy.
+- Prices format by locale and currency; price-check times use `Asia/Tbilisi`.
+- Preserve `{{placeholder}}` names. Missing translations fall back to the source string; product names are not translated. Keep locale in providers, never module-level globals.
 
-| Utility           | Intended use                              |
-| ----------------- | ----------------------------------------- |
-| `type-display`    | Large promotional headlines.              |
-| `type-title`      | Page and section headings.                |
-| `type-card-title` | Product and card titles.                  |
-| `type-body`       | Descriptive copy.                         |
-| `type-caption`    | Small supporting information.             |
-| `type-eyebrow`    | Short category, brand, or section labels. |
-| `type-num`        | Prices, counts, and other numeric values. |
+## Development
 
-### Layout and component composition
-
-[`Container` and `Section`](src/components/layout/container.tsx) provide the
-shared content width, responsive gutters, and vertical spacing. Reuse
-[`SectionHeader`](src/components/layout/section-header.tsx) for section headings
-and actions. Shared `brand-surface` styles connect the hero, closing banner, and
-footer visually.
-
-UI primitives live in `src/components/ui/` and are composed from Base UI and copied
-shadcn components. Reuse these for buttons, dialogs, sheets, selects, fields,
-and feedback. `cn()` combines conditional classes with Tailwind conflict
-resolution; component variants are defined with class-variance-authority.
-Use Hugeicons consistently for icons.
-
-Product cards have one primary link rather than several duplicate navigation
-targets. Product images reserve space, show a translated fallback for missing or
-broken images, and support explicit loading priority. Catalog grids use two,
-three, or four columns as space permits. The home deals row is a horizontal
-carousel; product details keep the image visible beside options on desktop.
-
-### Responsive and accessible interaction
-
-Check both languages from a 320px viewport through desktop sizes. Georgian
-labels can be much longer than their English equivalents. Allow flex/grid
-children to shrink, wrap long calls to action, and avoid fixed widths that make
-filters or cart content overflow.
-
-The shared shell includes a skip link and main landmark. Controls use labels,
-visible keyboard focus, pending/disabled states, and status announcements where
-appropriate. Base UI supplies modal focus behavior and keyboard interaction.
-The stylesheet respects reduced-motion preferences. Preserve these behaviors
-when customizing a primitive, and check loading, empty, failure, and success
-states alongside the populated layout.
-
-## Localization
-
-`ka` and `en` are supported; `ka` is the default. The server reads the HTTP-only
-`2o-locale` cookie before rendering, and the language selector saves changes
-through a server function before invalidating route data. The document's `lang`
-attribute and providers use the same resolved locale.
-- [`storefront-ka.ts`](src/i18n/storefront-ka.ts) maps English storefront source
-  strings to Georgian. `useTranslation()` formats component copy; `translate()`
-  accepts an explicit locale for route metadata and other non-hook callers.
-- [`en.ts`](src/i18n/en.ts) and [`ka.ts`](src/i18n/ka.ts) provide typed messages for
-  shared forms and custom auth flows through `MessagesProvider`.
-- [`auth-ka.ts`](src/i18n/auth-ka.ts) supplies Better Auth UI's Georgian copy.
-- Price helpers format minor units using the selected locale and currency.
-  Price-check timestamps use the store's `Asia/Tbilisi` time zone.
-
-Preserve `{{placeholder}}` names across translations. Missing storefront
-translations fall back to the source string, and dynamic product names are not
-automatically translated. Keep locale state in providers rather than mutable
-module-level globals so concurrent server requests do not share a language.
-
-## Everyday development
-
-Always select a Compose file explicitly; there is no default Compose file.
+There is no default Compose file; always pass `-f`.
 
 ```sh
-# Check service status
+# Status
 docker compose --env-file .env.development -f docker-compose.dev.yaml ps
-
-# Run the project's checks inside the app container
+# Run checks in the app container
 docker compose --env-file .env.development -f docker-compose.dev.yaml exec app pnpm verify
-
 # Rebuild after dependency, Dockerfile, or migration changes
 docker compose --env-file .env.development -f docker-compose.dev.yaml up --build
-
-# Stop the stack while retaining database and dependency volumes
+# Stop, keeping volumes
 docker compose --env-file .env.development -f docker-compose.dev.yaml down
 ```
 
-The development project is named `2o-dev`; production uses `2o`. Their named
-volumes are separate. Adding `--volumes` to `down` deletes that stack's stored data.
+Dev project is `2o-dev`, production is `2o`; their volumes are separate. `down --volumes` deletes that stack's data.
 
-For host-based development, use Node.js 26 and pnpm 12.14.0 (the version pinned in
-`package.json`), run `pnpm install --frozen-lockfile`, and provide reachable
-PostgreSQL and Redis instances before running `pnpm db:migrate` and `pnpm dev`.
-The Compose files do **not** publish database or Redis ports to the host; use
-container commands above when using those services.
+Host development: Node.js 26, pnpm 12.14.0, `pnpm install --frozen-lockfile`, plus your own reachable PostgreSQL and Redis before `pnpm db:migrate` and `pnpm dev`. Compose does **not** publish DB or Redis ports.
 
 ## Configuration
 
-Development loads `.env.development`; production loads `.env.production`.
-Pass `--env-file` to Compose so database credential interpolation uses the same
-file as the application. Vite selects these files automatically for dev/build.
-Database and maintenance package commands use Node’s built-in `--env-file-if-exists`
-flag and default to development; no loader imports are needed. Use
-`NODE_ENV=production pnpm db:migrate` (or another maintenance command) to select
-production on the host. Existing process environment variables take precedence.
-Settings are validated in
-[`src/server/env.server.ts`](src/server/env.server.ts) and
-[`src/db/connection.ts`](src/db/connection.ts).
+Dev loads `.env.development`, production `.env.production`. These are real, untracked files; get values separately on a new machine. Pass `--env-file` to Compose so credential interpolation matches the app. Package DB/maintenance commands use Node's `--env-file-if-exists`, default to development, and honor existing process env; use `NODE_ENV=production pnpm db:migrate` to target production. Validation lives in `src/server/env.server.ts` and `src/db/connection.ts`.
 
-| Variable                                       | Purpose                                                                                                             |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `DB_USER`, `DB_PASSWORD`, `DB_NAME`            | Required by both Compose stacks; used to initialize PostgreSQL and connect the app.                                 |
-| `DB_HOST`, `DB_PORT`                           | Default to `localhost:5432` outside Docker. Compose sets `db:5432`.                                                 |
-| `DB_SSL`                                       | Defaults to `false`; Compose sets `false` in development and `true` in production.                                  |
-| `DB_SSL_SERVERNAME`                            | Required by production Compose; hostname verified against the database TLS certificate.                             |
-| `REDIS_HOST`, `REDIS_PORT`                     | Default to `localhost:6379` outside Docker. Compose sets `redis:6379`.                                              |
-| `BETTER_AUTH_SECRET`                           | Required authentication secret, at least 32 characters.                                                             |
-| `BETTER_AUTH_URL`                              | Authentication origin. Development Compose sets `http://localhost:3000`; set the public HTTPS origin in production. |
-| `SITE_URL`                                     | Public origin for the sitemap; falls back to `BETTER_AUTH_URL`. Development Compose sets `http://localhost:3000`.   |
-| `RESEND_API_KEY`                               | Required in production. When absent in development, email content is logged.                                        |
-| `EMAIL_FROM`                                   | Email sender; defaults to `2o <onboarding@resend.dev>`. Configure your sender for production.                       |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`     | Optional Google sign-in; set both or neither.                                                                       |
-| `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET` | Optional Facebook sign-in; set both or neither.                                                                     |
-| `CHAT_EMBED_URL`                               | Optional Tawk.to embed URL. The widget is hidden when unset.                                                        |
+| Variable                                       | Purpose                                                                               |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `DB_USER`, `DB_PASSWORD`, `DB_NAME`            | Required by both stacks; initialize PostgreSQL and connect the app.                   |
+| `DB_HOST`, `DB_PORT`                           | Default `localhost:5432`; Compose sets `db:5432`.                                     |
+| `DB_SSL`                                       | Default `false`; Compose sets `false` in dev, `true` in production.                   |
+| `DB_SSL_SERVERNAME`                            | Required in production; hostname verified against the DB certificate.                 |
+| `REDIS_HOST`, `REDIS_PORT`                     | Default `localhost:6379`; Compose sets `redis:6379`.                                  |
+| `BETTER_AUTH_SECRET`                           | Required, at least 32 characters.                                                     |
+| `BETTER_AUTH_URL`                              | Auth origin. Dev Compose: `http://localhost:3000`; production: your public HTTPS URL. |
+| `SITE_URL`                                     | Public origin for the sitemap; falls back to `BETTER_AUTH_URL`.                       |
+| `RESEND_API_KEY`                               | Required in production; if absent in dev, emails are logged.                          |
+| `EMAIL_FROM`                                   | Sender; defaults to `2o <onboarding@resend.dev>`. Set your own for production.        |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`     | Optional Google sign-in; set both or neither.                                         |
+| `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET` | Optional Facebook sign-in; set both or neither.                                       |
+| `CHAT_EMBED_URL`                               | Optional Tawk.to embed; widget hidden when unset.                                     |
 
-Compose's explicit environment settings override the corresponding environment-file values.
-Changing PostgreSQL initialization credentials does not update an existing
-database volume's users or passwords.
+Compose's explicit `environment` values override env-file values. Changing PostgreSQL credentials does not update an existing volume's users or passwords.
 
 ## Commands
 
-Run these with `pnpm` on the host, or prefix them with
-`docker compose --env-file .env.development -f docker-compose.dev.yaml exec app pnpm` inside the development stack.
+Run with `pnpm` on the host, or prefix with `docker compose --env-file .env.development -f docker-compose.dev.yaml exec app pnpm`.
 
-| Command                                        | Purpose                                                                                    |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `dev`                                          | Start Vite on port 3000.                                                                   |
-| `build`                                        | Build the production application into `.output`.                                           |
-| `preview`                                      | Preview the production build.                                                              |
-| `check` / `fix`                                | Check formatting and lint rules / apply automatic fixes.                                   |
-| `check:deprecations`                           | Reject compiler-marked deprecated APIs in project code.                                    |
-| `typecheck`                                    | Check TypeScript types.                                                                    |
-| `test`                                         | Run Vitest tests.                                                                          |
-| `verify`                                       | Run Biome CI checks, TypeScript, and tests.                                                |
-| `knip`                                         | Find unused files, exports, and dependencies.                                              |
-| `db:generate`                                  | Generate a migration from schema changes.                                                  |
-| `db:migrate`                                   | Apply pending migrations.                                                                  |
-| `db:push`                                      | Apply the schema directly to a database, without a migration file.                         |
-| `db:studio`                                    | Open Drizzle Studio.                                                                       |
-| `db:seed`                                      | Populate sample development catalog data.                                                  |
-| `search:sync`                                  | Rebuild the Redis catalog index from PostgreSQL after catalog imports or updates.          |
-| `search:check`                                 | Check Redis Search Sit Down with the REAL Donnie Brasco (Joe Pistone) and Michael Franzese |
-| and JSON support using a temporary test index. |
+| Command              | Purpose                                                           |
+| -------------------- | ----------------------------------------------------------------- |
+| `dev`                | Start Vite on port 3000.                                          |
+| `build` / `preview`  | Build into `.output` / preview the build.                         |
+| `check` / `fix`      | Check formatting and lint / apply automatic fixes.                |
+| `check:deprecations` | Reject compiler-marked deprecated APIs in project code.           |
+| `typecheck`          | Check TypeScript types.                                           |
+| `test`               | Run Vitest.                                                       |
+| `verify`             | Biome CI checks, TypeScript, and tests.                           |
+| `knip`               | Find unused files, exports, and dependencies.                     |
+| `db:generate`        | Generate a migration from schema changes.                         |
+| `db:migrate`         | Apply pending migrations.                                         |
+| `db:push`            | Apply the schema directly, without a migration file.              |
+| `db:studio`          | Open Drizzle Studio.                                              |
+| `db:seed`            | Populate sample development catalog data.                         |
+| `search:sync`        | Rebuild the Redis catalog index from PostgreSQL.                  |
+| `search:check`       | Check Redis Search and JSON support using a temporary test index. |
 
-Redis must include the Search and JSON modules; the Compose files use
-`redis:8.10.2-alpine`. CI runs `verify`, `check:deprecations`, `knip`, `build`, and
-`search:check` with a Redis service. Unit tests use a separate Vitest configuration
-so application RPC/build plugins do not interfere with mocked server boundaries.
-See [the codebase review](docs/codebase-review.md) for architecture guidance,
-validation scope, and remaining production work.
+Redis needs the Search and JSON modules; Compose uses `redis:8.10.2-alpine`. See [docs/codebase-review.md](docs/codebase-review.md) for architecture guidance and remaining production work.
 
 ## Production
 
-The production stack builds the application, runs migrations, and serves it
-through Nginx. Port 80 redirects to HTTPS on port 443. Nginx serves built static
-assets directly and proxies application requests to the Node.js server.
+The production stack builds the app, runs migrations, and serves it through Nginx. Port 80 redirects to HTTPS on 443; Nginx serves built assets directly and proxies the rest to Node.
 
-Before starting:
-1. Copy `.env.production.example` to `.env.production`, then set database
-   credentials, a distinct `BETTER_AUTH_SECRET`, `RESEND_API_KEY`, and `EMAIL_FROM`.
+**Before starting**
+1. Configure `.env.production`: DB credentials, a distinct `BETTER_AUTH_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`.
 2. Set `BETTER_AUTH_URL` and `SITE_URL` to your public HTTPS origin.
-3. Provide `certs/fullchain.pem` and `certs/privkey.pem`. The same files are mounted
-   into Nginx and PostgreSQL; ensure their ownership and permissions allow each
-   service to use them and satisfy PostgreSQL's private-key requirements.
-4. Set `DB_SSL_SERVERNAME` to a hostname covered by that certificate. Database
-   connections validate both certificate trust and hostname.
+3. Provide `certs/fullchain.pem` and `certs/privkey.pem` (real files, not symlinks). They are mounted into both Nginx and PostgreSQL.
+4. Set `DB_SSL_SERVERNAME` to a hostname the certificate covers. DB connections verify both trust and hostname.
+
+**Certificate permissions.** PostgreSQL refuses a private key that is group/world-accessible or not owned by its user. You can fix this on the host without copying the key:
 
 ```sh
-# Validate the Compose configuration without printing resolved secrets
+sudo chown root:70 certs/privkey.pem   # uid/gid 70 = postgres in the Alpine image
+sudo chmod 640 certs/privkey.pem       # root-owned keys may be 0640
+chmod 644 certs/fullchain.pem
+```
+
+Alternative: `chown 70:70` with `chmod 600`. Nginx's master process runs as root and reads either. If certbot renews the files, re-apply ownership in a deploy hook. With rootless Docker/Podman, uid mapping differs; copy the key inside the container instead.
+
+**Startup order**
+
+```mermaid
+flowchart LR
+    DB[PostgreSQL healthy] --> Migrate[Migrations succeed]
+    Migrate --> App
+    Redis[Redis healthy] --> App[App healthy]
+    App --> Web[Nginx]
+```
+
+These are startup gates only; the liveness endpoint does not recheck the database afterwards.
+
+```sh
+# Validate config without printing secrets
 docker compose --env-file .env.production -f docker-compose.prod.yaml config --quiet
-
-# Build and start, or deploy updated application code
+# Build and start / deploy updated code
 docker compose --env-file .env.production -f docker-compose.prod.yaml up -d --build
-
-# Inspect startup and migration results
+# Inspect status and logs
 docker compose --env-file .env.production -f docker-compose.prod.yaml ps -a
 docker compose --env-file .env.production -f docker-compose.prod.yaml logs --tail=100 migrate app web
-
-# Stop while retaining data
+# Stop, keeping data
 docker compose --env-file .env.production -f docker-compose.prod.yaml down
 ```
 
-The production runtime image contains only the built application. Source-based
-maintenance scripts can run through the `migrate` service, which retains the
-source and tooling, for example:
+The runtime image contains only the built app. Run source-based scripts through the `migrate` service, which keeps the source and tooling:
 
 ```sh
 docker compose --env-file .env.production -f docker-compose.prod.yaml run --rm migrate pnpm search:sync
@@ -493,157 +317,89 @@ docker compose --env-file .env.production -f docker-compose.prod.yaml run --rm m
 
 ## Repository layout
 
-| Path                                    | Contents                                                          |
-| --------------------------------------- | ----------------------------------------------------------------- |
-| `src/routes/`                           | File-based routes, page loaders, and server endpoints.            |
-| `src/features/`                         | Catalog, search, cart, authentication, addresses, and statistics. |
-| `src/components/`                       | Shared UI, forms, layout, and homepage components.                |
-| `src/i18n/`                             | Georgian and English messages, locale state, and persistence.     |
-| `src/data/`                             | Shared catalog taxonomy, types, sizes, and site information.      |
-| `src/db/` and `drizzle/`                | Database connection, schema, and migration history.               |
-| `src/server/`                           | Environment validation, Redis client, and cache helpers.          |
-| `scripts/`                              | Catalog seeding, search synchronization, and integration checks.  |
-| `public/`                               | Static assets.                                                    |
-| `docker-compose.*.yaml`, `nginx.*.conf` | Environment-specific service and proxy configuration.             |
-| `vite.config.ts`, `vitest.config.ts`    | Separate application build and unit-test configurations.          |
-| `.github/workflows/ci.yml`              | Automated quality checks and Redis Search integration check.      |
-| `docs/`                                 | Review findings and implementation notes.                         |
+| Path                                    | Contents                                       |
+| --------------------------------------- | ---------------------------------------------- |
+| `src/routes/`                           | File-based routes, loaders, server endpoints.  |
+| `src/features/`                         | Catalog, search, cart, auth, addresses, stats. |
+| `src/components/`                       | Shared UI, forms, layout, homepage.            |
+| `src/i18n/`                             | Messages, locale state, persistence.           |
+| `src/data/`                             | Taxonomy, types, sizes, site info.             |
+| `src/db/`, `drizzle/`                   | Connection, schema, migration history.         |
+| `src/server/`                           | Env validation, Redis client, cache helpers.   |
+| `scripts/`                              | Seeding, search sync, integration checks.      |
+| `docker-compose.*.yaml`, `nginx.*.conf` | Per-environment service and proxy config.      |
+| `vite.config.ts`, `vitest.config.ts`    | Separate app build and unit-test configs.      |
+| `.github/workflows/ci.yml`              | CI checks and Redis Search integration check.  |
+| `docs/`                                 | Review findings and notes.                     |
 
-## Testing and quality checks
+## Testing
 
-Run the same checks as CI before proposing a substantial change:
+Run the CI checks before proposing a substantial change:
 
 ```sh
-pnpm verify
-pnpm check:deprecations
-pnpm knip
-pnpm build
-pnpm search:check
+pnpm verify && pnpm check:deprecations && pnpm knip && pnpm build && pnpm search:check
 ```
 
-`verify` runs Biome, TypeScript, and Vitest. It does not include the other four
-commands. `search:check` needs a reachable Redis instance with Search and JSON;
-use the development container command prefix when working with Compose.
+`verify` covers Biome, TypeScript, and Vitest only. `search:check` needs Redis with Search and JSON (use the container prefix under Compose).
 
-Tests are colocated with source as `*.test.ts` or `*.test.tsx`. They cover areas
-including catalog query construction, filters, SKU selection, cart calculations
-and mutation ordering, locale persistence, form behavior, and cache/connection
-failure handling. Unit tests use a separate Node-based Vitest configuration so
-Start/Nitro RPC transforms do not bypass mocked server boundaries.
+Tests live beside source as `*.test.ts(x)`, run under a separate Node-based Vitest config so Start/Nitro RPC transforms don't bypass mocked server boundaries. `check:deprecations` reads TypeScript's suggestion diagnostics; it is not a vulnerability scanner and depends on the installed TypeScript version.
 
-`check:deprecations` reads suggestion diagnostics from the installed TypeScript
-compiler. It catches compiler-marked deprecated APIs in project code, which a
-normal typecheck does not reject. It is not a dependency vulnerability scanner
-or a guarantee that every behavioral deprecation can be detected. The script
-uses TypeScript's version-specific API and should be checked when upgrading
-TypeScript.
+CI runs on pushes to `main` and pull requests with a Redis service. It does not provision PostgreSQL or run browser end-to-end tests. For UI work, also check both languages at mobile/tablet/desktop widths, keyboard use, dialog dismissal, and loading/empty/error states. Verify auth, authorization, persistence, and concurrency against real services.
 
-CI runs on pushes to `main` and pull requests, installs the frozen lockfile, and
-executes the commands above with a Redis service. It does not currently provision
-PostgreSQL or run a complete browser end-to-end suite.
-
-For UI work, also check Georgian and English at mobile, tablet, and desktop
-widths; keyboard navigation and dialog dismissal; and loading, empty, unavailable,
-and error states. Use real service-backed checks for authentication, authorization,
-database persistence, and concurrent HTTP requests. A component preview with
-sample data cannot verify those behaviors.
-
-## Extending the application
+## Extending
 
 ### Add a feature or route
 
-1. Place feature-specific logic under `src/features/<feature>/`; keep reusable
-   primitives and layout in `src/components/`.
-2. Define shared input schemas and types. Validate all untrusted server-function
-   input with `.validator()` and enforce ownership inside the server handler.
-3. Add server operations in `*.server.ts` and expose the necessary boundary in
-   `*.functions.ts`. Keep secrets out of browser configuration and UI props.
-4. Define query keys and reusable options in `*.queries.ts`. Use the installed
-   Query APIs, `.query()` and `.infiniteQuery()`, in loaders, and forward abort
-   signals through server-function calls where supported.
-5. Add the route, validate its parameters/search state, and provide metadata and
-   appropriate pending/error/empty states. Let the route tree regenerate.
-6. Use `useServerFn` for component mutations and explicitly refresh affected
-   query data after writes. Keep UI-only state separate from server data.
-7. Add both languages' copy, targeted regression coverage, and run the relevant
-   quality and browser checks.
+1. Put feature logic in `src/features/<feature>/`; shared primitives in `src/components/`.
+2. Validate untrusted server-function input with `.validator()`; enforce ownership in the handler.
+3. Implement in `*.server.ts`, expose through `*.functions.ts`. Keep secrets out of browser config and props.
+4. Define keys and options in `*.queries.ts`; use `.query()` / `.infiniteQuery()` in loaders and forward abort signals.
+5. Add the route with validated params/search, metadata, and pending/error/empty states. Let the route tree regenerate.
+6. Use `useServerFn` for mutations and refresh affected queries after writes.
+7. Add copy in both languages and regression tests.
 
-### Change catalog or database structure
-
-Use versioned migrations for shared environments:
+### Change the database or catalog
 
 ```sh
-# After editing the Drizzle schema, generate and review the SQL and snapshot.
-pnpm db:generate
-
-# Apply reviewed migrations to the selected development database.
-pnpm db:migrate
-
-# After catalog data or search document changes, update the derived search index.
-pnpm search:sync
+pnpm db:generate   # after editing the Drizzle schema; review SQL and snapshot
+pnpm db:migrate    # apply to the selected dev database
+pnpm search:sync   # refresh derived search data
 ```
 
-Commit the schema changes together with their migration artifacts. `db:push`
-applies a schema directly without generating migration history; reserve it for
-disposable development databases. Review renames and destructive operations
-before applying them to stored data.
+Commit schema changes with their migration files. Use `db:push` only on disposable databases, and review renames and destructive operations first.
 
-Adding a department or category also changes the PostgreSQL enums. Update
-`src/data/catalog.ts`, the schema migration, labels/translations, and any affected
-navigation. New departments need a visual tone in `department-tiles.tsx`.
-Changes to search document shape or indexed fields must also update the document
-builder, field definitions, queries, and tests.
+New departments or categories change the PostgreSQL enums: update `src/data/catalog.ts`, the migration, labels/translations, navigation, and `department-tiles.tsx` (visual tone). Changes to search fields also require updating the document builder, field definitions, queries, and tests.
 
-### Change brand or interface content
+### Change brand content
 
-Edit [`src/data/site.ts`](src/data/site.ts) for shared brand copy, currency, time
-zone, and delivery display settings; edit
-[`src/data/socials.ts`](src/data/socials.ts) for social links. Update design tokens
-in `src/styles.css` and reuse the shared layout/typography utilities. Keep content
-changes synchronized with `src/i18n/` and avoid presenting an unimplemented
-service as an available shopping action.
+Edit `src/data/site.ts` (brand copy, currency, time zone, delivery display) and `src/data/socials.ts`; adjust tokens in `src/styles.css`. Keep `src/i18n/` in sync and don't present unimplemented services as available actions.
 
 ## Troubleshooting
 
-| Symptom                                                   | What to check                                                                                                                                                                     |
-| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Compose reports missing variables                         | Use the matching `--env-file` and explicit Compose file. Set required values from the environment template.                                                                       |
-| The app does not start or Nginx returns 502               | Run `docker compose --env-file .env.development -f docker-compose.dev.yaml ps -a`, then inspect `migrate`, `app`, and `web` logs. An unsuccessful migration prevents app startup. |
-| Host commands cannot reach PostgreSQL or Redis            | Compose does not publish their ports. Run maintenance commands inside the app container or provide separate reachable services for host development.                              |
-| Catalog is empty                                          | Check that PostgreSQL contains products with in-stock SKUs. Seed only a development database, then run `search:sync`.                                                             |
-| Search reports an unknown `FT.*` or `JSON.*` command      | The Redis instance lacks required modules. Use the configured Redis image and run `search:check`.                                                                                 |
-| Products or prices appear stale                           | Run `search:sync` after source data changes and allow the client cache to refresh. Refresh statistics separately if needed.                                                       |
-| Verification email does not arrive                        | In development without Resend, inspect app logs. In production, verify the Resend key and configured sender.                                                                      |
-| Social sign-in is missing                                 | Configure both the client ID and secret for the provider, its callback settings, and the correct public auth origin.                                                              |
-| Production database TLS fails                             | Check certificate trust, file access, and whether `DB_SSL_SERVERNAME` matches the certificate. The connection intentionally validates the server identity.                        |
-| A new route is not recognized                             | Run the configured Vite dev/build flow to regenerate `src/routeTree.gen.ts`, then typecheck.                                                                                      |
-| Unit tests unexpectedly start Nitro or generate RPC calls | Ensure Vitest loads `vitest.config.ts`; do not merge application server plugins into the unit-test configuration.                                                                 |
+| Symptom                                                | Check                                                                                             |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Compose reports missing variables                      | Use the matching `--env-file` and `-f`; set required values per [Configuration](#configuration).  |
+| App won't start or Nginx returns 502                   | `... ps -a`, then check `migrate`, `app`, `web` logs. A failed migration blocks the app.          |
+| `Permission denied` on mounted files (Fedora/RHEL)     | SELinux. Keep `:z` / `selinux: z` on bind mounts; confirm with `sudo ausearch -m avc -ts recent`. |
+| `db` fails with private-key ownership/permission error | See [Certificate permissions](#production).                                                       |
+| Production database TLS fails                          | Check certificate trust, file access, and that `DB_SSL_SERVERNAME` matches the certificate.       |
+| Host commands can't reach PostgreSQL or Redis          | Ports aren't published. Run commands in the app container or provide separate services.           |
+| Catalog is empty                                       | Ensure PostgreSQL has products with in-stock SKUs (seed dev only), then `search:sync`.            |
+| Unknown `FT.*` or `JSON.*` command                     | Redis lacks the modules. Use the configured image and run `search:check`.                         |
+| Stale products or prices                               | Run `search:sync`, wait out the client cache; refresh stats separately.                           |
+| Verification email missing                             | Dev without Resend: check app logs. Production: check the Resend key and sender.                  |
+| Social sign-in missing                                 | Set both ID and secret, callback settings, and the correct public auth origin.                    |
+| New route not recognized                               | Run the Vite dev/build flow to regenerate `src/routeTree.gen.ts`, then typecheck.                 |
+| Unit tests start Nitro or generate RPC calls           | Make sure Vitest loads `vitest.config.ts`; don't merge app server plugins into it.                |
 
-`/api/health` is a liveness probe only. A successful response means the process
-can answer HTTP, not that catalog search, PostgreSQL, email delivery, or checkout
-is operational. Inspect service health and application logs when diagnosing
-feature failures.
+`/api/health` is liveness only: it shows the process answers HTTP, not that search, PostgreSQL, email, or checkout work.
 
 ## Known limitations
 
-- **Checkout and fulfillment:** `/checkout` is a coming-soon page. Payment,
-  shipping/tax calculation, order placement, and order confirmation are not
-  implemented, even though order tables exist. Delivery display settings are
-  not a fulfillment integration.
-- **Cross-client cart consistency:** the shared mutation scope orders writes
-  within a single client. Server currency/line-limit checks and existence checks
-  precede Redis writes and can race across separate clients. Atomic enforcement
-  and service-backed concurrency tests remain necessary before launch.
-- **Catalog ingestion:** the repository includes sample seeding and index
-  synchronization, not a warehouse importer or scheduled price-refresh job.
-- **Operational durability:** named volumes retain data across ordinary container
-  restarts, but the repository does not provide automated backups, restore drills,
-  or high-availability orchestration. Redis loss affects carts and auth secondary
-  state as well as rebuildable search/cache data.
-- **Verification scope:** CI has unit tests and a Redis Search integration check,
-  but no complete PostgreSQL/auth/browser end-to-end suite or formal accessibility
-  certification.
+- **Checkout and fulfillment:** `/checkout` is a placeholder. Payment, shipping/tax, order placement, and confirmation are not implemented, though order tables exist.
+- **Cross-client cart consistency:** writes are ordered within one client only. Server limit and existence checks precede Redis writes and can race across clients; atomic enforcement and concurrency tests are needed before launch.
+- **Catalog ingestion:** only sample seeding and index sync exist; no warehouse importer or scheduled price refresh.
+- **Operational durability:** no automated backups, restore drills, or high availability. Redis loss also affects carts and auth secondary state.
+- **Verification scope:** CI has unit tests and a Redis Search check, but no PostgreSQL/auth/browser end-to-end suite or formal accessibility certification.
 
-See [the codebase review](docs/codebase-review.md) for the dated audit, completed
-improvements, validation evidence, and follow-up work. Treat it as a snapshot of
-that review rather than a substitute for running checks on later changes.
+See [docs/codebase-review.md](docs/codebase-review.md) for the dated audit and follow-up work; treat it as a snapshot, not a substitute for running checks.

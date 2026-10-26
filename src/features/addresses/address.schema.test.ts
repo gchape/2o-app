@@ -46,7 +46,7 @@ describe("addressSchema", () => {
 			"შეიყვანეთ მიმღების სახელი",
 		]);
 		expect(messages({ ...valid, line1: "" })).toEqual([
-			"შეიყვანეთ ქუჩის მისამართი",
+			"შეიყვანეთ ქუჩა და სახლის ნომერი",
 		]);
 		expect(messages({ ...valid, city: "" })).toEqual(["შეიყვანეთ ქალაქი"]);
 	});

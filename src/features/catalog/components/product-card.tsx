@@ -3,8 +3,8 @@ import { Badge } from "#/components/ui/badge";
 import { Card, CardContent } from "#/components/ui/card";
 import type { ProductListItem } from "#/data/catalog.types";
 import { useTranslation } from "#/i18n/translate";
-import { isOnSale } from "#/lib/price";
-import { Price } from "./price";
+import { isOnSale, usePriceFormatter } from "#/lib/price";
+import { cn } from "#/lib/utils";
 import { ProductImage } from "./product-image";
 
 /**
@@ -20,8 +20,10 @@ export function ProductCard({
 	loading?: "lazy" | "eager";
 }) {
 	const t = useTranslation();
+	const { formatPriceCompact } = usePriceFormatter();
 	const { slug, name, brand, imageUrl, price, originalPrice, currency } =
 		product;
+	const onSale = isOnSale(price, originalPrice);
 
 	return (
 		<Card className="group relative h-full min-w-0 gap-4 overflow-visible rounded-none py-0 ring-0">
@@ -32,9 +34,7 @@ export function ProductCard({
 					loading={loading}
 					className="aspect-4/5 rounded-xl [&_img]:transition-transform [&_img]:duration-500 motion-safe:group-hover:[&_img]:scale-[1.03]"
 				/>
-				{isOnSale(price, originalPrice) && (
-					<Badge className="absolute top-3 left-3">{t("Sale")}</Badge>
-				)}
+				{onSale && <Badge className="absolute top-3 left-3">{t("Sale")}</Badge>}
 			</div>
 
 			<CardContent className="flex-1 space-y-2 px-0">
@@ -52,13 +52,29 @@ export function ProductCard({
 						{name}
 					</Link>
 				</h3>
-				<p className="type-num text-foreground text-sm sm:text-base">
-					<Price
-						price={price}
-						originalPrice={originalPrice}
-						currency={currency}
-					/>
+				<p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 pt-1">
+					<span className="text-muted-foreground text-xs">{t("From")}</span>
+					<span
+						className={cn(
+							"type-num text-lg sm:text-xl",
+							onSale ? "text-price" : "text-slate-700 dark:text-slate-200",
+						)}
+					>
+						{formatPriceCompact(price, currency)}
+					</span>
+					{onSale && (
+						<span className="text-price-original text-sm line-through">
+							{formatPriceCompact(originalPrice, currency)}
+						</span>
+					)}
 				</p>
+				{onSale && (
+					<p className="w-fit rounded-md bg-price-savings px-2 py-1 font-medium text-price text-xs sm:text-sm">
+						{t("You save {{price}}", {
+							price: formatPriceCompact(originalPrice - price, currency),
+						})}
+					</p>
+				)}
 			</CardContent>
 		</Card>
 	);

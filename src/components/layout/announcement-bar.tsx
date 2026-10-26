@@ -1,8 +1,4 @@
-import {
-	Clock01Icon,
-	DeliveryTruck01Icon,
-	Message01Icon,
-} from "@hugeicons/core-free-icons";
+import { DeliveryTruck01Icon, Message01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
@@ -32,7 +28,7 @@ function Item({
 	);
 }
 
-/** Three facts that answer a shopper's first questions: freshness, help, delivery. */
+/** Delivery information and optional shopping support. */
 export function AnnouncementBar() {
 	const { formatPriceCompact } = usePriceFormatter();
 	const t = useTranslation();
@@ -44,12 +40,6 @@ export function AnnouncementBar() {
 			className="border-b bg-neutral-100 text-neutral-600 type-caption"
 		>
 			<Container className="flex min-h-8 items-center justify-center gap-6 py-1 md:justify-between">
-				<Item icon={Clock01Icon}>
-					{t("Prices refreshed every morning at {{time}}", {
-						time: site.priceCheckTime,
-					})}
-				</Item>
-
 				{config.chatEmbedUrl && (
 					<Item icon={Message01Icon} className="hidden sm:flex">
 						{t("Questions about sizes?")}{" "}
@@ -65,9 +55,12 @@ export function AnnouncementBar() {
 					</Item>
 				)}
 
-				<Item icon={DeliveryTruck01Icon} className="hidden md:flex">
-					{t("Free delivery in Georgia over {{price}}", {
-						price: formatPriceCompact(site.delivery.freeFrom),
+				<Item icon={DeliveryTruck01Icon}>
+					{t("Free U.S. shipping from {{price}}", {
+						price: formatPriceCompact(
+							site.delivery.freeFrom,
+							site.delivery.currency,
+						),
 					})}
 				</Item>
 			</Container>

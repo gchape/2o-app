@@ -36,9 +36,12 @@ describe("priceCheckNote", () => {
 		);
 	});
 
-	it("falls back to the schedule before the first run", () => {
+	it("reports missing history before the first run without promising a schedule", () => {
 		expect(priceCheckNote(null, now)).toBe(
-			"ახალი ფასები ყოველ დილით, 08:00 საათზე გამოჩნდება.",
+			"ფასების შემოწმების ისტორია პირველი განახლების შემდეგ გამოჩნდება.",
+		);
+		expect(priceCheckNote(null, now, "en")).toBe(
+			"Price-check history will appear with the first update.",
 		);
 	});
 });

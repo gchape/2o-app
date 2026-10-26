@@ -36,12 +36,14 @@ services:
         read_only: true
         bind:
           create_host_path: false
+          selinux: z
       - type: bind
         source: ./certs/privkey.pem
         target: /etc/postgresql/certs/privkey.pem
         read_only: true
         bind:
           create_host_path: false
+          selinux: z
     healthcheck:
       test:
         ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
@@ -92,6 +94,17 @@ services:
       retries: 5
       start_period: 15s
 
+  checkout-notifications:
+    build:
+      context: .
+      target: migrate
+    <<: *app-env
+    command: ["pnpm", "checkout:notifications"]
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
   web:
     build:
       context: .
@@ -107,12 +120,14 @@ services:
         read_only: true
         bind:
           create_host_path: false
+          selinux: z
       - type: bind
         source: ./certs/privkey.pem
         target: /etc/nginx/certs/privkey.pem
         read_only: true
         bind:
           create_host_path: false
+          selinux: z
     depends_on:
       app:
         condition: service_healthy

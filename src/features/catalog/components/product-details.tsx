@@ -48,7 +48,11 @@ export function ProductDetails({
 					{shown && (
 						<p className="mt-5 flex flex-wrap items-center gap-3">
 							<span className="type-num text-2xl">
-								{!selected && t("From ")}
+								{!selected && (
+									<span className="font-normal text-base text-muted-foreground">
+										{t("From ")}
+									</span>
+								)}
 								<Price
 									price={shown.price}
 									originalPrice={shown.originalPrice}
@@ -105,9 +109,15 @@ export function ProductDetails({
 										: t("Select a size to check availability.")}
 								</p>
 								<p>
-									{t("Delivery in Georgia; free over {{price}}.", {
-										price: formatPriceCompact(site.delivery.freeFrom),
-									})}
+									{t(
+										"U.S. delivery only; free from {{price}}. We do not ship to Georgia.",
+										{
+											price: formatPriceCompact(
+												site.delivery.freeFrom,
+												site.delivery.currency,
+											),
+										},
+									)}
 								</p>
 							</div>
 						</div>
