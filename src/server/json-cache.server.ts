@@ -4,16 +4,13 @@ import { getRedis } from "./redis.server";
 type JsonCacheOptions<S extends z.ZodType> = {
 	key: string;
 	ttlSeconds: number;
-	/** Validates cached payloads, so a changed shape reads as a miss. */
 	schema: S;
-	/** Source of truth, used on a miss or when Redis is down. */
 	compute: () => Promise<z.output<S>>;
 };
 
 /**
- * A Redis-backed JSON cache with a Postgres (or any other) fallback. Reads
- * never throw: an empty, stale-shaped or unreachable cache falls through to
- * `compute`. Returns `get` (cache-aside) and `refresh` (recompute, overwrite).
+ * Invalid or unavailable cache entries fall through to `compute`; source errors
+ * still propagate. `get` writes opportunistically, while `refresh` awaits storage.
  */
 export function createJsonCache<S extends z.ZodType>({
 	key,

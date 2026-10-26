@@ -44,12 +44,14 @@ export const checkoutPageFn = createServerFn({ method: "GET" })
 		const session = await auth.api.getSession({ headers: getRequestHeaders() });
 		if (!session)
 			return { userId: null, ready: false, addresses: [], checkout: null };
-		return run(async (userId) => ({
-			userId,
-			ready: Boolean(checkoutPricing()),
-			addresses: await addresses.list(userId),
-			checkout: data.id ? await getCheckout(userId, data.id) : null,
-		}));
+		return run(async (userId) => {
+			const [ready, savedAddresses, checkout] = await Promise.all([
+				data.id ? true : checkoutPricing().then(Boolean),
+				addresses.list(userId),
+				data.id ? getCheckout(userId, data.id) : null,
+			]);
+			return { userId, ready, addresses: savedAddresses, checkout };
+		});
 	});
 
 export const prepareCheckoutFn = createServerFn({ method: "POST" })

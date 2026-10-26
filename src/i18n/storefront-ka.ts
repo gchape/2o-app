@@ -1,5 +1,23 @@
 /** English source strings are also the English catalog. Keep placeholders unchanged. */
 export const storefrontKa = {
+	"One step closer to your next find": "კიდევ ერთი ნაბიჯი სასურველ ნივთამდე",
+	"Copy {{label}}": "კოპირება: {{label}}",
+	"Add a U.S. address to get started. You can use your forwarding address.":
+		"დასაწყებად დაამატეთ აშშ-ის მისამართი. შეგიძლიათ გადამზიდის მისამართიც გამოიყენოთ.",
+	"We only ship to U.S. addresses.":
+		"მიწოდება მხოლოდ აშშ-ის მისამართებზეა შესაძლებელი.",
+	"Replace payment screenshot": "გადახდის სურათის შეცვლა",
+	"Choose screenshot": "სურათის არჩევა",
+	"Choose a valid screenshot to continue.":
+		"გასაგრძელებლად აირჩიეთ სწორი ფორმატის სურათი.",
+	"Transfer either amount below and include your payment reference.":
+		"გადარიცხეთ ქვემოთ მითითებული ერთ-ერთი თანხა და დანიშნულებაში ჩაწერეთ გადახდის კოდი.",
+	"Pay in one currency only. Your total is fixed until these instructions expire. Your bank may charge a separate transfer fee.":
+		"გადაიხადეთ მხოლოდ ერთ ვალუტაში. ჯამური თანხა გადახდის ვადის ამოწურვამდე უცვლელია. ბანკმა შეიძლება დამატებითი საკომისიო ჩამოგაჭრათ.",
+	"Review your final total in USD and GEL, including shipping and fees, before you pay.":
+		"გადახდამდე ნახავთ საბოლოო თანხას დოლარსა და ლარში, მიწოდებისა და მომსახურების საფასურის ჩათვლით.",
+	"Service fee applies to items only. Free U.S. shipping on items totaling {{amount}} or more.":
+		"მომსახურების საფასური მხოლოდ ნივთების ღირებულებაზე ითვლება. აშშ-ში მიწოდება უფასოა, თუ ნივთების ღირებულება მინიმუმ {{amount}}-ია.",
 	"U.S. shipping and the service fee are calculated at checkout.":
 		"აშშ-ში მიწოდებისა და მომსახურების საფასური შეკვეთის გაფორმებისას გამოითვლება.",
 	"Sign in to save your delivery address and place an order.":
@@ -24,12 +42,11 @@ export const storefrontKa = {
 	"Preparing checkout…": "შეკვეთა მზადდება…",
 	"Review total and continue": "ჯამური თანხის ნახვა და გაგრძელება",
 	"Transfer the exact amount": "გადარიცხეთ მითითებული თანხა",
-	"Review the order total, then send a bank transfer using the details below. Include the payment reference.":
-		"შეამოწმეთ ჯამური თანხა და გადარიცხეთ ქვემოთ მოცემულ ანგარიშზე. დანიშნულებაში მიუთითეთ გადახდის კოდი.",
 	"These payment instructions have expired. Do not make a new transfer. If you already paid, upload your proof; otherwise start a new checkout.":
 		"ამ რეკვიზიტებით გადახდის ვადა ამოიწურა. თანხა აღარ გადარიცხოთ. თუ უკვე გადაიხადეთ, ატვირთეთ დასტური; სხვა შემთხვევაში შეკვეთა თავიდან გააფორმეთ.",
 	"Amount to transfer": "გადასარიცხი თანხა",
-	Beneficiary: "მიმღები",
+	"Or pay in lari:": "ან გადაიხადეთ ლარში:",
+	"Total in lari (GEL)": "სულ (ლარი)",
 	IBAN: "ანგარიშის ნომერი (IBAN)",
 	"Payment reference": "გადახდის კოდი",
 	Copy: "კოპირება",
@@ -38,8 +55,6 @@ export const storefrontKa = {
 		"კოპირება ვერ მოხერხდა. მონიშნეთ ტექსტი და თავად დააკოპირეთ.",
 	"Payment instructions valid until {{time}}":
 		"ამ თანხის გადახდა შესაძლებელია {{time}}-მდე",
-	"Send the amount in the currency shown. Any bank transfer charges are paid separately to your bank.":
-		"თანხა გადარიცხეთ მითითებულ ვალუტაში. ბანკის საკომისიოს, ასეთის არსებობის შემთხვევაში, ცალკე იხდით.",
 	"I have transferred — upload proof": "გადავრიცხე — დასტურის ატვირთვა",
 	"Start a new checkout": "შეკვეთის თავიდან გაფორმება",
 	"Upload your payment screenshot": "ატვირთეთ გადახდის სურათი",
@@ -59,21 +74,12 @@ export const storefrontKa = {
 	"Place order": "შეკვეთის გაფორმება",
 	"Back to payment details": "გადახდის რეკვიზიტებზე დაბრუნება",
 	"Order summary": "შეკვეთის შეჯამება",
-	"Your USD total, exchange rate, service fee and shipping will be shown before you transfer any money.":
-		"გადარიცხვამდე ნახავთ ჯამურ თანხას აშშ დოლარში, გაცვლით კურსს, მომსახურებისა და მიწოდების საფასურს.",
 	"United States": "ამერიკის შეერთებული შტატები",
-	"Items (GEL)": "ნივთების ღირებულება (₾)",
 	"Items (USD)": "ნივთების ღირებულება ($)",
 	"Service fee ({{percent}}%)": "მომსახურების საფასური ({{percent}}%)",
 	"U.S. shipping": "მიწოდება აშშ-ში",
 	Free: "უფასო",
 	"Total (USD)": "სულ (აშშ დოლარი)",
-	"Exchange rate: 1 USD = {{rate}} GEL":
-		"გაცვლითი კურსი: 1 აშშ დოლარი = {{rate}} ლარი",
-	"USD item prices are rounded to cents before quantities are applied.":
-		"თითოეული ნივთის ფასი დოლარში ცენტამდე მრგვალდება, შემდეგ კი რაოდენობაზე მრავლდება.",
-	"The service fee applies to items only. U.S. shipping is free when the item subtotal reaches US$99, before fees.":
-		"მომსახურების საფასური მხოლოდ ნივთების ღირებულებაზე ითვლება. აშშ-ში მიწოდება უფასოა, თუ ნივთების ღირებულება, დამატებითი საფასურის გარეშე, მინიმუმ 99 აშშ დოლარია.",
 	"Checkout not found.": "შეკვეთა ვერ მოიძებნა.",
 	"Too many checkout attempts. Please try again later.":
 		"შეკვეთის გაფორმება მეტისმეტად ბევრჯერ სცადეთ. სცადეთ მოგვიანებით.",

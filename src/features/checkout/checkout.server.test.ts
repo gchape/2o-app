@@ -5,7 +5,7 @@ import {
 	orderNotification,
 	orders,
 } from "#/db/schema";
-import { calculateQuote } from "./checkout";
+import { calculateQuote } from "./checkout-quote.server";
 
 const state = vi.hoisted(() => ({
 	rows: [] as unknown[][],
@@ -14,6 +14,7 @@ const state = vi.hoisted(() => ({
 	remove: vi.fn(),
 	cart: vi.fn(),
 	rollback: vi.fn(),
+	pricing: vi.fn(),
 }));
 vi.mock("#/db", () => {
 	const tx = {
@@ -62,10 +63,9 @@ vi.mock("#/db", () => {
 vi.mock("#/features/cart/cart.server", () => ({
 	cart: { removePurchased: state.remove, getForCheckout: state.cart },
 }));
-vi.mock("./checkout-config.server", () => ({ checkoutPricing: () => null }));
-const { getCheckout, submitCheckout, uploadProof } = await import(
-	"./checkout.server"
-);
+vi.mock("./checkout-config.server", () => ({ checkoutPricing: state.pricing }));
+const { getCheckout, prepareCheckout, submitCheckout, uploadProof } =
+	await import("./checkout.server");
 const id = "00000000-0000-4000-8000-000000000001";
 const quote = calculateQuote(
 	[
@@ -80,12 +80,10 @@ const quote = calculateQuote(
 	],
 	{
 		gelPerUsd: 2.7,
-		rateUpdatedAt: "2026-10-26T00:00:00Z",
+		rateDate: "2026-10-26T00:00:00Z",
 		serviceFeeBps: 500,
 		shippingUsd: 700,
-		paymentCurrency: "USD",
 		iban: "GE29NB0000000101904917",
-		beneficiary: "Test",
 	},
 );
 const shippingAddress = {
@@ -119,6 +117,44 @@ beforeEach(() => {
 	state.inserts.length = 0;
 	state.updates.length = 0;
 	vi.clearAllMocks();
+});
+
+it("resumes a prepared checkout without fetching a new exchange rate", async () => {
+	state.rows.push([{ id }], [publicRow]);
+	expect(await prepareCheckout("buyer", id, id)).toMatchObject({ id, quote });
+	expect(state.pricing).not.toHaveBeenCalled();
+	expect(state.inserts).toHaveLength(0);
+});
+
+it("serializes legacy stored quotes with both totals and their original rate date", async () => {
+	const {
+		totalGel,
+		pricing: { rateDate, ...oldPricing },
+		...oldQuote
+	} = quote;
+	state.rows.push([
+		{
+			...publicRow,
+			quote: {
+				...oldQuote,
+				paymentTotal: totalGel,
+				pricing: {
+					...oldPricing,
+					paymentCurrency: "GEL",
+					rateUpdatedAt: rateDate,
+				},
+			},
+		},
+	]);
+	expect((await getCheckout("buyer", id)).quote).toMatchObject(quote);
+	expect(state.pricing).not.toHaveBeenCalled();
+});
+
+it("returns a concurrent checkout created while pricing was unavailable", async () => {
+	state.pricing.mockResolvedValue(null);
+	state.rows.push([], [{ id: "buyer" }], [{ id }], [publicRow]);
+	expect(await prepareCheckout("buyer", id, id)).toMatchObject({ id, quote });
+	expect(state.inserts).toHaveLength(0);
 });
 
 it("requires ownership before reading or uploading a receipt", async () => {
@@ -167,12 +203,14 @@ it("atomically stores an order, item snapshots, and notification as pending, not
 		},
 		{
 			table: orderItem,
-			value: expect.objectContaining({
-				orderId: id,
-				price: 5000,
-				quantity: 1,
-				name: "Shoes (Black, 8)",
-			}),
+			value: [
+				expect.objectContaining({
+					orderId: id,
+					price: 5000,
+					quantity: 1,
+					name: "Shoes (Black, 8)",
+				}),
+			],
 		},
 		{ table: orderNotification, value: { orderId: id } },
 	]);
@@ -187,6 +225,38 @@ it("atomically stores an order, item snapshots, and notification as pending, not
 		submittedAt: "2026-10-26T12:00:00.000Z",
 	});
 	expect(result).not.toHaveProperty("proofBase64");
+});
+
+it("stores all item snapshots in one batch, including removed catalog SKUs", async () => {
+	const firstLine = quote.lines[0];
+	if (!firstLine) throw new Error("Missing test line");
+	const quoteWithRemovedSku = calculateQuote(
+		[
+			firstLine,
+			{ ...firstLine, id: "removed-sku", name: "Original product name" },
+		],
+		quote.pricing,
+	);
+	state.rows.push(
+		[{ ...draft, quote: quoteWithRemovedSku }],
+		[{ name: "Buyer", email: "buyer@example.com" }],
+		[{ id, color: "Black", size: "8" }],
+		[{ ...publicRow, quote: quoteWithRemovedSku }],
+	);
+	await submitCheckout("buyer", id);
+	expect(state.inserts.filter((insert) => insert.table === orderItem)).toEqual([
+		{
+			table: orderItem,
+			value: [
+				expect.objectContaining({ skuId: id, price: 5000 }),
+				expect.objectContaining({
+					skuId: null,
+					name: "Original product name",
+					price: 5000,
+				}),
+			],
+		},
+	]);
 });
 it("returns the same order on retry without another insert or cart removal", async () => {
 	state.rows.push([{ ...draft, submittedAt: new Date() }], [publicRow]);

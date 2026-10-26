@@ -1,4 +1,4 @@
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import { db } from "#/db";
 import {
 	address,
@@ -12,11 +12,11 @@ import {
 import { cart } from "#/features/cart/cart.server";
 import {
 	type CheckoutView,
-	calculateQuote,
 	QUOTE_LIFETIME_MS,
 	usAddressSchema,
 } from "./checkout";
 import { checkoutPricing } from "./checkout-config.server";
+import { calculateQuote, restoreCheckoutQuote } from "./checkout-quote.server";
 import { readPaymentProof } from "./payment-proof.server";
 
 export class CheckoutError extends Error {}
@@ -45,18 +45,29 @@ export async function getCheckout(
 	ensure(row, "Checkout not found.");
 	return {
 		...row,
+		quote: restoreCheckoutQuote(row.quote),
 		expiresAt: row.expiresAt.toISOString(),
 		submittedAt: row.submittedAt?.toISOString() ?? null,
 	};
 }
 
+/**
+ * Reusing an ID returns its frozen quote, including during a rate-service outage.
+ * The account lock serializes creation and enforces the daily attempt limit.
+ */
 export async function prepareCheckout(
 	userId: string,
 	id: string,
 	addressId: string,
 ) {
+	const [already] = await db
+		.select({ id: checkoutSession.id })
+		.from(checkoutSession)
+		.where(mine(userId, id));
+	if (already) return getCheckout(userId, id);
+	// Keep external HTTP requests outside the transaction's row locks.
+	const pricing = await checkoutPricing();
 	await db.transaction(async (tx) => {
-		// Serialize checkout creation per account and make retries with the same UUID idempotent.
 		await tx
 			.select({ id: user.id })
 			.from(user)
@@ -67,7 +78,7 @@ export async function prepareCheckout(
 			.from(checkoutSession)
 			.where(mine(userId, id));
 		if (existing) return;
-		const pricing = checkoutPricing();
+
 		ensure(
 			pricing,
 			"Checkout is temporarily unavailable. Please try again later.",
@@ -117,6 +128,7 @@ export async function prepareCheckout(
 	return getCheckout(userId, id);
 }
 
+/** Accept evidence after quote expiry: the customer may already have transferred. */
 export async function uploadProof(userId: string, id: string, file: File) {
 	// Verify ownership before reading the file into memory.
 	const current = await getCheckout(userId, id);
@@ -131,7 +143,6 @@ export async function uploadProof(userId: string, id: string, file: File) {
 			.where(mine(userId, id))
 			.for("update");
 		ensure(row && !row.submittedAt, "This order has already been submitted.");
-		// A receipt can still be submitted after quote expiry: the user may have already transferred.
 		await tx
 			.update(checkoutSession)
 			.set({ proofBase64: proof.base64, proofType: proof.type })
@@ -140,6 +151,7 @@ export async function uploadProof(userId: string, id: string, file: File) {
 	return getCheckout(userId, id);
 }
 
+/** Commit the pending order and notification together; a receipt never marks it paid. */
 export async function submitCheckout(userId: string, id: string) {
 	const result = await db.transaction(async (tx) => {
 		const [draft] = await tx
@@ -148,6 +160,7 @@ export async function submitCheckout(userId: string, id: string) {
 			.where(mine(userId, id))
 			.for("update");
 		ensure(draft, "Checkout not found.");
+		draft.quote = restoreCheckoutQuote(draft.quote);
 		if (draft.submittedAt) return { created: false, lines: draft.quote.lines };
 		ensure(
 			draft.proofBase64 && draft.proofType,
@@ -172,23 +185,32 @@ export async function submitCheckout(userId: string, id: string) {
 			createdAt: placedAt,
 		});
 		// Preserve the purchased snapshot even if a catalog SKU has since been removed.
-		for (const line of draft.quote.lines) {
-			const [sku] = await tx
-				.select({ id: skus.id, color: skus.color, size: skus.size })
-				.from(skus)
-				.where(eq(skus.id, line.id))
-				.for("key share");
-			await tx.insert(orderItem).values({
-				orderId: id,
-				skuId: sku?.id ?? null,
-				name: line.name,
-				price: line.usdPrice,
-				quantity: line.quantity,
-				imageUrl: line.image,
-				color: sku?.color,
-				size: sku?.size,
-			});
-		}
+		const availableSkus = await tx
+			.select({ id: skus.id, color: skus.color, size: skus.size })
+			.from(skus)
+			.where(
+				inArray(
+					skus.id,
+					draft.quote.lines.map((line) => line.id),
+				),
+			)
+			.for("key share");
+		const skuById = new Map(availableSkus.map((sku) => [sku.id, sku]));
+		await tx.insert(orderItem).values(
+			draft.quote.lines.map((line) => {
+				const sku = skuById.get(line.id);
+				return {
+					orderId: id,
+					skuId: sku?.id ?? null,
+					name: line.name,
+					price: line.usdPrice,
+					quantity: line.quantity,
+					imageUrl: line.image,
+					color: sku?.color,
+					size: sku?.size,
+				};
+			}),
+		);
 		await tx.insert(orderNotification).values({ orderId: id });
 		await tx
 			.update(checkoutSession)

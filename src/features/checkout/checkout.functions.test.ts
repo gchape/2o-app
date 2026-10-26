@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
 	submit: vi.fn(),
 	list: vi.fn(),
 	header: vi.fn(),
+	pricing: vi.fn(),
 }));
 vi.mock("@tanstack/react-start", () => ({
 	createServerFn: () => {
@@ -43,7 +44,7 @@ vi.mock("#/features/auth/auth.server", () => ({
 vi.mock("#/features/addresses/address.server", () => ({
 	addresses: { list: mocks.list },
 }));
-vi.mock("./checkout-config.server", () => ({ checkoutPricing: () => ({}) }));
+vi.mock("./checkout-config.server", () => ({ checkoutPricing: mocks.pricing }));
 vi.mock("./checkout.server", () => ({
 	CheckoutError: class extends Error {},
 	getCheckout: mocks.getCheckout,
@@ -60,6 +61,7 @@ beforeEach(() => {
 	mocks.requireUserId.mockResolvedValue("signed-in-user");
 	mocks.getSession.mockResolvedValue({ user: { id: "signed-in-user" } });
 	mocks.list.mockResolvedValue([]);
+	mocks.pricing.mockResolvedValue({});
 });
 
 it("rejects anonymous prepare, upload and submit requests at the server boundary", async () => {
@@ -112,10 +114,20 @@ it("returns a private resumable checkout response with no receipt bytes", async 
 		"signed-in-user",
 		id,
 	);
+	expect(mocks.pricing).not.toHaveBeenCalled();
 	expect(mocks.header).toHaveBeenCalledWith(
 		"Cache-Control",
 		"private, no-store",
 	);
+});
+
+it("reports unavailable pricing only for new checkout sessions", async () => {
+	mocks.pricing.mockResolvedValue(null);
+	expect(await checkoutPageFn({ data: {} })).toMatchObject({
+		ready: false,
+		checkout: null,
+	});
+	expect(mocks.pricing).toHaveBeenCalledOnce();
 });
 it("does not load an anonymous visitor's requested checkout", async () => {
 	mocks.getSession.mockResolvedValue(null);

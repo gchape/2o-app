@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { calculateQuote } from "./checkout";
+import { calculateQuote } from "./checkout-quote.server";
 
 const state = vi.hoisted(() => ({
 	rows: [] as unknown[][],
@@ -57,12 +57,10 @@ const quote = calculateQuote(
 	],
 	{
 		gelPerUsd: 2.7,
-		rateUpdatedAt: "2026-10-26T00:00:00Z",
+		rateDate: "2026-10-26T00:00:00Z",
 		serviceFeeBps: 500,
 		shippingUsd: 700,
-		paymentCurrency: "USD",
 		iban: "GE29NB0000000101904917",
-		beneficiary: "Test",
 	},
 );
 const order = {

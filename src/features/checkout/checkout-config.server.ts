@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { env } from "#/server/env.server";
 import type { CheckoutPricing } from "./checkout";
+import { getGelPerUsd } from "./exchange-rate.server";
 
 export function validIban(value: string) {
 	if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(value)) return false;
@@ -18,13 +19,6 @@ const settingsSchema = z.object({
 		.string()
 		.transform((s) => s.replace(/\s/g, "").toUpperCase())
 		.refine(validIban),
-	CHECKOUT_BENEFICIARY: z.string().trim().min(2).max(150),
-	CHECKOUT_PAYMENT_CURRENCY: z.enum(["USD", "GEL"]),
-	CHECKOUT_GEL_PER_USD: z
-		.string()
-		.min(1)
-		.pipe(z.coerce.number<string>().positive().max(100)),
-	CHECKOUT_RATE_UPDATED_AT: z.iso.datetime({ offset: true }),
 	CHECKOUT_SERVICE_FEE_BPS: z
 		.string()
 		.min(1)
@@ -37,23 +31,29 @@ const settingsSchema = z.object({
 	TELEGRAM_CHAT_ID: z.string().min(1),
 });
 
-export function checkoutPricing(
-	source: Record<string, unknown> = env,
-	now = Date.now(),
-): CheckoutPricing | null {
+/** Incomplete payment or notification settings disable new checkouts. */
+export function checkoutSettings(source: Record<string, unknown> = env) {
 	const parsed = settingsSchema.safeParse(source);
 	if (!parsed.success) return null;
 	const e = parsed.data;
-	const age = now - Date.parse(e.CHECKOUT_RATE_UPDATED_AT);
-	// Explicit merchant rate, refreshed at least weekly. Never silently invent an FX rate.
-	if (age < -60_000 || age > 7 * 24 * 60 * 60 * 1000) return null;
 	return {
-		gelPerUsd: e.CHECKOUT_GEL_PER_USD,
-		rateUpdatedAt: e.CHECKOUT_RATE_UPDATED_AT,
+		iban: e.CHECKOUT_IBAN,
 		serviceFeeBps: e.CHECKOUT_SERVICE_FEE_BPS,
 		shippingUsd: e.CHECKOUT_SHIPPING_USD_CENTS,
-		paymentCurrency: e.CHECKOUT_PAYMENT_CURRENCY,
-		iban: e.CHECKOUT_IBAN,
-		beneficiary: e.CHECKOUT_BENEFICIARY,
 	};
+}
+
+/**
+ * Resolve pricing only when creating a quote. Saved orders retain their own
+ * rate and fee snapshot even after configuration changes.
+ */
+export async function checkoutPricing(
+	source: Record<string, unknown> = env,
+): Promise<CheckoutPricing | null> {
+	const settings = checkoutSettings(source);
+	if (!settings) return null;
+	const rate = await getGelPerUsd();
+	return (
+		rate && { ...settings, gelPerUsd: rate.gelPerUsd, rateDate: rate.date }
+	);
 }
