@@ -5,28 +5,10 @@ import { LinkButton } from "#/components/link-button";
 import { buttonVariants } from "#/components/ui/button";
 import { site } from "#/data/site";
 import { SkewTag } from "#/features/catalog/components/skew-tag";
-import { formatCheckedAt } from "#/features/stats/format-checked-at";
 import type { Stats } from "#/features/stats/stats.schema";
 import { languageTags, useLocale } from "#/i18n/locale";
 import { useTranslation } from "#/i18n/translate";
 import { cn } from "#/lib/utils";
-
-const Stat = ({ label, value }: { label: string; value: string }) => {
-	const numeric = /^[\d,.]+$/.test(value);
-	return (
-		<div>
-			<dt className="type-eyebrow text-white/60">{label}</dt>
-			<dd
-				className={cn(
-					"type-num mt-2 flex min-h-9 items-end",
-					numeric ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl",
-				)}
-			>
-				{value}
-			</dd>
-		</div>
-	);
-};
 
 type HeroProps = {
 	stats: Stats;
@@ -47,10 +29,6 @@ export function Hero({ stats, topDiscount }: HeroProps) {
 		{
 			label: t("Warehouses checked"),
 			value: stats.warehouses.toLocaleString(languageTags[locale]),
-		},
-		{
-			label: t("Last price check"),
-			value: stats.checkedAt ? formatCheckedAt(stats.checkedAt) : t("Not yet"),
 		},
 	];
 
@@ -115,7 +93,12 @@ export function Hero({ stats, topDiscount }: HeroProps) {
 
 				<dl className="mt-8 flex flex-wrap gap-x-8 gap-y-6 border-t border-white/15 pt-6 sm:gap-x-12 lg:mt-10">
 					{items.map((item) => (
-						<Stat key={item.label} {...item} />
+						<div key={item.label}>
+							<dt className="type-eyebrow text-white/70">{item.label}</dt>
+							<dd className="type-num mt-2 text-2xl sm:text-3xl">
+								{item.value}
+							</dd>
+						</div>
 					))}
 				</dl>
 			</Container>

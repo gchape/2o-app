@@ -35,7 +35,7 @@ export function DepartmentTiles() {
 					<li
 						key={slug}
 						className={cn(
-							"group relative flex min-h-56 flex-col justify-between overflow-hidden rounded-xl p-7 md:min-h-80 lg:p-9",
+							"group relative flex min-h-48 flex-col justify-between gap-6 overflow-hidden rounded-xl p-7 md:min-h-60 lg:p-9",
 							tones[slug],
 						)}
 					>
@@ -44,11 +44,11 @@ export function DepartmentTiles() {
 							className="absolute -right-6 -bottom-8 h-48 w-28 -skew-x-12 bg-current/5 transition-transform duration-300 group-hover:-translate-x-3"
 						/>
 
-						<h3 className="type-title text-3xl sm:text-4xl lg:text-5xl">
+						<h3 className="type-title text-3xl lg:text-4xl">
 							<Link
 								to="/$department/{-$category}"
 								params={{ department: slug, category: undefined }}
-								className="after:absolute after:inset-0"
+								className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:-outline-offset-4 focus-visible:after:outline-current"
 							>
 								{t(departments[slug].label)}
 							</Link>
@@ -70,6 +70,7 @@ export function DepartmentTiles() {
 							</ul>
 							<HugeiconsIcon
 								icon={ArrowUpRight01Icon}
+								aria-hidden="true"
 								size={28}
 								className="shrink-0 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
 							/>

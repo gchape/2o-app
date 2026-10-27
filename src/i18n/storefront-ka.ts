@@ -1,5 +1,16 @@
 /** English source strings are also the English catalog. Keep placeholders unchanged. */
 export const storefrontKa = {
+	"A good find, in three steps.": "სასურველი ნივთი სამ ნაბიჯში.",
+	"How we choose our stores": "როგორ ვარჩევთ მაღაზიებს",
+	"Find your fit": "იპოვეთ სასურველი ნივთი",
+	"Start with a department, then narrow your search by brand, size, colour or budget.":
+		"აირჩიეთ კატეგორია, შემდეგ კი გაფილტრეთ ნივთები ბრენდის, ზომის, ფერის ან ბიუჯეტის მიხედვით.",
+	"Compare the details": "შეადარეთ დეტალები",
+	"Check the listed price, available sizes and latest price-check time before adding an item to your cart.":
+		"კალათაში დამატებამდე ნახეთ ნივთის ფასი, ხელმისაწვდომი ზომები და ფასის ბოლო შემოწმების დრო.",
+	"Review your order": "გადაამოწმეთ შეკვეთა",
+	"Review shipping, service fees and your final total at checkout before placing your order.":
+		"შეკვეთის დადასტურებამდე გადაამოწმეთ მიწოდებისა და მომსახურების საფასური და საბოლოო თანხა.",
 	"Shipment {{number}}": "გზავნილი {{number}}",
 	"Shipment items: {{amount}}": "ნივთების ჯამური ღირებულება: {{amount}}",
 	"Shipping: {{amount}}": "მიწოდება: {{amount}}",
@@ -34,7 +45,7 @@ export const storefrontKa = {
 		"ვარჩევთ მაღაზიებს აშშ-ში, ვფილტრავთ მათ შეთავაზებებს და თქვენთვის საინტერესო ნივთებს ერთ სივრცეში ვუყრით თავს, რომ ძებნაში ნაკლები დრო დახარჯოთ.",
 	"Select stores": "მაღაზიების შერჩევა",
 	"Good finds start at the source.":
-		"ჯერ მაღაზიას ვარჩევთ, შემდეგ — შეთავაზებებს.",
+		"ჯერ მაღაზიას ვარჩევთ, შემდეგ კი შეთავაზებებს.",
 	"We look for reputable US warehouses and discount stores, choosing sources with original products and quality in mind.":
 		"აშშ-ში ვეძებთ კარგი რეპუტაციის მქონე საწყობებსა და მაღაზიებს, სადაც ნივთები ფასდაკლებით იყიდება. შერჩევისას ყურადღებას პროდუქციის ორიგინალობასა და ხარისხს ვაქცევთ.",
 	"Selected US stores": "შერჩეული მაღაზიები აშშ-ში",
@@ -105,7 +116,7 @@ export const storefrontKa = {
 		"კოპირება ვერ მოხერხდა. მონიშნეთ ტექსტი და თავად დააკოპირეთ.",
 	"Payment instructions valid until {{time}}":
 		"ამ თანხის გადახდა შესაძლებელია {{time}}-მდე",
-	"I have transferred — upload proof": "გადავრიცხე — დასტურის ატვირთვა",
+	"Upload payment proof": "გადახდის დასტურის ატვირთვა",
 	"Start a new checkout": "შეკვეთის თავიდან გაფორმება",
 	"Upload your payment screenshot": "ატვირთეთ გადახდის სურათი",
 	"The screenshot should show the amount, recipient and transfer reference. Hide unrelated balances or transactions.":
@@ -152,7 +163,7 @@ export const storefrontKa = {
 	Clothing: "ტანსაცმელი",
 	"Big brands. Small prices.": "ცნობილი ბრენდები. დაბალი ფასები.",
 	"Daily deals on shoes and clothing for men, women and kids, checked across wholesale stores.":
-		"ფეხსაცმლისა და ტანსაცმლის ყოველდღიური შეთავაზებები მთელი ოჯახისთვის — საბითუმო მაღაზიებში გადამოწმებული ფასებით.",
+		"ფეხსაცმლისა და ტანსაცმლის ყოველდღიური შეთავაზებები მთელი ოჯახისთვის, საბითუმო მაღაზიებში გადამოწმებული ფასებით.",
 	"Discover shoes and clothing from wholesale stores, compare listed prices, and find something for the whole family.":
 		"აღმოაჩინეთ ფეხსაცმელი და ტანსაცმელი საბითუმო მაღაზიებიდან, შეადარეთ ფასები და შეარჩიეთ ნივთები მთელი ოჯახისთვის.",
 	"Discover shoes and clothing for the whole family. Compare the deals, find your fit, and spend less time searching.":
@@ -171,7 +182,7 @@ export const storefrontKa = {
 	Find: "აღმოაჩინეთ",
 	"A wider search.": "მეტი არჩევანი.",
 	"Discover shoes and clothing from wholesale stores, brought together in one place.":
-		"საბითუმო მაღაზიების ფეხსაცმელი და ტანსაცმელი — ყველაფერი ერთ სივრცეში.",
+		"საბითუმო მაღაზიების ფეხსაცმელი და ტანსაცმელი ერთ სივრცეში.",
 	Compare: "შეადარეთ",
 	"See the value.": "ნახეთ, რამდენს დაზოგავთ.",
 	"Compare listed prices and discounts, with sizes and colours that help you find the right fit.":
@@ -213,7 +224,7 @@ export const storefrontKa = {
 		"ფასები და მარაგი შეიძლება შეიცვალოს. ბრენდების სახელები მათ მფლობელებს ეკუთვნის. {{brand}} ამ ბრენდების ოფიციალური წარმომადგენელი არ არის.",
 	"Open menu": "მენიუს გახსნა",
 	Menu: "მენიუ",
-	"{{brand}} home": "{{brand}} — მთავარი გვერდი",
+	"{{brand}} home": "{{brand}}: მთავარი გვერდი",
 	Home: "მთავარი",
 	"Couldn't load this page": "გვერდი ვერ ჩაიტვირთა",
 	"Please try again in a moment.": "ცოტა ხანში სცადეთ ხელახლა.",
@@ -231,7 +242,7 @@ export const storefrontKa = {
 	Checkout: "შეკვეთის გაფორმება",
 	"Checkout is coming soon": "შეკვეთის გაფორმება მალე იქნება შესაძლებელი",
 	"We're still setting up ordering. Your cart is saved, so you can keep shopping and come back.":
-		"შეკვეთის გაფორმების ფუნქციას ვამზადებთ. კალათა შენახულია — შეგიძლიათ გააგრძელოთ ნივთების შერჩევა და მოგვიანებით დაბრუნდეთ.",
+		"შეკვეთის გაფორმების ფუნქციას ვამზადებთ. კალათა შენახულია. შეგიძლიათ გააგრძელოთ ნივთების შერჩევა და მოგვიანებით დაბრუნდეთ.",
 	Deals: "შეთავაზებები",
 	"All deals": "ყველა შეთავაზება",
 	"Everything on sale right now.": "ყველაფერი, რაც ახლა ფასდაკლებით იყიდება.",
@@ -264,8 +275,8 @@ export const storefrontKa = {
 	"Color:": "ფერი:",
 	Size: "ზომა",
 	"Size {{size}}": "ზომა {{size}}",
-	"Size {{size}}, sold out": "ზომა {{size}} — მარაგში აღარ არის",
-	"In stock and ready to order.": "მარაგშია — შეგიძლიათ შეუკვეთოთ.",
+	"Size {{size}}, sold out": "ზომა {{size}}, მარაგში აღარ არის",
+	"In stock and ready to order.": "მარაგშია. შეგიძლიათ შეუკვეთოთ.",
 	"This size is currently sold out.": "ეს ზომა ამჟამად მარაგში არ არის.",
 	"Select a size to check availability.": "მარაგის შესამოწმებლად აირჩიეთ ზომა.",
 	"This product is currently unavailable.":
@@ -285,7 +296,7 @@ export const storefrontKa = {
 	"On sale": "ფასდაკლებით",
 	"Hide filters": "ფილტრების დამალვა",
 	Filters: "ფილტრები",
-	"{{min}} to {{max}}": "{{min}} — {{max}}",
+	"{{min}} to {{max}}": "{{min}}–{{max}}",
 	"From {{price}}": "{{price}}-დან",
 	"Up to {{price}}": "{{price}}-მდე",
 	"Active filters": "აქტიური ფილტრები",

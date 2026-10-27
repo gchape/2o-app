@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "#/lib/utils";
+import { Eyebrow } from "./eyebrow";
 
 type SectionHeaderProps = {
 	title: ReactNode;
@@ -25,11 +26,7 @@ export function SectionHeader({
 			)}
 		>
 			<div className="max-w-2xl">
-				{eyebrow && (
-					<p className="type-eyebrow mb-3 flex items-center gap-2 text-muted-foreground before:h-1 before:w-5 before:rounded-full before:bg-brand">
-						{eyebrow}
-					</p>
-				)}
+				{eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}
 				<h2 className="type-title text-[clamp(1.875rem,3.2vw,2.75rem)]">
 					{title}
 				</h2>

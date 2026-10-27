@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ClosingBanner } from "#/components/home/closing-banner";
 import { DealsSection } from "#/components/home/deals-section";
 import { DepartmentTiles } from "#/components/home/department-tiles";
 import { Hero } from "#/components/home/hero";
@@ -31,8 +30,7 @@ function HomePage() {
 				checkedAt={stats.checkedAt}
 			/>
 			<DepartmentTiles />
-			<HowItWorks warehouses={stats.warehouses} checkedAt={stats.checkedAt} />
-			<ClosingBanner total={stats.deals} />
+			<HowItWorks />
 		</>
 	);
 }

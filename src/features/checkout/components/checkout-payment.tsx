@@ -136,7 +136,7 @@ export function CheckoutPayment({
 				size="lg"
 				onClick={onContinue}
 			>
-				{t("I have transferred — upload proof")}
+				{t("Upload payment proof")}
 			</Button>
 			{expired && (
 				<LinkButton

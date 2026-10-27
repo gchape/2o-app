@@ -74,7 +74,7 @@ export const georgianAuthLocale = defineAuthLocale({
 			confirmPassword: "პაროლის დადასტურება",
 			confirmPasswordPlaceholder: "გაიმეორეთ პაროლი",
 			checkYourEmail:
-				"შეამოწმეთ ელფოსტა — დადასტურების შეტყობინება გამოგიგზავნეთ",
+				"შეამოწმეთ ელფოსტა. დადასტურების შეტყობინება გამოგიგზავნეთ",
 			checkYourEmailTitle: "შეამოწმეთ ელფოსტა",
 			continueWith: "გაგრძელება {{provider}}-ით",
 			email: "ელფოსტა",

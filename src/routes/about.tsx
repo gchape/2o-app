@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Section } from "#/components/layout/container";
+import { Eyebrow } from "#/components/layout/eyebrow";
+import { SectionHeader } from "#/components/layout/section-header";
 import { LinkButton } from "#/components/link-button";
+import { StepNumber } from "#/components/step-number";
 import { site } from "#/data/site";
 import { translate, useTranslation } from "#/i18n/translate";
 
@@ -63,19 +66,16 @@ function AboutPage() {
 	const currentStep = steps[active] ?? steps[0];
 	return (
 		<>
-			<Section className="brand-surface text-white" spacing="none">
+			<Section className="brand-surface about-hero text-white" spacing="none">
 				<div className="grid gap-10 py-20 md:py-28 lg:grid-cols-[1.5fr_1fr] lg:items-end lg:gap-20 lg:py-36">
 					<div>
-						<p className="type-eyebrow flex items-center gap-3 text-brand">
-							<span className="h-0.5 w-8 bg-brand" aria-hidden="true" />
-							{t("About us")}
-						</p>
-						<h1 className="type-display mt-8 max-w-3xl text-5xl leading-[1.08] sm:text-6xl lg:text-7xl">
+						<Eyebrow className="text-brand">{t("About us")}</Eyebrow>
+						<h1 className="type-display mt-8 max-w-3xl text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[1.08]">
 							{t("Good finds. Less searching.")}
 						</h1>
 					</div>
-					<div className="max-w-lg">
-						<p className="type-body text-lg text-white/70 md:text-xl">
+					<div className="max-w-lg border-l border-brand/50 pl-6 lg:mb-2">
+						<p className="type-body text-lg text-white/80 md:text-xl">
 							{t(description)}
 						</p>
 						<a
@@ -91,15 +91,12 @@ function AboutPage() {
 				id="our-process"
 				className="scroll-mt-28 overflow-hidden bg-background"
 			>
-				<div className="mb-12 max-w-2xl md:mb-16">
-					<p className="type-eyebrow text-muted-foreground">
-						{t("Our process")}
-					</p>
-					<h2 className="type-display mt-4 text-3xl leading-tight md:text-5xl">
-						{t("From the source to your shortlist.")}
-					</h2>
-				</div>
-				<div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+				<SectionHeader
+					eyebrow={t("Our process")}
+					title={t("From the source to your shortlist.")}
+					className="mb-10 md:mb-14"
+				/>
+				<div className="grid items-center gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
 					<fieldset
 						className="min-w-0 space-y-3"
 						aria-label={t("Explore our process")}
@@ -111,25 +108,32 @@ function AboutPage() {
 								aria-pressed={active === index}
 								aria-controls="about-step"
 								onClick={() => setActive(index)}
-								className={`flex w-full items-start gap-5 rounded-2xl border p-5 text-left transition-colors md:p-6 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand ${active === index ? "border-brand bg-brand/10" : "border-border hover:bg-muted/50"}`}
+								className={`flex w-full items-center gap-4 rounded-2xl border p-5 text-left transition-colors md:p-6 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current ${active === index ? "border-brand bg-brand/10" : "border-border hover:bg-muted/50"}`}
 							>
-								<span
-									className={`type-num flex size-10 shrink-0 items-center justify-center rounded-full text-sm ${active === index ? "bg-brand text-brand-foreground" : "bg-muted text-muted-foreground"}`}
-								>
-									{String(index + 1).padStart(2, "0")}
+								<StepNumber index={index} active={active === index} />
+								<span className="flex-1 text-base font-semibold sm:text-lg">
+									{t(step.label)}
 								</span>
-								<span>
-									<span className="block text-lg font-semibold">
-										{t(step.label)}
-									</span>
-									<span className="mt-2 block text-sm leading-7 text-muted-foreground">
-										{t(step.body)}
-									</span>
+								<span aria-hidden="true" className="text-xl">
+									↗
 								</span>
 							</button>
 						))}
 					</fieldset>
-					<div className="about-visual rounded-3xl border p-5 sm:p-8">
+					<div className="about-visual min-w-0 overflow-hidden rounded-3xl border p-5 sm:p-8">
+						<div
+							id="about-step"
+							aria-live="polite"
+							aria-atomic="true"
+							className="relative min-h-36 border-b pb-6"
+						>
+							<h3 className="type-card-title text-xl">
+								{t(currentStep.title)}
+							</h3>
+							<p className="type-body mt-3 text-sm text-muted-foreground">
+								{t(currentStep.body)}
+							</p>
+						</div>
 						<div className="about-scene" aria-hidden="true">
 							<div className="about-stack">
 								{steps.map((step, index) => (
@@ -152,32 +156,16 @@ function AboutPage() {
 								))}
 							</div>
 						</div>
-						<div
-							id="about-step"
-							aria-live="polite"
-							aria-atomic="true"
-							className="relative min-h-28 border-t pt-6"
-						>
-							<p className="type-eyebrow text-muted-foreground">
-								{t(currentStep.short)}
-							</p>
-							<h3 className="mt-3 text-xl font-semibold">
-								{t(currentStep.title)}
-							</h3>
-						</div>
 					</div>
 				</div>
 			</Section>
 			<Section className="border-t bg-muted/35">
 				<div className="grid gap-8 md:grid-cols-2 md:gap-20">
-					<div>
-						<p className="type-eyebrow text-muted-foreground">
-							{t("You make the final call")}
-						</p>
-						<h2 className="type-display mt-4 max-w-lg text-3xl leading-tight md:text-5xl">
-							{t("Better informed. Your choice.")}
-						</h2>
-					</div>
+					<SectionHeader
+						eyebrow={t("You make the final call")}
+						title={t("Better informed. Your choice.")}
+						className="items-start"
+					/>
 					<div>
 						<p className="type-body text-lg text-muted-foreground">
 							{t(

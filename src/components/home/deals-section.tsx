@@ -54,7 +54,7 @@ export function DealsSection({ deals, total, checkedAt }: DealsSectionProps) {
 					</>
 				}
 				action={
-					<div className="flex items-center gap-4">
+					<div className="flex flex-wrap items-center gap-4">
 						<Link
 							to="/deals"
 							className="py-2 font-semibold text-sm underline decoration-1 underline-offset-8"
@@ -63,42 +63,51 @@ export function DealsSection({ deals, total, checkedAt }: DealsSectionProps) {
 								count: total.toLocaleString(languageTags[locale]),
 							})}
 						</Link>
-						<div className="flex gap-2">
-							<Button
-								type="button"
-								variant="outline"
-								size="icon-lg"
-								className="rounded-full"
-								aria-label={t("Previous deals")}
-								disabled={atStart}
-								onClick={() => scrollByPage(-1)}
-							>
-								<HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
-							</Button>
-							<Button
-								type="button"
-								variant="outline"
-								size="icon-lg"
-								className="rounded-full"
-								aria-label={t("Next deals")}
-								disabled={atEnd}
-								onClick={() => scrollByPage(1)}
-							>
-								<HugeiconsIcon icon={ArrowRight01Icon} size={18} />
-							</Button>
+						<div className="flex gap-2" hidden={atStart && atEnd}>
+							{(
+								[
+									{
+										direction: -1,
+										label: "Previous deals",
+										icon: ArrowLeft01Icon,
+										disabled: atStart,
+									},
+									{
+										direction: 1,
+										label: "Next deals",
+										icon: ArrowRight01Icon,
+										disabled: atEnd,
+									},
+								] as const
+							).map(({ direction, label, icon, disabled }) => (
+								<Button
+									key={direction}
+									type="button"
+									variant="outline"
+									size="icon-lg"
+									className="rounded-full"
+									aria-label={t(label)}
+									aria-controls="home-deals"
+									disabled={disabled}
+									onClick={() => scrollByPage(direction)}
+								>
+									<HugeiconsIcon icon={icon} size={18} aria-hidden="true" />
+								</Button>
+							))}
 						</div>
 					</div>
 				}
 			/>
 
 			<ul
+				id="home-deals"
 				ref={scroller}
 				className="mt-8 flex snap-x snap-mandatory gap-5 md:mt-10 md:gap-6 overflow-x-auto pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden"
 			>
 				{deals.map((deal, i) => (
 					<li
 						key={deal.id}
-						className="w-[68%] shrink-0 snap-start sm:w-[40%] md:w-[calc((100%-4.5rem)/4)]"
+						className="w-[68%] shrink-0 snap-start sm:w-[40%] md:w-[calc((100%-3rem)/3)] lg:w-[calc((100%-4.5rem)/4)]"
 					>
 						<DealCard deal={deal} loading={dealImageLoading(i)} />
 					</li>
