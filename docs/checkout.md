@@ -2,7 +2,7 @@
 
 Delivery is to U.S. addresses, including forwarding addresses. Shipping is calculated **separately for each warehouse**, then added to one checkout total. Each warehouse has an explicit flat rate and an optional free-shipping threshold; only that warehouse’s merchandise counts toward its threshold.
 
-The customer signs in, chooses a saved U.S. address, reviews a server-created quote, copies the bank details/reference, transfers the total in **either USD or lari**, uploads a PNG/JPEG/WebP receipt (maximum 2 MB), and places the order. The quote shows the USD total prominently and the same total in lari in smaller type; the customer pays one of them, in its own currency. The submit button enables only after the server stores the receipt. Orders enter `pending`, meaning **payment awaiting verification**, never automatically `paid`.
+The customer signs in, chooses a saved U.S. address, reviews a server-created quote, copies the bank details/reference, transfers the total in **either USD or lari**, selects **Upload payment proof**, uploads a PNG/JPEG/WebP receipt (maximum 2 MB), and places the order. The quote shows the USD total prominently and the same total in lari in smaller type; the customer pays one of them, in its own currency. The submit button enables only after the server stores the receipt. Orders enter `pending`, meaning **payment awaiting verification**, never automatically `paid`.
 
 ## Deployment settings
 
@@ -42,7 +42,7 @@ New quotes freeze each shipment’s item IDs, merchandise subtotal, shipping cha
 
 ## Development preview with seeded products
 
-The seed script uses four fictional warehouse domains. The following sample rates are configured in this workspace’s untracked `.env.development`. They are not committed defaults: on another checkout, add this entry explicitly. Never copy these fictional rates into production.
+The seed script uses four fictional warehouse domains. To preview their shipping costs, add the following sample rates to your local `.env.development`. Seeding does not configure shipping, and these rates are not committed defaults. Never copy these fictional rates into production.
 
 | Seed warehouse     | Shipping charge | Free shipping threshold |
 | ------------------ | --------------- | ----------------------- |

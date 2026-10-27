@@ -125,7 +125,7 @@ Route loaders run on both server and client, so they are **not** a server-only b
 
 | URL                         | Purpose                                                                           |
 | --------------------------- | --------------------------------------------------------------------------------- |
-| `/`                         | Hero, deals, departments, how it works, closing CTA.                              |
+| `/`                         | Hero, deals, departments, and a three-step shopping guide.                        |
 | `/deals`                    | Searchable, filterable discounted products.                                       |
 | `/stores/$storeId`          | Anonymous store catalog with filters, including full-price products; not indexed. |
 | `/about`                    | Store selection story and interactive 3D process illustration.                    |
@@ -142,10 +142,19 @@ Route loaders run on both server and client, so they are **not** a server-only b
 
 ## Features
 
+### Homepage
+
+The homepage introduces the store, shows the biggest discounts, links to departments, and explains shopping in three steps: find your fit, compare the details, and review your order. The guide links to About for the store-selection story.
+
+- The hero shows deal and warehouse counts. The deals section owns the last price-check note and the link to all deals; it is hidden when no deals are available.
+- Deal cards scroll horizontally, with three cards across at tablet widths and four on desktop. Previous/next controls disappear when the row fits, and scrolling respects reduced-motion preferences.
+- Department tiles link to each department and its categories. The shopping guide covers shipping, service fees, and the final total.
+
 ### About and footer navigation
 
-`/about` explains the selection process: choose reputable U.S. stores, filter and compare listings, and bring the results together for customers. The page has a brand-black introduction, a light process section, and a closing explanation of recorded prices and availability.
-- Three selectable steps highlight layers in a CSS 3D illustration; no WebGL or graphics-library dependency. All step descriptions remain visible, with keyboard-operable buttons, an announced selection summary, and reduced-motion support.
+`/about` explains the selection process: choose reputable U.S. stores, filter and compare listings, and bring the results together for customers. The page has a charcoal introduction with a warm gold background, a light process section, and a closing explanation of recorded prices and availability.
+
+- Three selectable steps highlight layers in a CSS 3D illustration; no WebGL or graphics-library dependency. Keyboard-operable buttons select one step at a time. Its title and description appear above the illustration in a live region, with reduced-motion support for the layer transitions.
 - The footer links to **About us** under **Discover** (Georgian: **ჩვენ შესახებ** under **გაგვიცანით**).
 - Page copy and metadata support English and Georgian; `/about` is included in the sitemap.
 - The page describes the service, not an ingestion implementation in this repository. It makes no claim of live AI selection or guaranteed lowest prices.
@@ -193,7 +202,7 @@ Set `WAREHOUSE_SHIPPING_RULES` in the app’s environment before accepting new o
 
 Use exact `product.warehouse` domains as keys, without `www.`. See [Warehouse shipping rules](docs/checkout.md#warehouse-shipping-rules) for the JSON format, limits, and a worked example. The old `CHECKOUT_SHIPPING_USD_CENTS` variable no longer applies. For Compose, recreate the app after changing environment values; `docker compose restart` does not reload container environment variables. See the [development setup](docs/checkout.md#development-preview-with-seeded-products) for the command.
 
-The seed script creates products for `sportmax.example`, `urbanfit.example`, `kidzone.example`, and `shoebox.example`. These are fictional stores, and seeding does **not** configure shipping. The [development preview configuration](docs/checkout.md#development-preview-with-seeded-products) uses $6/free from $50 for Sportmax, $8/free from $75 for Urbanfit, a flat $5 for Kidzone, and always-free shipping for Shoebox. These sample rules have been added to this workspace’s untracked `.env.development`; new checkouts of the repository must add them explicitly. They are not real supplier charges or production defaults.
+The seed script creates products for `sportmax.example`, `urbanfit.example`, `kidzone.example`, and `shoebox.example`. These are fictional stores, and seeding does **not** configure shipping. The [development preview configuration](docs/checkout.md#development-preview-with-seeded-products) uses $6/free from $50 for Sportmax, $8/free from $75 for Urbanfit, a flat $5 for Kidzone, and always-free shipping for Shoebox. Add the sample rules explicitly to your local `.env.development` to use them. They are not real supplier charges or production defaults.
 
 Without a matching rule, customers can still browse and edit their cart, but cannot create payment instructions for any cart containing that shipment. Previously saved checkout quotes retain their original shipping totals.
 
@@ -232,14 +241,14 @@ Schema: `src/db/schema.ts`, `src/db/auth-schema.ts`; migrations in `drizzle/`. R
 | `type-eyebrow`    | Short category/brand/section labels. |
 | `type-num`        | Prices, counts, numbers.             |
 
-**Composition.** Use `Container`, `Section` (`src/components/layout/container.tsx`) and `SectionHeader` for layout. Reuse primitives in `src/components/ui/`; combine classes with `cn()`, define variants with class-variance-authority, and use Hugeicons. Product cards have one primary link; images reserve space and show a translated fallback.
+**Composition.** Use `Container`, `Section` (`src/components/layout/container.tsx`) and `SectionHeader` for layout. `Eyebrow` shares section-label styling, and `StepNumber` shares the numbered badges used by the shopping guide and About process. Keep page-specific backgrounds and illustration styles in `src/styles.css`. Reuse primitives in `src/components/ui/`; combine classes with `cn()`, define variants with class-variance-authority, and use Hugeicons. Product cards have one primary link; images reserve space and show a translated fallback.
 
 **Responsive and accessible.** Check both languages from 320px up; Georgian strings run long, so let flex/grid children shrink and avoid fixed widths. The shell has a skip link and main landmark; keep labels, visible focus, pending/disabled states, status announcements, and reduced-motion support intact. Test loading, empty, error, and success states.
 
 **Localization.** `ka` (default) and `en`. The server reads the HTTP-only `2o-locale` cookie before rendering; the language selector saves via a server function and invalidates route data.
 - `src/i18n/storefront-ka.ts` maps English source strings to Georgian. Use `useTranslation()` in components and `translate()` (explicit locale) elsewhere.
 - `en.ts` / `ka.ts` hold typed messages for forms and custom auth flows; `auth-ka.ts` holds Better Auth UI's Georgian copy.
-- Prices format by locale and currency; price-check times use `Asia/Tbilisi`.
+- `src/lib/price.ts` assembles currency layouts explicitly to keep server and browser output consistent across ICU/CLDR versions. Georgian uses nonbreaking spaces for grouping, a decimal comma, and a trailing currency symbol; English uses comma grouping, a decimal point, and a leading symbol. Use `usePriceFormatter()` in components rather than formatting currency independently. Price-check times use `Asia/Tbilisi`.
 - Write Georgian as natural customer-facing copy rather than translating English slogans word for word. Keep the meaning and service claims consistent across languages.
 - Preserve `{{placeholder}}` names. Missing translations fall back to the source string; product names are not translated. Keep locale in providers, never module-level globals.
 
@@ -394,7 +403,11 @@ pnpm verify && pnpm check:deprecations && pnpm knip && pnpm build && pnpm search
 
 Tests live beside source as `*.test.ts(x)`, run under a separate Node-based Vitest config so Start/Nitro RPC transforms don't bypass mocked server boundaries. `check:deprecations` reads TypeScript's suggestion diagnostics; it is not a vulnerability scanner and depends on the installed TypeScript version.
 
-Shipping tests cover per-warehouse thresholds, multiple paid shipments, quantity changes, GEL conversion, missing or invalid rules, and saved-quote compatibility. Cart reads and checkout persistence are tested with mocked services; these are not live-database integration tests.
+Shipping tests cover per-warehouse thresholds, multiple paid shipments, quantity changes, GEL conversion, missing or invalid rules, and saved-quote compatibility.
+
+Store tests cover route scoping, anonymous identifiers in product responses, and store filters in catalog search; `search:check` also exercises store filtering against Redis. Price tests cover locale-specific output, currency placement, grouping, and negative amounts.
+
+Cart reads and checkout persistence are tested with mocked services; these are not live-database integration tests.
 
 CI runs on pushes to `main` and pull requests with a Redis service. It does not provision PostgreSQL or run browser end-to-end tests. For UI work, also check both languages at mobile/tablet/desktop widths, keyboard use, dialog dismissal, and loading/empty/error states. Verify auth, authorization, persistence, and concurrency against real services.
 
@@ -426,7 +439,7 @@ New departments or categories change the PostgreSQL enums: update `src/data/cata
 
 Edit `src/data/site.ts` (brand copy, currency, time zone) and `src/data/socials.ts`; adjust tokens in `src/styles.css`. Keep `src/i18n/` in sync and don't present unimplemented services as available actions.
 
-The About story and process steps live in `src/routes/about.tsx`, with scene styles in `src/styles.css`. Footer links live in `src/components/layout/footer.tsx`; Georgian storefront copy lives in `src/i18n/storefront-ka.ts`. Update page metadata and translations when changing the story, and retain keyboard and reduced-motion behavior when adjusting the illustration.
+The shopping guide lives in `src/components/home/how-it-works.tsx`; the About story and selection process live in `src/routes/about.tsx`, with scene styles in `src/styles.css`. Keep the shopper instructions distinct from the store-selection story. Footer links live in `src/components/layout/footer.tsx`; Georgian storefront copy lives in `src/i18n/storefront-ka.ts`. Update page metadata and translations when changing the story, and retain keyboard and reduced-motion behavior when adjusting the illustration.
 
 ## Troubleshooting
 
