@@ -23,10 +23,6 @@ const settingsSchema = z.object({
 		.string()
 		.min(1)
 		.pipe(z.coerce.number<string>().int().min(0).max(10000)),
-	CHECKOUT_SHIPPING_USD_CENTS: z
-		.string()
-		.min(1)
-		.pipe(z.coerce.number<string>().int().min(0).max(100000)),
 	TELEGRAM_BOT_TOKEN: z.string().min(1),
 	TELEGRAM_CHAT_ID: z.string().min(1),
 });
@@ -39,7 +35,6 @@ export function checkoutSettings(source: Record<string, unknown> = env) {
 	return {
 		iban: e.CHECKOUT_IBAN,
 		serviceFeeBps: e.CHECKOUT_SERVICE_FEE_BPS,
-		shippingUsd: e.CHECKOUT_SHIPPING_USD_CENTS,
 	};
 }
 

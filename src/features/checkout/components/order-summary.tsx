@@ -1,9 +1,10 @@
 import { LinkButton } from "#/components/link-button";
 import { Button } from "#/components/ui/button";
-import { site } from "#/data/site";
 import type { CartItem } from "#/features/cart/cart";
 import type { useCart } from "#/features/cart/use-cart";
 import { ProductImage } from "#/features/catalog/components/product-image";
+import { ShipmentDetails } from "#/features/shipping/shipment-details";
+import { groupShipments } from "#/features/shipping/shipping";
 import { useTranslation } from "#/i18n/translate";
 import { usePriceFormatter } from "#/lib/price";
 import type { CheckoutQuote } from "../checkout";
@@ -46,13 +47,36 @@ export function OrderSummary({ quote }: { quote: CheckoutQuote }) {
 	return (
 		<div className="space-y-5 rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
 			<h2 className="type-title text-xl">{t("Order summary")}</h2>
-			<OrderItems
-				items={quote.lines.map((line) => ({
-					...line,
-					price: line.usdPrice,
-					currency: "USD",
-				}))}
-			/>
+			{quote.shipments ? (
+				quote.shipments.map((shipment, index) => {
+					const items = quote.lines
+						.filter((line) => shipment.itemIds.includes(line.id))
+						.map((line) => ({
+							...line,
+							price: line.usdPrice,
+							currency: "USD",
+						}));
+					return (
+						<section key={shipment.groupId}>
+							<ShipmentDetails
+								number={index + 1}
+								items={items}
+								quote={shipment}
+							/>
+							<OrderItems items={items} />
+						</section>
+					);
+				})
+			) : (
+				<OrderItems
+					items={quote.lines.map((line) => ({
+						...line,
+						price: line.usdPrice,
+						currency: "USD",
+					}))}
+				/>
+			)}
+
 			<dl className="space-y-3 border-t pt-4 text-sm [&>div]:flex [&>div]:flex-wrap [&>div]:justify-between [&>div]:gap-x-3 [&>div]:gap-y-1 [&_dd]:font-medium [&_dd]:tabular-nums">
 				<div>
 					<dt>{t("Items (USD)")}</dt>
@@ -83,8 +107,7 @@ export function OrderSummary({ quote }: { quote: CheckoutQuote }) {
 			</dl>
 			<p className="border-t pt-4 text-xs leading-relaxed text-muted-foreground">
 				{t(
-					"Service fee applies to items only. Free U.S. shipping on items totaling {{amount}} or more.",
-					{ amount: usd(site.delivery.freeFrom) },
+					"Service fee applies to items only. Shipping is charged separately for each warehouse.",
 				)}
 			</p>
 		</div>
@@ -117,7 +140,12 @@ export function CartSummary({ cart }: { cart: ReturnType<typeof useCart> }) {
 				</>
 			) : (
 				<>
-					<OrderItems items={cart.items} />
+					{groupShipments(cart.items).map((group, index) => (
+						<section key={group.groupId}>
+							<ShipmentDetails number={index + 1} items={group.lines} />
+							<OrderItems items={group.lines} />
+						</section>
+					))}
 					<div className="flex flex-wrap justify-between gap-2 border-t pt-4 font-semibold">
 						<span>{t("Subtotal")}</span>
 						<span>{formatPrice(cart.subtotal, cart.currency)}</span>

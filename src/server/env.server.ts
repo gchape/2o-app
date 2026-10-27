@@ -37,7 +37,7 @@ const envSchema = z
 		// Checkout stays unavailable until these are valid and NBG's exchange rate can be fetched.
 		CHECKOUT_IBAN: optionalString,
 		CHECKOUT_SERVICE_FEE_BPS: optionalString,
-		CHECKOUT_SHIPPING_USD_CENTS: optionalString,
+		WAREHOUSE_SHIPPING_RULES: optionalString,
 		TELEGRAM_BOT_TOKEN: optionalString,
 		TELEGRAM_CHAT_ID: optionalString,
 	})

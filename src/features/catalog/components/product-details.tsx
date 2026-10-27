@@ -1,11 +1,10 @@
 import { Container } from "#/components/layout/container";
 import { Badge } from "#/components/ui/badge";
-import { site } from "#/data/site";
 import { AddToCartButton } from "#/features/cart/components/add-to-cart-button";
 import type { ProductDetail } from "#/features/catalog/product.functions";
 import type { SkuSelection } from "#/features/catalog/product-selection";
 import { useTranslation } from "#/i18n/translate";
-import { isOnSale, usePriceFormatter } from "#/lib/price";
+import { isOnSale } from "#/lib/price";
 import { OptionGroup } from "./option-group";
 import { Price } from "./price";
 import { ProductImage } from "./product-image";
@@ -24,7 +23,6 @@ export function ProductDetails({
 	onColorChange,
 	onSkuChange,
 }: ProductDetailsProps) {
-	const { formatPriceCompact } = usePriceFormatter();
 	const t = useTranslation();
 	const { colors, color, colorSkus, selected, shown, imageUrl } = selection;
 
@@ -110,13 +108,7 @@ export function ProductDetails({
 								</p>
 								<p>
 									{t(
-										"U.S. delivery only; free from {{price}}. We do not ship to Georgia.",
-										{
-											price: formatPriceCompact(
-												site.delivery.freeFrom,
-												site.delivery.currency,
-											),
-										},
+										"Shipping varies by warehouse and is calculated at checkout.",
 									)}
 								</p>
 							</div>

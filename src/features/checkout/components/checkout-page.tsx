@@ -8,6 +8,7 @@ import { site } from "#/data/site";
 import { addressesQuery } from "#/features/addresses/address.queries";
 import { AddressDialog } from "#/features/addresses/components/address-dialog";
 import { useCart, useCartUpdating } from "#/features/cart/use-cart";
+import { validShippingRule } from "#/features/shipping/shipping";
 import { languageTags, useLocale } from "#/i18n/locale";
 import { useTranslation } from "#/i18n/translate";
 import { cn } from "#/lib/utils";
@@ -126,9 +127,7 @@ function CheckoutFlow({ data, userId }: { data: PageData; userId: string }) {
 				</p>
 				<h1 className="type-title text-3xl md:text-4xl">{t("Checkout")}</h1>
 				<p className="text-sm leading-relaxed text-muted-foreground">
-					{t(
-						"We deliver only to your U.S. address. Delivery to Georgia is not included or available.",
-					)}
+					{t("We deliver only to your U.S. address.")}
 				</p>
 			</div>
 			<ol
@@ -224,6 +223,9 @@ function CheckoutFlow({ data, userId }: { data: PageData; userId: string }) {
 									cart.isError ||
 									cartUpdating ||
 									!cart.items.length ||
+									cart.items.some(
+										(item) => !validShippingRule(item.shipping?.rule),
+									) ||
 									Boolean(busy)
 								}
 								onClick={() => selected && flow.prepare(selected.id)}

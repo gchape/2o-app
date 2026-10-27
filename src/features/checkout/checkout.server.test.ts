@@ -76,6 +76,11 @@ const quote = calculateQuote(
 			currency: "GEL",
 			quantity: 1,
 			image: null,
+			shipping: {
+				groupId: "store-a",
+				rule: { flatRateUsd: 700, freeFromUsd: 9900 },
+				estimatedUnitUsd: null,
+			},
 		},
 	],
 	{
@@ -263,4 +268,41 @@ it("returns the same order on retry without another insert or cart removal", asy
 	expect((await submitCheckout("buyer", id)).id).toBe(id);
 	expect(state.inserts).toHaveLength(0);
 	expect(state.remove).not.toHaveBeenCalled();
+});
+
+it("blocks a new checkout before saving payment instructions when a warehouse has no shipping rule", async () => {
+	state.pricing.mockResolvedValue(quote.pricing);
+	state.cart.mockResolvedValue(
+		quote.lines.map((line) => ({ ...line, shipping: undefined })),
+	);
+	state.rows.push([], [{ id: "buyer" }], [], [], [shippingAddress]);
+	await expect(prepareCheckout("buyer", id, id)).rejects.toThrow(
+		"Shipping is not available",
+	);
+	expect(state.inserts).toHaveLength(0);
+});
+
+it("persists the per-warehouse breakdown on a new checkout", async () => {
+	state.pricing.mockResolvedValue(quote.pricing);
+	state.cart.mockResolvedValue(quote.lines);
+	state.rows.push(
+		[],
+		[{ id: "buyer" }],
+		[],
+		[],
+		[shippingAddress],
+		[publicRow],
+	);
+	await prepareCheckout("buyer", id, id);
+	expect(state.inserts).toEqual([
+		{
+			table: checkoutSession,
+			value: expect.objectContaining({
+				quote: expect.objectContaining({
+					shipments: quote.shipments,
+					shippingUsd: 700,
+				}),
+			}),
+		},
+	]);
 });

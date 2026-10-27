@@ -28,6 +28,10 @@ export function orderMessages(order: OrderNotice) {
 			(line, i) =>
 				`${i + 1}. ${escapeHtml(line.name.slice(0, 400))}\n${line.quantity} × ${usd(line.usdPrice)} = <b>${usd(line.usdTotal)}</b>\nSKU: <code>${escapeHtml(line.id)}</code>`,
 		),
+		...(q.shipments ?? []).map(
+			(shipment, index) =>
+				`<b>Shipment ${index + 1}</b>\nItems: ${usd(shipment.subtotalUsd)}\nShipping: ${shipment.shippingUsd ? usd(shipment.shippingUsd) : "FREE"}\nFlat rate: ${usd(shipment.rule.flatRateUsd)}; free from: ${shipment.rule.freeFromUsd === null ? "not offered" : usd(shipment.rule.freeFromUsd)}\nItem numbers: ${shipment.itemIds.map((id) => q.lines.findIndex((line) => line.id === id) + 1).join(", ")}`,
+		),
 		`<b>Price breakdown</b>\nItems: ${usd(q.subtotalUsd)}\nService fee (${q.pricing.serviceFeeBps / 100}%): ${usd(q.serviceFeeUsd)}\nU.S. shipping: ${q.shippingUsd ? usd(q.shippingUsd) : "FREE"}\n<b>Total: ${usd(q.totalUsd)}</b>\nCustomer may pay either ${usd(q.totalUsd)} or ${(q.totalGel / 100).toFixed(2)} GEL\nExchange rate at quote: 1 USD = ${q.pricing.gelPerUsd} GEL\nRate date: ${escapeHtml(q.pricing.rateDate)}\n\nVerify the bank deposit (either amount) before marking this order paid.`,
 	];
 	const chunks: string[] = [];

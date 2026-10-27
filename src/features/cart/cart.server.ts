@@ -4,6 +4,9 @@ import { compact, keyBy } from "es-toolkit";
 import { z } from "zod";
 import { db } from "#/db";
 import { product, skus } from "#/db/schema";
+import { getGelPerUsd } from "#/features/checkout/exchange-rate.server";
+import { unitPriceUsd } from "#/features/shipping/money.server";
+import { warehouseShipping } from "#/features/shipping/shipping-config.server";
 import { getRedis } from "#/server/redis.server";
 import { type CartItem, MAX_QUANTITY } from "./cart";
 import { CART_TTL_SECONDS, createCartStore } from "./cart-store.server";
@@ -33,6 +36,7 @@ const findAvailableSkus = (ids: string[]) =>
 			id: skus.id,
 			name: sql<string>`${product.name} || ' (' || ${skus.color} || ', ' || ${skus.size} || ')'`,
 			currency: product.currency,
+			warehouse: product.warehouse,
 			image: skus.imageUrl,
 			price: skus.price, // minor units
 		})
@@ -68,10 +72,27 @@ async function getCart(strict = false): Promise<CartItem[]> {
 		);
 	}
 
+	const rate =
+		!strict && Object.values(available).some((sku) => sku.currency === "GEL")
+			? await getGelPerUsd()
+			: null;
 	return compact(
 		entries.map(([field, value]) => {
 			const sku = available[String(field)];
-			return sku && { ...sku, quantity: Number(value) };
+			if (!sku) return undefined;
+			const { warehouse, ...line } = sku;
+			return {
+				...line,
+				quantity: Number(value),
+				shipping: {
+					...warehouseShipping(warehouse),
+					estimatedUnitUsd: unitPriceUsd(
+						sku.price,
+						sku.currency,
+						rate?.gelPerUsd ?? null,
+					),
+				},
+			};
 		}),
 	);
 }

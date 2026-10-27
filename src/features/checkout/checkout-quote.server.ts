@@ -1,20 +1,25 @@
 import Decimal from "decimal.js";
-import { site } from "#/data/site";
 import {
 	type CartItem,
 	MAX_CART_LINES,
 	MAX_QUANTITY,
 } from "#/features/cart/cart";
+import {
+	roundMinorUnits,
+	unitPriceUsd,
+} from "#/features/shipping/money.server";
+import {
+	groupShipments,
+	shippingCharge,
+	validShippingRule,
+} from "#/features/shipping/shipping";
 import type { CheckoutPricing, CheckoutQuote } from "./checkout";
-
-const roundMinorUnits = (amount: Decimal) =>
-	amount.toDecimalPlaces(0, Decimal.ROUND_HALF_UP).toNumber();
 
 /**
  * Freeze prices in integer minor units: convert each unit to USD before applying
  * quantities, charge the fee on merchandise, then convert the final total to GEL.
  * Decimal half-up rounding avoids binary floating-point errors at half a cent.
- * Free shipping is based on merchandise alone, before fees.
+ * Each warehouse qualifies for free shipping using only its own merchandise.
  */
 export function calculateQuote(
 	items: CartItem[],
@@ -31,9 +36,7 @@ export function calculateQuote(
 	if (
 		!Number.isSafeInteger(pricing.serviceFeeBps) ||
 		pricing.serviceFeeBps < 0 ||
-		pricing.serviceFeeBps > 10000 ||
-		!Number.isSafeInteger(pricing.shippingUsd) ||
-		pricing.shippingUsd < 0
+		pricing.serviceFeeBps > 10000
 	)
 		throw new Error("Invalid checkout fees");
 	const sourceCurrency = items[0]?.currency;
@@ -49,11 +52,13 @@ export function calculateQuote(
 			item.quantity > MAX_QUANTITY
 		)
 			throw new Error("Invalid cart item");
-		const usdPrice =
-			sourceCurrency === "GEL"
-				? roundMinorUnits(new Decimal(item.price).div(pricing.gelPerUsd))
-				: item.price;
-		if (usdPrice < 1) throw new Error("Invalid converted price");
+		const usdPrice = unitPriceUsd(
+			item.price,
+			sourceCurrency,
+			pricing.gelPerUsd,
+		);
+		if (usdPrice === null || usdPrice < 1)
+			throw new Error("Invalid converted price");
 		return { ...item, usdPrice, usdTotal: usdPrice * item.quantity };
 	});
 	const sourceSubtotal = lines.reduce(
@@ -61,8 +66,38 @@ export function calculateQuote(
 		0,
 	);
 	const subtotalUsd = lines.reduce((sum, line) => sum + line.usdTotal, 0);
-	const shippingUsd =
-		subtotalUsd >= site.delivery.freeFrom ? 0 : pricing.shippingUsd;
+	const shipments = groupShipments(lines).map(
+		({ groupId, lines: shipmentLines }) => {
+			const rule = shipmentLines[0]?.shipping?.rule;
+			if (
+				!validShippingRule(rule) ||
+				shipmentLines.some(
+					(line) =>
+						!line.shipping?.groupId ||
+						line.shipping.rule?.flatRateUsd !== rule.flatRateUsd ||
+						line.shipping.rule?.freeFromUsd !== rule.freeFromUsd,
+				)
+			)
+				throw new Error(
+					"Shipping is not available for some items. Please review your cart or contact us.",
+				);
+			const subtotalUsd = shipmentLines.reduce(
+				(sum, line) => sum + line.usdTotal,
+				0,
+			);
+			return {
+				groupId,
+				itemIds: shipmentLines.map((line) => line.id),
+				subtotalUsd,
+				shippingUsd: shippingCharge(subtotalUsd, rule),
+				rule: { ...rule },
+			};
+		},
+	);
+	const shippingUsd = shipments.reduce(
+		(sum, shipment) => sum + shipment.shippingUsd,
+		0,
+	);
 	const serviceFeeUsd = Math.round(
 		(subtotalUsd * pricing.serviceFeeBps) / 10000,
 	);
@@ -78,6 +113,7 @@ export function calculateQuote(
 		throw new Error("Order total is too large");
 	return {
 		lines,
+		shipments,
 		sourceCurrency,
 		sourceSubtotal,
 		subtotalUsd,

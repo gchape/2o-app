@@ -18,6 +18,8 @@ import {
 	useCartUpdating,
 } from "#/features/cart/use-cart";
 import { ProductImage } from "#/features/catalog/components/product-image";
+import { ShipmentDetails } from "#/features/shipping/shipment-details";
+import { groupShipments } from "#/features/shipping/shipping";
 import { useTranslation } from "#/i18n/translate";
 import { usePriceFormatter } from "#/lib/price";
 
@@ -63,7 +65,14 @@ export function CartDrawer() {
 					<EmptyCart />
 				) : (
 					<>
-						<CartLines items={items} />
+						<div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 sm:px-6">
+							{groupShipments(items).map((group, index) => (
+								<section key={group.groupId}>
+									<ShipmentDetails number={index + 1} items={group.lines} />
+									<CartLines items={group.lines} />
+								</section>
+							))}
+						</div>
 						<SheetFooter className="gap-4 border-t p-6">
 							<div
 								aria-live="polite"
@@ -77,7 +86,7 @@ export function CartDrawer() {
 							</div>
 							<p className="text-muted-foreground text-xs">
 								{t(
-									"U.S. shipping and the service fee are calculated at checkout.",
+									"Shipping is calculated separately for each warehouse. Review the final shipping and service fee at checkout.",
 								)}
 							</p>
 							<LinkButton
@@ -118,10 +127,7 @@ function CartLines({ items }: { items: CartItem[] }) {
 	const updating = useCartUpdating();
 
 	return (
-		<ul
-			aria-busy={updating}
-			className="min-h-0 flex-1 divide-y overflow-y-auto overscroll-contain px-5 sm:px-6"
-		>
+		<ul aria-busy={updating} className="divide-y">
 			{items.map((item) => (
 				<li key={item.id} className="flex gap-4 py-6">
 					<ProductImage

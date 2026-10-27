@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createAddressSchema } from "#/features/addresses/address.schema";
 import type { CartItem } from "#/features/cart/cart";
+import type { ShipmentQuote } from "#/features/shipping/shipping";
 
 export const MAX_PROOF_BYTES = 2 * 1024 * 1024;
 export const PROOF_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -39,12 +40,15 @@ export type CheckoutPricing = {
 	gelPerUsd: number;
 	rateDate: string;
 	serviceFeeBps: number;
-	shippingUsd: number;
+	/** Retained only when reading an old pricing snapshot. */
+	shippingUsd?: number;
 	iban: string;
 };
 type CheckoutLine = CartItem & { usdPrice: number; usdTotal: number };
 export type CheckoutQuote = {
 	lines: CheckoutLine[];
+	/** Missing on legacy quotes; never invent a historical breakdown. */
+	shipments?: ShipmentQuote[];
 	sourceCurrency: "USD" | "GEL";
 	sourceSubtotal: number;
 	subtotalUsd: number;

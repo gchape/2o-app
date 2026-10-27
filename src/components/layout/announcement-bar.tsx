@@ -3,11 +3,9 @@ import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { Button } from "#/components/ui/button";
-import { site } from "#/data/site";
 import { publicConfigQuery } from "#/features/config/config.queries";
 import { useTranslation } from "#/i18n/translate";
 import { openChat } from "#/lib/chat-widget";
-import { usePriceFormatter } from "#/lib/price";
 import { cn } from "#/lib/utils";
 import { Container } from "./container";
 
@@ -30,7 +28,6 @@ function Item({
 
 /** Delivery information and optional shopping support. */
 export function AnnouncementBar() {
-	const { formatPriceCompact } = usePriceFormatter();
 	const t = useTranslation();
 	const { data: config } = useSuspenseQuery(publicConfigQuery);
 
@@ -56,12 +53,7 @@ export function AnnouncementBar() {
 				)}
 
 				<Item icon={DeliveryTruck01Icon}>
-					{t("Free U.S. shipping from {{price}}", {
-						price: formatPriceCompact(
-							site.delivery.freeFrom,
-							site.delivery.currency,
-						),
-					})}
+					{t("U.S. delivery · Shipping calculated at checkout")}
 				</Item>
 			</Container>
 		</section>

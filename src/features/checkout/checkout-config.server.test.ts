@@ -11,7 +11,6 @@ const { checkoutPricing, checkoutSettings, validIban } = await import(
 const settings = {
 	CHECKOUT_IBAN: "GE29NB0000000101904917",
 	CHECKOUT_SERVICE_FEE_BPS: "500",
-	CHECKOUT_SHIPPING_USD_CENTS: "700",
 	TELEGRAM_BOT_TOKEN: "test-token",
 	TELEGRAM_CHAT_ID: "test-chat",
 };
@@ -29,7 +28,6 @@ describe("checkout configuration", () => {
 		expect(checkoutSettings(settings)).toEqual({
 			iban: "GE29NB0000000101904917",
 			serviceFeeBps: 500,
-			shippingUsd: 700,
 		});
 		for (const key of Object.keys(settings))
 			expect(checkoutSettings({ ...settings, [key]: undefined })).toBeNull();
@@ -43,6 +41,7 @@ describe("checkout configuration", () => {
 			checkoutSettings({
 				...settings,
 				CHECKOUT_BENEFICIARY: "Someone",
+				CHECKOUT_SHIPPING_USD_CENTS: "700",
 				CHECKOUT_PAYMENT_CURRENCY: "GEL",
 				CHECKOUT_GEL_PER_USD: "9",
 				CHECKOUT_RATE_UPDATED_AT: "2020-01-01T00:00:00Z",
@@ -57,7 +56,6 @@ describe("checkout pricing", () => {
 		expect(await checkoutPricing(settings)).toEqual({
 			iban: "GE29NB0000000101904917",
 			serviceFeeBps: 500,
-			shippingUsd: 700,
 			gelPerUsd: 2.65,
 			rateDate: "2026-10-26T00:00:00.000Z",
 		});

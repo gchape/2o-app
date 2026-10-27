@@ -8,13 +8,6 @@ export const site = {
 	/** IANA zone the store operates in; times shown to shoppers use it. */
 	timezone: "Asia/Tbilisi",
 
-	delivery: {
-		region: "United States",
-		currency: "USD",
-		/** Free U.S. delivery from this merchandise subtotal, in USD cents. */
-		freeFrom: 9_900,
-	},
-
 	tagline: "Big brands. Small prices.",
 	description:
 		"Daily deals on shoes and clothing for men, women and kids, checked across wholesale stores.",

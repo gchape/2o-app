@@ -1,5 +1,27 @@
 /** English source strings are also the English catalog. Keep placeholders unchanged. */
 export const storefrontKa = {
+	"Shipment {{number}}": "გზავნილი {{number}}",
+	"Shipment items: {{amount}}": "ნივთების ჯამური ღირებულება: {{amount}}",
+	"Shipping: {{amount}}": "მიწოდება: {{amount}}",
+	"Estimated shipping: {{amount}}":
+		"მიწოდების სავარაუდო ღირებულება: {{amount}}",
+	"Shipping estimate unavailable. Your final cost will be shown before payment.":
+		"მიწოდების ღირებულება ამჟამად ვერ გამოითვლება. საბოლოო თანხას გადახდამდე ნახავთ.",
+	"Shipping is not available for some items. Please review your cart or contact us.":
+		"ზოგიერთი ნივთის მიწოდების ღირებულება ჯერ განსაზღვრული არ არის. გადახედეთ კალათას ან დაგვიკავშირდით.",
+	"Add {{amount}} from this warehouse for free shipping.":
+		"უფასო მიწოდებისთვის ამავე საწყობიდან დაამატეთ კიდევ {{amount}}-ის ნივთები.",
+	"Free shipping from {{amount}} for this shipment only.":
+		"ამ გზავნილის მიწოდება უფასოა, თუ მასში შემავალი ნივთების ღირებულება მინიმუმ {{amount}}-ია.",
+	"Shipping is calculated separately for each warehouse. Review the final shipping and service fee at checkout.":
+		"მიწოდების ღირებულება თითოეული საწყობისთვის ცალ-ცალკე ითვლება. მიწოდებისა და მომსახურების საბოლოო საფასურს შეკვეთის გაფორმებისას ნახავთ.",
+	"Service fee applies to items only. Shipping is charged separately for each warehouse.":
+		"მომსახურების საფასური მხოლოდ ნივთების ღირებულებაზე ითვლება. მიწოდების საფასური თითოეული საწყობისთვის ცალ-ცალკე გამოითვლება.",
+	"U.S. delivery · Shipping calculated at checkout":
+		"მიწოდება აშშ-ში · საფასური გამოითვლება შეკვეთის გაფორმებისას",
+	"Shipping varies by warehouse and is calculated at checkout.":
+		"მიწოდების საფასური საწყობის მიხედვით განსხვავდება და შეკვეთის გაფორმებისას გამოითვლება.",
+
 	Discover: "გაგვიცანით",
 	"See how we choose": "ნახეთ, როგორ ვარჩევთ",
 	"Our process": "როგორ ვმუშაობთ",
@@ -48,10 +70,6 @@ export const storefrontKa = {
 		"გადაიხადეთ მხოლოდ ერთ ვალუტაში. ჯამური თანხა გადახდის ვადის ამოწურვამდე უცვლელია. ბანკმა შეიძლება დამატებითი საკომისიო ჩამოგაჭრათ.",
 	"Review your final total in USD and GEL, including shipping and fees, before you pay.":
 		"გადახდამდე ნახავთ საბოლოო თანხას დოლარსა და ლარში, მიწოდებისა და მომსახურების საფასურის ჩათვლით.",
-	"Service fee applies to items only. Free U.S. shipping on items totaling {{amount}} or more.":
-		"მომსახურების საფასური მხოლოდ ნივთების ღირებულებაზე ითვლება. აშშ-ში მიწოდება უფასოა, თუ ნივთების ღირებულება მინიმუმ {{amount}}-ია.",
-	"U.S. shipping and the service fee are calculated at checkout.":
-		"აშშ-ში მიწოდებისა და მომსახურების საფასური შეკვეთის გაფორმებისას გამოითვლება.",
 	"Sign in to save your delivery address and place an order.":
 		"მისამართის შესანახად და შეკვეთის გასაფორმებლად შედით ანგარიშში.",
 	"Order received": "შეკვეთა მიღებულია",
@@ -60,8 +78,8 @@ export const storefrontKa = {
 		"თქვენი შეკვეთა და გადახდის სურათი მიღებულია. შეკვეთის დამუშავებას თანხის ჩარიცხვის დადასტურების შემდეგ დავიწყებთ.",
 	"Order ID": "შეკვეთის ნომერი",
 	"U.S. delivery · Bank transfer": "მიწოდება აშშ-ში · საბანკო გადარიცხვა",
-	"We deliver only to your U.S. address. Delivery to Georgia is not included or available.":
-		"შეკვეთას მხოლოდ აშშ-ის მისამართზე ვაგზავნით. საქართველოში მიწოდებას არ ვახორციელებთ.",
+	"We deliver only to your U.S. address.":
+		"შეკვეთას მხოლოდ აშშ-ის მისამართზე ვაგზავნით.",
 	"Checkout steps": "შეკვეთის გაფორმების ეტაპები",
 	"Delivery address": "მიწოდების მისამართი",
 	"Bank transfer": "საბანკო გადარიცხვა",
@@ -185,9 +203,6 @@ export const storefrontKa = {
 	Announcements: "განცხადებები",
 	"Questions about sizes?": "ზომის შერჩევაში დახმარება გჭირდებათ?",
 	"Chat with us": "მოგვწერეთ",
-	"Free U.S. shipping from {{price}}": "უფასო მიწოდება აშშ-ში {{price}}-დან",
-	"U.S. delivery only; free from {{price}}. We do not ship to Georgia.":
-		"მიწოდება მხოლოდ აშშ-ში — უფასოდ {{price}}-დან. საქართველოში არ ვაგზავნით.",
 	"Price-check times shown": "მითითებულია ფასების შემოწმების დრო",
 	"Deals on shoes and clothing": "შეთავაზებები ფეხსაცმელსა და ტანსაცმელზე",
 	"Men, women and kids": "მამაკაცებისთვის, ქალებისთვის და ბავშვებისთვის",

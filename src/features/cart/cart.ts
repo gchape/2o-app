@@ -1,5 +1,6 @@
 import { sumBy } from "es-toolkit";
 import { site } from "#/data/site";
+import type { ItemShipping } from "#/features/shipping/shipping";
 
 export type CartItem = {
 	/** SKU id (uuid). */
@@ -10,6 +11,8 @@ export type CartItem = {
 	currency: string;
 	image: string | null;
 	quantity: number;
+	/** Absent only in snapshots created before warehouse shipping. */
+	shipping?: ItemShipping;
 };
 
 export const MAX_QUANTITY = 10;

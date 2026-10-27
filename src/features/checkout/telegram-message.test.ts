@@ -13,6 +13,11 @@ it.each([false, true])(
 				currency: "USD",
 				quantity: 1,
 				image: null,
+				shipping: {
+					groupId: "store-a",
+					rule: { flatRateUsd: 700, freeFromUsd: 9900 },
+					estimatedUnitUsd: null,
+				},
 			})),
 			{
 				gelPerUsd: 2.7,

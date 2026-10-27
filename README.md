@@ -2,7 +2,7 @@
 
 A Georgian and English storefront for browsing wholesale clothing and footwear, comparing deals, and saving products to a cart. Includes catalog search and filters, email/password sign-in, email-code verification and password reset, optional social sign-in, and an address book. Georgian is the default language.
 
-**Status:** browsing, accounts, addresses, carts, and bank-transfer checkout are implemented. Checkout supports U.S. delivery, frozen USD/GEL totals, private receipt uploads, and pending orders. Payment verification and fulfillment remain manual. See [Checkout setup](docs/checkout.md) and [Known limitations](#known-limitations).
+**Status:** browsing, accounts, addresses, carts, and bank-transfer checkout are implemented. Checkout supports U.S. delivery, frozen USD/GEL totals, private receipt uploads, and pending orders. Warehouse shipping rates must be configured before new orders can proceed; no default rates are bundled. Payment verification and fulfillment remain manual. See [Checkout setup](docs/checkout.md) and [Known limitations](#known-limitations).
 
 ## Contents
 
@@ -23,8 +23,8 @@ A Georgian and English storefront for browsing wholesale clothing and footwear, 
 
 ## Quick start
 
-Requires Docker with the Compose plugin. The dev stack runs the app, PostgreSQL, Redis, and Nginx; host Node.js and pnpm are optional.
-1. Create `.env.development` in the repo root (see [Configuration](#configuration)). Set DB credentials and `BETTER_AUTH_SECRET` (`openssl rand -hex 32`). Env files are git- and Docker-ignored; no examples are included.
+Requires Docker with the Compose plugin. The dev stack runs the app, PostgreSQL, Redis, Nginx, and the checkout notification worker; host Node.js and pnpm are optional.
+1. Create `.env.development` in the repo root (see [Configuration](#configuration)). Set DB credentials and `BETTER_AUTH_SECRET` (`openssl rand -hex 32`). Env files are git- and Docker-ignored; no complete env template is included. The [checkout guide](docs/checkout.md) documents payment settings and sample development shipping rules.
 2. Start the stack:
 
    ```sh
@@ -39,6 +39,7 @@ Requires Docker with the Compose plugin. The dev stack runs the app, PostgreSQL,
    ```
 
    Seeding creates sample products and SKUs, then tries to refresh the search index and stats. Re-running replaces products under the reserved `.example` warehouse domains. It refuses to run with `NODE_ENV=production`.
+5. To preview shipment costs with seeded products, use the [development shipping rules](docs/checkout.md#development-preview-with-seeded-products). They cover all four fictional stores; checkout still requires the payment settings and a valid exchange rate.
 
 Without a Resend key, dev emails and verification codes appear in the app logs:
 
@@ -68,7 +69,7 @@ Drizzle and Nitro are pinned prereleases: review migration notes and run the ful
 
 ## Architecture
 
-A single full-stack service organized by feature. PostgreSQL is the source of truth; Redis holds derived catalog documents and transient state.
+A full-stack app organized by feature, with a separate checkout notification worker. PostgreSQL is the source of truth; Redis holds derived catalog documents and transient state.
 
 ```mermaid
 flowchart LR
@@ -78,6 +79,9 @@ flowchart LR
     App --> PG[(PostgreSQL)]
     App --> Redis[(Redis Search / JSON)]
     App --> Email[Resend]
+    App --> Rates[NBG USD rate]
+    Worker[Checkout notification worker] --> PG
+    Worker --> Telegram[Telegram]
     Sync[search:sync] --> PG
     Sync --> Redis
 ```
@@ -119,18 +123,18 @@ Route loaders run on both server and client, so they are **not** a server-only b
 
 ### Routes
 
-| URL                         | Purpose                                                         |
-| --------------------------- | --------------------------------------------------------------- |
-| `/`                         | Hero, featured deals, department tiles, closing CTA.            |
-| `/deals`                    | Searchable, filterable discounted products.                     |
-| `/about`                    | Store selection story and interactive 3D process illustration.  |
-| `/$department/{-$category}` | Department listing, optional category (`/women/shoes`).         |
-| `/product/$slug`            | Product details and SKU selection.                              |
-| `/auth/$path`               | Better Auth UI views (sign-in, verification, ...).              |
-| `/settings/$path`           | Account and security settings, saved addresses.                 |
-| `/checkout`                 | Resumable bank-transfer checkout and confirmation, not indexed. |
-| `/api/auth/*`               | Better Auth handler.                                            |
-| `/api/health`               | Liveness only; does not check PostgreSQL or Redis.              |
+| URL                         | Purpose                                                          |
+| --------------------------- | ---------------------------------------------------------------- |
+| `/`                         | Hero, deals, departments, how it works, closing CTA.             |
+| `/deals`                    | Searchable, filterable discounted products.                      |
+| `/about`                    | Store selection story and interactive 3D process illustration.   |
+| `/$department/{-$category}` | Department listing, optional category (`/women/shoes`).          |
+| `/product/$slug`            | Product details and SKU selection.                               |
+| `/auth/$path`               | Better Auth UI views (sign-in, verification, ...).               |
+| `/settings/$path`           | Account and security settings, saved addresses.                  |
+| `/checkout`                 | Resumable bank-transfer checkout and confirmation, not indexed.  |
+| `/api/auth/*`               | Better Auth handler.                                             |
+| `/api/health`               | Liveness only; does not check PostgreSQL or Redis.               |
 | `/sitemap.xml`              | Public pages (including About) and products with available SKUs. |
 
 `src/routeTree.gen.ts` is generated by the Vite integration. Don't edit it.
@@ -140,7 +144,6 @@ Route loaders run on both server and client, so they are **not** a server-only b
 ### About and footer navigation
 
 `/about` explains the selection process: choose reputable U.S. stores, filter and compare listings, and bring the results together for customers. The page has a brand-black introduction, a light process section, and a closing explanation of recorded prices and availability.
-
 - Three selectable steps highlight layers in a CSS 3D illustration; no WebGL or graphics-library dependency. All step descriptions remain visible, with keyboard-operable buttons, an announced selection summary, and reduced-motion support.
 - The footer links to **About us** under **Discover** (Georgian: **ჩვენ შესახებ** under **გაგვიცანით**).
 - Page copy and metadata support English and Georgian; `/about` is included in the sitemap.
@@ -148,7 +151,7 @@ Route loaders run on both server and client, so they are **not** a server-only b
 
 ### Catalog and search
 
-`src/data/catalog.ts` defines the department/category taxonomy. Products hold identity and descriptions; SKUs hold color, size, image, price, original price, and stock. Money is stored as integer minor units (tetri) plus a currency code.
+`src/data/catalog.ts` defines the department/category taxonomy. Products hold identity and descriptions; SKUs hold color, size, image, price, original price, and stock. Money is stored as integer minor units (tetri for GEL, cents for USD) plus a currency code.
 
 In-stock SKUs are transformed into Redis JSON documents. Department listings show each product's cheapest SKU; Deals shows the deepest-discounted one. Search supports text, brand, size, color, price range, sale status, and sorting, in pages of up to 48 with automatic and manual load-more.
 - The index name includes a hash of its schema. First catalog access creates the index and syncs if it is new or empty (memoized per process). This is **not** a scheduled import.
@@ -170,9 +173,20 @@ In-stock SKUs are transformed into Redis JSON documents. Department listings sho
 ### Checkout
 
 - Signed-in customers select a U.S. address, review a server-created quote, transfer either the USD or GEL total, and upload a receipt before placing an order.
+- Shipping is calculated per warehouse using explicit flat rates and optional free-shipping thresholds in `WAREHOUSE_SHIPPING_RULES`. Cart and checkout group items into shipments; missing rules prevent payment. Saved quotes retain their original shipping costs.
 - The server owns prices, fees, and the exchange rate. Quotes last 24 hours; retries retain their original amounts.
 - Orders and notification jobs commit together. The separate worker forwards order details and receipts to the configured Telegram chat; payment verification remains manual.
 - See [docs/checkout.md](docs/checkout.md) for required settings, worker deployment, pricing rules, and operational limits.
+
+### Configure warehouse shipping
+
+Set `WAREHOUSE_SHIPPING_RULES` in the app’s environment before accepting new orders. The repository does not include actual supplier shipping rates, and catalog product prices do not determine those rates. Each rule needs the warehouse’s confirmed flat shipping charge and optional free-shipping threshold, both in USD cents.
+
+Use exact `product.warehouse` domains as keys, without `www.`. See [Warehouse shipping rules](docs/checkout.md#warehouse-shipping-rules) for the JSON format, limits, and a worked example. The old `CHECKOUT_SHIPPING_USD_CENTS` variable no longer applies. For Compose, recreate the app after changing environment values; `docker compose restart` does not reload container environment variables. See the [development setup](docs/checkout.md#development-preview-with-seeded-products) for the command.
+
+The seed script creates products for `sportmax.example`, `urbanfit.example`, `kidzone.example`, and `shoebox.example`. These are fictional stores, and seeding does **not** configure shipping. The [development preview configuration](docs/checkout.md#development-preview-with-seeded-products) uses $6/free from $50 for Sportmax, $8/free from $75 for Urbanfit, a flat $5 for Kidzone, and always-free shipping for Shoebox. These sample rules have been added to this workspace’s untracked `.env.development`; new checkouts of the repository must add them explicitly. They are not real supplier charges or production defaults.
+
+Without a matching rule, customers can still browse and edit their cart, but cannot create payment instructions for any cart containing that shipment. Previously saved checkout quotes retain their original shipping totals.
 
 ### Authentication and addresses
 
@@ -241,23 +255,27 @@ Host development: Node.js 26, pnpm 12.14.0, `pnpm install --frozen-lockfile`, pl
 
 ## Configuration
 
-Dev loads `.env.development`, production `.env.production`. These are real, untracked files; get values separately on a new machine. Pass `--env-file` to Compose so credential interpolation matches the app. Package DB/maintenance commands use Node's `--env-file-if-exists`, default to development, and honor existing process env; use `NODE_ENV=production pnpm db:migrate` to target production. Validation lives in `src/server/env.server.ts` and `src/db/connection.ts`.
+Compose injects `.env.development` or `.env.production` through each app service’s `env_file`. These are real, untracked files; get values separately on a new machine. The built production Node server does not load an env file itself; supply its process environment through Compose or your service manager. Pass `--env-file` to Compose so credential interpolation matches the app. Package DB/maintenance commands use Node's `--env-file-if-exists`, default to development, and honor existing process env; use `NODE_ENV=production pnpm db:migrate` to target production. Validation lives in `src/server/env.server.ts` and `src/db/connection.ts`.
 
-| Variable                                       | Purpose                                                                               |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `DB_USER`, `DB_PASSWORD`, `DB_NAME`            | Required by both stacks; initialize PostgreSQL and connect the app.                   |
-| `DB_HOST`, `DB_PORT`                           | Default `localhost:5432`; Compose sets `db:5432`.                                     |
-| `DB_SSL`                                       | Default `false`; Compose sets `false` in dev, `true` in production.                   |
-| `DB_SSL_SERVERNAME`                            | Required in production; hostname verified against the DB certificate.                 |
-| `REDIS_HOST`, `REDIS_PORT`                     | Default `localhost:6379`; Compose sets `redis:6379`.                                  |
-| `BETTER_AUTH_SECRET`                           | Required, at least 32 characters.                                                     |
-| `BETTER_AUTH_URL`                              | Auth origin. Dev Compose: `http://localhost:3000`; production: your public HTTPS URL. |
-| `SITE_URL`                                     | Public origin for the sitemap; falls back to `BETTER_AUTH_URL`.                       |
-| `RESEND_API_KEY`                               | Required in production; if absent in dev, emails are logged.                          |
-| `EMAIL_FROM`                                   | Sender; defaults to `2o <onboarding@resend.dev>`. Set your own for production.        |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`     | Optional Google sign-in; set both or neither.                                         |
-| `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET` | Optional Facebook sign-in; set both or neither.                                       |
-| `CHAT_EMBED_URL`                               | Optional Tawk.to embed; widget hidden when unset.                                     |
+| Variable                                       | Purpose                                                                                                                    |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `DB_USER`, `DB_PASSWORD`, `DB_NAME`            | Required by both stacks; initialize PostgreSQL and connect the app.                                                        |
+| `DB_HOST`, `DB_PORT`                           | Default `localhost:5432`; Compose sets `db:5432`.                                                                          |
+| `DB_SSL`                                       | Default `false`; Compose sets `false` in dev, `true` in production.                                                        |
+| `DB_SSL_SERVERNAME`                            | Required in production; hostname verified against the DB certificate.                                                      |
+| `REDIS_HOST`, `REDIS_PORT`                     | Default `localhost:6379`; Compose sets `redis:6379`.                                                                       |
+| `BETTER_AUTH_SECRET`                           | Required, at least 32 characters.                                                                                          |
+| `BETTER_AUTH_URL`                              | Auth origin. Dev Compose: `http://localhost:3000`; production: your public HTTPS URL.                                      |
+| `SITE_URL`                                     | Public origin for the sitemap; falls back to `BETTER_AUTH_URL`.                                                            |
+| `RESEND_API_KEY`                               | Required in production; if absent in dev, emails are logged.                                                               |
+| `EMAIL_FROM`                                   | Sender; defaults to `2o <onboarding@resend.dev>`. Set your own for production.                                             |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`     | Optional Google sign-in; set both or neither.                                                                              |
+| `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET` | Optional Facebook sign-in; set both or neither.                                                                            |
+| `CHECKOUT_IBAN`                                | Receiving IBAN; required for new checkouts. See [checkout setup](docs/checkout.md#deployment-settings).                    |
+| `CHECKOUT_SERVICE_FEE_BPS`                     | Service fee in basis points, from 0 to 10,000; required for new checkouts.                                                 |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`       | Required for new checkouts and the notification worker.                                                                    |
+| `WAREHOUSE_SHIPPING_RULES`                     | Required for new orders: per-warehouse shipping rates and thresholds. See [shipping setup](#configure-warehouse-shipping). |
+| `CHAT_EMBED_URL`                               | Optional Tawk.to embed; widget hidden when unset.                                                                          |
 
 Compose's explicit `environment` values override env-file values. Changing PostgreSQL credentials does not update an existing volume's users or passwords.
 
@@ -295,6 +313,7 @@ The production stack builds the app, runs migrations, and serves it through Ngin
 2. Set `BETTER_AUTH_URL` and `SITE_URL` to your public HTTPS origin.
 3. Provide `certs/fullchain.pem` and `certs/privkey.pem` (real files, not symlinks). They are mounted into both Nginx and PostgreSQL.
 4. Set `DB_SSL_SERVERNAME` to a hostname the certificate covers. DB connections verify both trust and hostname.
+5. To accept orders, configure the receiving IBAN, service fee, Telegram destination, and confirmed warehouse shipping rules as described in [Checkout setup](docs/checkout.md). Development sample rates are not production defaults.
 
 **Certificate permissions.** PostgreSQL refuses a private key that is group/world-accessible or not owned by its user. You can fix this on the host without copying the key:
 
@@ -314,6 +333,7 @@ flowchart LR
     Migrate --> App
     Redis[Redis healthy] --> App[App healthy]
     App --> Web[Nginx]
+    Migrate --> Worker[Checkout notification worker]
 ```
 
 These are startup gates only; the liveness endpoint does not recheck the database afterwards.
@@ -325,7 +345,7 @@ docker compose --env-file .env.production -f docker-compose.prod.yaml config --q
 docker compose --env-file .env.production -f docker-compose.prod.yaml up -d --build
 # Inspect status and logs
 docker compose --env-file .env.production -f docker-compose.prod.yaml ps -a
-docker compose --env-file .env.production -f docker-compose.prod.yaml logs --tail=100 migrate app web
+docker compose --env-file .env.production -f docker-compose.prod.yaml logs --tail=100 migrate app web checkout-notifications
 # Stop, keeping data
 docker compose --env-file .env.production -f docker-compose.prod.yaml down
 ```
@@ -338,20 +358,20 @@ docker compose --env-file .env.production -f docker-compose.prod.yaml run --rm m
 
 ## Repository layout
 
-| Path                                    | Contents                                       |
-| --------------------------------------- | ---------------------------------------------- |
-| `src/routes/`                           | File-based routes, loaders, server endpoints.  |
-| `src/features/`                         | Catalog, search, cart, auth, addresses, stats. |
-| `src/components/`                       | Shared UI, forms, layout, homepage.            |
-| `src/i18n/`                             | Messages, locale state, persistence.           |
-| `src/data/`                             | Taxonomy, types, sizes, site info.             |
-| `src/db/`, `drizzle/`                   | Connection, schema, migration history.         |
-| `src/server/`                           | Env validation, Redis client, cache helpers.   |
-| `scripts/`                              | Seeding, search sync, integration checks.      |
-| `docker-compose.*.yaml`, `nginx.*.conf` | Per-environment service and proxy config.      |
-| `vite.config.ts`, `vitest.config.ts`    | Separate app build and unit-test configs.      |
-| `.github/workflows/ci.yml`              | CI checks and Redis Search integration check.  |
-| `docs/`                                 | Checkout setup and operational details.        |
+| Path                                    | Contents                                                           |
+| --------------------------------------- | ------------------------------------------------------------------ |
+| `src/routes/`                           | File-based routes, loaders, server endpoints.                      |
+| `src/features/`                         | Catalog, search, cart, checkout, shipping, auth, addresses, stats. |
+| `src/components/`                       | Shared UI, forms, layout, homepage.                                |
+| `src/i18n/`                             | Messages, locale state, persistence.                               |
+| `src/data/`                             | Taxonomy, types, sizes, site info.                                 |
+| `src/db/`, `drizzle/`                   | Connection, schema, migration history.                             |
+| `src/server/`                           | Env validation, Redis client, cache helpers.                       |
+| `scripts/`                              | Seeding, search sync, integration checks.                          |
+| `docker-compose.*.yaml`, `nginx.*.conf` | Per-environment service and proxy config.                          |
+| `vite.config.ts`, `vitest.config.ts`    | Separate app build and unit-test configs.                          |
+| `.github/workflows/ci.yml`              | CI checks and Redis Search integration check.                      |
+| `docs/`                                 | Checkout setup and operational details.                            |
 
 ## Testing
 
@@ -364,6 +384,8 @@ pnpm verify && pnpm check:deprecations && pnpm knip && pnpm build && pnpm search
 `verify` covers Biome, TypeScript, and unit tests. `search:check` needs Redis with Search and JSON (use the container prefix under Compose).
 
 Tests live beside source as `*.test.ts(x)`, run under a separate Node-based Vitest config so Start/Nitro RPC transforms don't bypass mocked server boundaries. `check:deprecations` reads TypeScript's suggestion diagnostics; it is not a vulnerability scanner and depends on the installed TypeScript version.
+
+Shipping tests cover per-warehouse thresholds, multiple paid shipments, quantity changes, GEL conversion, missing or invalid rules, and saved-quote compatibility. Cart reads and checkout persistence are tested with mocked services; these are not live-database integration tests.
 
 CI runs on pushes to `main` and pull requests with a Redis service. It does not provision PostgreSQL or run browser end-to-end tests. For UI work, also check both languages at mobile/tablet/desktop widths, keyboard use, dialog dismissal, and loading/empty/error states. Verify auth, authorization, persistence, and concurrency against real services.
 
@@ -393,33 +415,38 @@ New departments or categories change the PostgreSQL enums: update `src/data/cata
 
 ### Change brand content
 
-Edit `src/data/site.ts` (brand copy, currency, time zone, delivery display) and `src/data/socials.ts`; adjust tokens in `src/styles.css`. Keep `src/i18n/` in sync and don't present unimplemented services as available actions.
+Edit `src/data/site.ts` (brand copy, currency, time zone) and `src/data/socials.ts`; adjust tokens in `src/styles.css`. Keep `src/i18n/` in sync and don't present unimplemented services as available actions.
 
 The About story and process steps live in `src/routes/about.tsx`, with scene styles in `src/styles.css`. Footer links live in `src/components/layout/footer.tsx`; Georgian storefront copy lives in `src/i18n/storefront-ka.ts`. Update page metadata and translations when changing the story, and retain keyboard and reduced-motion behavior when adjusting the illustration.
 
 ## Troubleshooting
 
-| Symptom                                                | Check                                                                                    |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Compose reports missing variables                      | Set matching `--env-file` / `-f` values; see [Configuration](#configuration).            |
-| App won't start or Nginx returns 502                   | `... ps -a`, then check `migrate`, `app`, `web` logs. A failed migration blocks the app. |
-| `Permission denied` on mounted files (Fedora/RHEL)     | Keep SELinux bind-mount labels; inspect denials with `sudo ausearch -m avc -ts recent`.  |
-| `db` fails with private-key ownership/permission error | See [Certificate permissions](#production).                                              |
-| Production database TLS fails                          | Check certificate trust, file access, and the `DB_SSL_SERVERNAME` match.                 |
-| Host commands can't reach PostgreSQL or Redis          | Ports aren't published. Run commands in the app container or provide separate services.  |
-| Catalog is empty                                       | Ensure PostgreSQL has products with in-stock SKUs (seed dev only), then `search:sync`.   |
-| Unknown `FT.*` or `JSON.*` command                     | Redis lacks the modules. Use the configured image and run `search:check`.                |
-| Stale products or prices                               | Run `search:sync`, wait out the client cache; refresh stats separately.                  |
-| Verification email missing                             | Dev without Resend: check app logs. Production: check the Resend key and sender.         |
-| Social sign-in missing                                 | Set both ID and secret, callback settings, and the correct public auth origin.           |
-| New route not recognized                               | Run the Vite dev/build flow to regenerate `src/routeTree.gen.ts`, then typecheck.        |
-| Unit tests start Nitro or generate RPC calls           | Make sure Vitest loads `vitest.config.ts`; don't merge app server plugins into it.       |
+| Symptom                                                | Check                                                                                                                                                 |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Compose reports missing variables                      | Set matching `--env-file` / `-f` values; see [Configuration](#configuration).                                                                         |
+| App won't start or Nginx returns 502                   | `... ps -a`, then check `migrate`, `app`, `web` logs. A failed migration blocks the app.                                                              |
+| `Permission denied` on mounted files (Fedora/RHEL)     | Keep SELinux bind-mount labels; inspect denials with `sudo ausearch -m avc -ts recent`.                                                               |
+| `db` fails with private-key ownership/permission error | See [Certificate permissions](#production).                                                                                                           |
+| Production database TLS fails                          | Check certificate trust, file access, and the `DB_SSL_SERVERNAME` match.                                                                              |
+| Host commands can't reach PostgreSQL or Redis          | Ports aren't published. Run commands in the app container or provide separate services.                                                               |
+| Catalog is empty                                       | Ensure PostgreSQL has products with in-stock SKUs (seed dev only), then `search:sync`.                                                                |
+| Unknown `FT.*` or `JSON.*` command                     | Redis lacks the modules. Use the configured image and run `search:check`.                                                                             |
+| Stale products or prices                               | Run `search:sync`, wait out the client cache; refresh stats separately.                                                                               |
+| Verification email missing                             | Dev without Resend: check app logs. Production: check the Resend key and sender.                                                                      |
+| Social sign-in missing                                 | Set both ID and secret, callback settings, and the correct public auth origin.                                                                        |
+| New route not recognized                               | Run the Vite dev/build flow to regenerate `src/routeTree.gen.ts`, then typecheck.                                                                     |
+| Shipping is unavailable for a shipment                 | Confirm the exact catalog domain exists in `WAREHOUSE_SHIPPING_RULES`, validate its rate/threshold, and recreate the app container after env changes. |
+| Shipping preview has no estimate                       | GEL carts need a valid NBG rate; check outbound access and rate-service logs. USD carts do not need conversion for estimates.                         |
+| Checkout is temporarily unavailable                    | Check IBAN, service fee, Telegram settings, and NBG access. See [checkout setup](docs/checkout.md).                                                   |
+| Saved checkout still shows old shipping                | Expected: existing quotes are frozen. Start a new checkout to use updated rules.                                                                      |
+| Unit tests start Nitro or generate RPC calls           | Make sure Vitest loads `vitest.config.ts`; don't merge app server plugins into it.                                                                    |
 
 `/api/health` is liveness only: it shows the process answers HTTP, not that search, PostgreSQL, email, or checkout work.
 
 ## Known limitations
 
 - **Payment and fulfillment:** bank transfers are verified manually. There is no card processor, sales-tax engine, stock reservation, fulfillment integration, or order-management dashboard. Shipping is limited to U.S. addresses.
+- **Shipping rules:** only predictable per-warehouse flat rates and optional thresholds are supported. Configure real rates before checkout; weight, regional surcharges, and coupon-dependent shipping are not modeled.
 - **Catalog ingestion:** only sample seeding and index sync exist; no warehouse importer or scheduled price refresh.
 - **Operational durability:** no automated backups, restore drills, or high availability. Redis loss also affects carts and auth secondary state.
 - **Verification scope:** CI has unit tests and a Redis Search check, but no automated cart integration tests, PostgreSQL/auth/browser end-to-end suite, or formal accessibility certification.

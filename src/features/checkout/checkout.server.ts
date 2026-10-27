@@ -10,6 +10,7 @@ import {
 	user,
 } from "#/db/schema";
 import { cart } from "#/features/cart/cart.server";
+import { validShippingRule } from "#/features/shipping/shipping";
 import {
 	type CheckoutView,
 	QUOTE_LIFETIME_MS,
@@ -116,6 +117,13 @@ export async function prepareCheckout(
 			);
 		});
 		ensure(items.length, "Your cart is empty");
+		ensure(
+			items.every(
+				(item) =>
+					item.shipping?.groupId && validShippingRule(item.shipping.rule),
+			),
+			"Shipping is not available for some items. Please review your cart or contact us.",
+		);
 		const quote = calculateQuote(items, pricing);
 		await tx.insert(checkoutSession).values({
 			id,

@@ -17,6 +17,11 @@ const item = (price: number, currency = "USD", quantity = 1): CartItem => ({
 	currency,
 	quantity,
 	image: null,
+	shipping: {
+		groupId: "store-a",
+		rule: { flatRateUsd: 700, freeFromUsd: 9900 },
+		estimatedUnitUsd: null,
+	},
 });
 
 describe("saved checkout compatibility", () => {
@@ -95,12 +100,23 @@ describe("checkout amounts", () => {
 		[2500, 2.5018, 6255],
 		[750, 2.502, 1877],
 	])("rounds %i USD cents at rate %s to %i tetri", (cents, rate, expected) => {
-		const quote = calculateQuote([item(cents)], {
-			...pricing,
-			gelPerUsd: rate,
-			shippingUsd: 0,
-			serviceFeeBps: 0,
-		});
+		const quote = calculateQuote(
+			[
+				{
+					...item(cents),
+					shipping: {
+						groupId: "store-a",
+						rule: { flatRateUsd: 0, freeFromUsd: null },
+						estimatedUnitUsd: null,
+					},
+				},
+			],
+			{
+				...pricing,
+				gelPerUsd: rate,
+				serviceFeeBps: 0,
+			},
+		);
 		expect(quote.totalGel).toBe(expected);
 	});
 	it.each([
