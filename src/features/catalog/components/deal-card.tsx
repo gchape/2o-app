@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { Deal } from "#/data/catalog.types";
+import { StoreLabel } from "#/features/stores/store-label";
 import { useTranslation } from "#/i18n/translate";
 import { usePriceFormatter } from "#/lib/price";
 import { cn } from "#/lib/utils";
@@ -50,6 +51,9 @@ export function DealCard({ deal, loading, className }: DealCardProps) {
 
 			<div className="mt-5 space-y-2">
 				{brand && <p className="type-eyebrow text-muted-foreground">{brand}</p>}
+				<p className="text-xs text-muted-foreground">
+					<StoreLabel storeId={deal.storeId} />
+				</p>
 				<h3 className="type-card-title line-clamp-2 min-h-[2.7em] text-sm sm:text-base">
 					<Link
 						to="/product/$slug"

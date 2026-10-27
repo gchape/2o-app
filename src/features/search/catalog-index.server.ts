@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { db } from "#/db";
+import { publicStoreId } from "#/features/stores/store.server";
 import { getRedis } from "#/server/redis.server";
 import { buildCatalogDocs } from "./catalog-doc";
 import { schemaArgs } from "./catalog-fields";
@@ -11,6 +12,7 @@ const KEY_PREFIX = "product:";
 /** Named after its schema, so changing `FIELDS` simply creates a new index. */
 export const INDEX = `${FAMILY}${createHash("sha1")
 	.update(schemaArgs().join("|"))
+	.update(publicStoreId("catalog-index"))
 	.digest("hex")
 	.slice(0, 8)}`;
 
@@ -70,6 +72,7 @@ export async function syncCatalogIndex() {
 			department: true,
 			category: true,
 			currency: true,
+			warehouse: true,
 		},
 		with: {
 			skus: {
@@ -86,7 +89,12 @@ export async function syncCatalogIndex() {
 		},
 	});
 
-	const docs = buildCatalogDocs(rows);
+	const docs = buildCatalogDocs(
+		rows.map(({ warehouse, ...product }) => ({
+			...product,
+			storeId: publicStoreId(warehouse),
+		})),
+	);
 	const redis = await getRedis();
 
 	for (let i = 0; i < docs.length; i += 500) {

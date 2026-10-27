@@ -9,6 +9,7 @@ const SEQ = 1_000_000;
  */
 export type CatalogDoc = {
 	id: string;
+	storeId: string;
 	slug: string;
 	name: string;
 	/** Omitted rather than null, so the TAG field simply isn't indexed. */
@@ -52,6 +53,7 @@ type SourceSku = {
 
 export type SourceProduct = {
 	id: string;
+	storeId: string;
 	slug: string;
 	name: string;
 	brand: string | null;
@@ -98,6 +100,7 @@ export function buildCatalogDocs(products: SourceProduct[]): CatalogDoc[] {
 
 			return {
 				id: p.id,
+				storeId: p.storeId,
 				slug: p.slug,
 				name: p.name,
 				brand: p.brand ?? undefined,

@@ -19,6 +19,7 @@ import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthPathRouteImport } from './routes/auth/$path'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as SettingsPathRouteImport } from './routes/settings/$path'
+import { Route as StoresStoreIdRouteImport } from './routes/stores.$storeId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -72,6 +73,11 @@ const SettingsPathRoute = SettingsPathRouteImport.update({
   path: '/settings/$path',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoresStoreIdRoute = StoresStoreIdRouteImport.update({
+  id: '/stores/$storeId',
+  path: '/stores/$storeId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/auth/$path': typeof AuthPathRoute
   '/product/$slug': typeof ProductSlugRoute
   '/settings/$path': typeof SettingsPathRoute
+  '/stores/$storeId': typeof StoresStoreIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/auth/$path': typeof AuthPathRoute
   '/product/$slug': typeof ProductSlugRoute
   '/settings/$path': typeof SettingsPathRoute
+  '/stores/$storeId': typeof StoresStoreIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/auth/$path': typeof AuthPathRoute
   '/product/$slug': typeof ProductSlugRoute
   '/settings/$path': typeof SettingsPathRoute
+  '/stores/$storeId': typeof StoresStoreIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/auth/$path'
     | '/product/$slug'
     | '/settings/$path'
+    | '/stores/$storeId'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/auth/$path'
     | '/product/$slug'
     | '/settings/$path'
+    | '/stores/$storeId'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/auth/$path'
     | '/product/$slug'
     | '/settings/$path'
+    | '/stores/$storeId'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -171,6 +183,7 @@ export interface RootRouteChildren {
   AuthPathRoute: typeof AuthPathRoute
   ProductSlugRoute: typeof ProductSlugRoute
   SettingsPathRoute: typeof SettingsPathRoute
+  StoresStoreIdRoute: typeof StoresStoreIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -246,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsPathRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stores/$storeId': {
+      id: '/stores/$storeId'
+      path: '/stores/$storeId'
+      fullPath: '/stores/$storeId'
+      preLoaderRoute: typeof StoresStoreIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -267,6 +287,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthPathRoute: AuthPathRoute,
   ProductSlugRoute: ProductSlugRoute,
   SettingsPathRoute: SettingsPathRoute,
+  StoresStoreIdRoute: StoresStoreIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

@@ -43,6 +43,7 @@ const sku = (
 const fixture: SourceProduct[] = [
 	{
 		id: "a",
+		storeId: "a".repeat(64),
 		slug: "a",
 		name: "Nike Air Runner",
 		brand: "Nike",
@@ -56,6 +57,7 @@ const fixture: SourceProduct[] = [
 	},
 	{
 		id: "b",
+		storeId: "b".repeat(64),
 		slug: "b",
 		name: "New Balance Retro 90",
 		brand: "New Balance",
@@ -66,6 +68,7 @@ const fixture: SourceProduct[] = [
 	},
 	{
 		id: "c",
+		storeId: "a".repeat(64),
 		slug: "c",
 		name: "Adidas Essential Hoodie",
 		brand: "Adidas",
@@ -117,6 +120,27 @@ const counts = (rows: Record<string, string>[], field: string) =>
 type Check = { name: string; hint: string; test: () => Promise<void> };
 
 const checks: Check[] = [
+	{
+		name: "Anonymous store scope includes full-price items and keeps filters inside the store",
+		hint: "Rebuild the catalog index with its store TAG field and opaque store IDs.",
+		test: async () => {
+			same(
+				await sorted({ scope: { mode: "listing", storeId: "a".repeat(64) } }),
+				["a", "c"],
+			);
+			same(
+				await sorted({ scope: { mode: "listing", storeId: "b".repeat(64) } }),
+				["b"],
+			);
+			same(
+				await ids({
+					scope: { mode: "listing", storeId: "a".repeat(64) },
+					filters: { brands: ["New Balance"] },
+				}),
+				[],
+			);
+		},
+	},
 	{
 		name: "Search and JSON modules are loaded",
 		hint: "Use the redis:8.10.2-alpine image. If you keep a `command:` override in docker-compose.dev.yaml or docker-compose.prod.yaml, it may be skipping the module flags the image normally passes.",

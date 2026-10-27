@@ -25,6 +25,7 @@ const toItem =
 		const shown = mode === "deals" && doc.deal ? doc.deal : doc;
 		return {
 			id: doc.id,
+			storeId: doc.storeId,
 			slug: doc.slug,
 			name: doc.name,
 			brand: doc.brand ?? null,

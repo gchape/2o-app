@@ -1,6 +1,7 @@
 /** One product in a listing, priced at its cheapest in-stock SKU. */
 export type ProductListItem = {
 	id: string;
+	storeId: string;
 	slug: string;
 	name: string;
 	brand: string | null;

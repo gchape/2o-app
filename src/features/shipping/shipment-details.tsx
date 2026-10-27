@@ -1,4 +1,7 @@
+import { Link } from "@tanstack/react-router";
 import type { CartItem } from "#/features/cart/cart";
+import { storeIdSchema } from "#/features/stores/store";
+import { StoreLabel } from "#/features/stores/store-label";
 import { useTranslation } from "#/i18n/translate";
 import { usePriceFormatter } from "#/lib/price";
 import { estimateShipment, type ShipmentQuote } from "./shipping";
@@ -7,12 +10,17 @@ export function ShipmentDetails({
 	number,
 	items,
 	quote,
+	onBrowse,
 }: {
 	number: number;
 	items: CartItem[];
 	quote?: ShipmentQuote;
+	onBrowse?: () => void;
 }) {
 	const t = useTranslation();
+	const storeId = storeIdSchema.safeParse(
+		quote?.groupId ?? items[0]?.shipping?.groupId,
+	).data;
 	const { formatPrice } = usePriceFormatter();
 	const usd = (value: number) => formatPrice(value, "USD");
 	const amounts = quote ?? estimateShipment(items);
@@ -26,6 +34,11 @@ export function ShipmentDetails({
 			<h3 className="text-sm font-semibold">
 				{t("Shipment {{number}}", { number })}
 			</h3>
+			{storeId && (
+				<p className="text-muted-foreground">
+					<StoreLabel storeId={storeId} />
+				</p>
+			)}
 			{amounts ? (
 				<>
 					<p>
@@ -57,13 +70,23 @@ export function ShipmentDetails({
 			{rule && rule.flatRateUsd > 0 && rule.freeFromUsd !== null && (
 				<p className="text-muted-foreground">
 					{!quote && remaining !== null && remaining > 0
-						? t("Add {{amount}} from this warehouse for free shipping.", {
+						? t("Add {{amount}} from this store for free shipping.", {
 								amount: usd(remaining),
 							})
 						: t("Free shipping from {{amount}} for this shipment only.", {
 								amount: usd(rule.freeFromUsd),
 							})}
 				</p>
+			)}
+			{storeId && !quote && (
+				<Link
+					to="/stores/$storeId"
+					params={{ storeId }}
+					onClick={onBrowse}
+					className="inline-flex min-h-10 items-center text-link underline underline-offset-4"
+				>
+					{t("Shop more from this store")}
+				</Link>
 			)}
 		</div>
 	);

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Badge } from "#/components/ui/badge";
 import { Card, CardContent } from "#/components/ui/card";
 import type { ProductListItem } from "#/data/catalog.types";
+import { StoreLabel } from "#/features/stores/store-label";
 import { useTranslation } from "#/i18n/translate";
 import { isOnSale, usePriceFormatter } from "#/lib/price";
 import { cn } from "#/lib/utils";
@@ -43,6 +44,9 @@ export function ProductCard({
 						{brand}
 					</p>
 				)}
+				<p className="text-xs text-muted-foreground">
+					<StoreLabel storeId={product.storeId} />
+				</p>
 				<h3 className="type-card-title line-clamp-2 min-h-[2.7em] text-sm sm:text-base">
 					<Link
 						to="/product/$slug"

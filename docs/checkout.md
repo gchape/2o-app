@@ -36,7 +36,7 @@ WAREHOUSE_SHIPPING_RULES='{"warehouse-a.example":{"flatRateUsd":600,"freeFromUsd
 - Missing or malformed configuration, or a cart warehouse without a matching rule, prevents a new quote. The cart identifies affected shipments; no bank instructions are created until all shipping costs are known.
 - The old `CHECKOUT_SHIPPING_USD_CENTS` variable and global $99 threshold are retired. Replace the old variable with warehouse rules before accepting new orders. Recreate Compose app containers after changing environment values; a plain container restart keeps the old environment.
 
-The cart and checkout group items as **Shipment 1**, **Shipment 2**, etc., without displaying supplier domains. Cart estimates show each shipment’s shipping and the amount still needed to qualify for free shipping. GEL cart estimates use the cached NBG rate and the same unit-rounding method as checkout; if the rate is unavailable, the cart remains usable but cannot show an estimate. Final prices are recalculated on the server before payment.
+The cart and checkout group items as **Shipment 1**, **Shipment 2**, etc., with the same anonymous store code shown on product cards and pages, without displaying supplier domains. The cart’s **Shop more from this store** link opens all available products from that store and closes the drawer. Cart estimates show each shipment’s shipping and the amount still needed to qualify for free shipping. GEL cart estimates use the cached NBG rate and the same unit-rounding method as checkout; if the rate is unavailable, the cart remains usable but cannot show an estimate. Final prices are recalculated on the server before payment.
 
 New quotes freeze each shipment’s item IDs, merchandise subtotal, shipping charge and policy in the existing JSON snapshot. Existing quotes without this breakdown keep their original totals and render the original combined shipping amount. Updating rules never reprices an existing checkout or submitted order. This change requires no database migration.
 
@@ -61,7 +61,7 @@ Start the development stack using the [README quick start](../README.md#quick-st
 docker compose --env-file .env.development -f docker-compose.dev.yaml up -d --no-deps --force-recreate app
 ```
 
-If payment or Telegram settings also changed, recreate `checkout-notifications` with the same command. For a host-run dev server, stop it and start it with the updated environment. Refresh the browser, add seeded products to the cart, and adjust quantities to see shipping costs and progress toward each shipment’s free-shipping threshold. The cart labels groups as Shipment 1, Shipment 2, etc., rather than showing supplier domains.
+If payment or Telegram settings also changed, recreate `checkout-notifications` with the same command. For a host-run dev server, stop it and start it with the updated environment. Refresh the browser, add seeded products to the cart, and adjust quantities to see shipping costs and progress toward each shipment’s free-shipping threshold. The cart labels groups as Shipment 1, Shipment 2, etc., alongside an anonymous store code. Use **Shop more from this store** to find more items from the same source without displaying its name.
 
 Cart shipping previews do not require bank or Telegram settings. Seeded prices use GEL, so their USD shipping estimates need a valid NBG rate. Creating a new checkout additionally requires a valid IBAN, an explicit service fee, Telegram settings, and a U.S. address. Already saved quotes retain their old amounts; start a new checkout to see changed rules.
 

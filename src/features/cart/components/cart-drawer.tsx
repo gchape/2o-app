@@ -68,7 +68,11 @@ export function CartDrawer() {
 						<div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 sm:px-6">
 							{groupShipments(items).map((group, index) => (
 								<section key={group.groupId}>
-									<ShipmentDetails number={index + 1} items={group.lines} />
+									<ShipmentDetails
+										number={index + 1}
+										items={group.lines}
+										onBrowse={cartDrawer.actions.close}
+									/>
 									<CartLines items={group.lines} />
 								</section>
 							))}

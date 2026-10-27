@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { categorySchema, departmentSchema } from "#/data/catalog";
+import { storeIdSchema } from "#/features/stores/store";
 
 /** Products per page of a listing. */
 export const CATALOG_PAGE_SIZE = 48;
@@ -50,6 +51,7 @@ export const DEFAULT_FILTERS: CatalogFilters = catalogFiltersSchema.parse({});
 
 /** Where a listing lives: a department or category, or the deals view. */
 export const scopeSchema = z.object({
+	storeId: storeIdSchema.optional(),
 	department: departmentSchema.optional(),
 	category: categorySchema.optional(),
 	/** "deals" shows each product at its deepest-discounted SKU. */

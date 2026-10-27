@@ -1,8 +1,10 @@
+import { Link } from "@tanstack/react-router";
 import { Container } from "#/components/layout/container";
 import { Badge } from "#/components/ui/badge";
 import { AddToCartButton } from "#/features/cart/components/add-to-cart-button";
 import type { ProductDetail } from "#/features/catalog/product.functions";
 import type { SkuSelection } from "#/features/catalog/product-selection";
+import { StoreLabel } from "#/features/stores/store-label";
 import { useTranslation } from "#/i18n/translate";
 import { isOnSale } from "#/lib/price";
 import { OptionGroup } from "./option-group";
@@ -43,6 +45,18 @@ export function ProductDetails({
 						</p>
 					)}
 					<h1 className="type-title text-3xl lg:text-4xl">{product.name}</h1>
+					<div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+						<p className="text-muted-foreground">
+							<StoreLabel storeId={product.storeId} />
+						</p>
+						<Link
+							to="/stores/$storeId"
+							params={{ storeId: product.storeId }}
+							className="text-link underline underline-offset-4"
+						>
+							<span>{t("Shop more from this store")}</span>
+						</Link>
+					</div>
 					{shown && (
 						<p className="mt-5 flex flex-wrap items-center gap-3">
 							<span className="type-num text-2xl">

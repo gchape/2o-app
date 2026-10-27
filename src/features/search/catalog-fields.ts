@@ -7,6 +7,7 @@
  */
 const FIELDS = {
 	q: { path: "$.searchText", type: "TEXT" },
+	store: { path: "$.storeId", type: "TAG" },
 	brand: { path: "$.brand", type: "TAG" },
 	department: { path: "$.department", type: "TAG" },
 	category: { path: "$.category", type: "TAG" },

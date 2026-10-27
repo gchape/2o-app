@@ -3,6 +3,7 @@ import { buildCatalogDocs, type SourceProduct } from "./catalog-doc";
 
 const product = (overrides: Partial<SourceProduct>): SourceProduct => ({
 	id: "p",
+	storeId: "a".repeat(64),
 	slug: "p",
 	name: "Product",
 	brand: "Nike",
@@ -102,6 +103,7 @@ describe("buildCatalogDocs", () => {
 		const docs = buildCatalogDocs([
 			product({
 				id: "a",
+				storeId: "a".repeat(64),
 				skus: [
 					sku({ price: 1000 }),
 					sku({ price: 8000, originalPrice: 16000, discount: 50 }),
@@ -109,6 +111,7 @@ describe("buildCatalogDocs", () => {
 			}),
 			product({
 				id: "b",
+				storeId: "a".repeat(64),
 				skus: [sku({ price: 5000, originalPrice: 10000, discount: 50 })],
 			}),
 		]);

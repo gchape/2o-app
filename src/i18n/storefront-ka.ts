@@ -11,6 +11,16 @@ export const storefrontKa = {
 	"Review your order": "გადაამოწმეთ შეკვეთა",
 	"Review shipping, service fees and your final total at checkout before placing your order.":
 		"შეკვეთის დადასტურებამდე გადაამოწმეთ მიწოდებისა და მომსახურების საფასური და საბოლოო თანხა.",
+	"Store {{code}}": "მაღაზია {{code}}",
+	"Shop more from this store": "ნახეთ ამავე მაღაზიის სხვა ნივთები",
+	"Shop by store": "შეარჩიეთ მაღაზიის მიხედვით",
+	"Items from this store share one shipping charge and free-shipping threshold.":
+		"ამ მაღაზიის ნივთები ერთ გზავნილში ერთიანდება. მიწოდების საფასური და უფასო მიწოდების პირობა მათ ჯამურ ღირებულებაზე ითვლება.",
+	"No products are currently available from this store.":
+		"ამ მაღაზიის ნივთები ამჟამად ხელმისაწვდომი არ არის.",
+	"Add {{amount}} from this store for free shipping.":
+		"უფასო მიწოდებისთვის ამავე მაღაზიიდან დაამატეთ კიდევ {{amount}}-ის ნივთები.",
+
 	"Shipment {{number}}": "გზავნილი {{number}}",
 	"Shipment items: {{amount}}": "ნივთების ჯამური ღირებულება: {{amount}}",
 	"Shipping: {{amount}}": "მიწოდება: {{amount}}",
@@ -20,8 +30,6 @@ export const storefrontKa = {
 		"მიწოდების ღირებულება ამჟამად ვერ გამოითვლება. საბოლოო თანხას გადახდამდე ნახავთ.",
 	"Shipping is not available for some items. Please review your cart or contact us.":
 		"ზოგიერთი ნივთის მიწოდების ღირებულება ჯერ განსაზღვრული არ არის. გადახედეთ კალათას ან დაგვიკავშირდით.",
-	"Add {{amount}} from this warehouse for free shipping.":
-		"უფასო მიწოდებისთვის ამავე საწყობიდან დაამატეთ კიდევ {{amount}}-ის ნივთები.",
 	"Free shipping from {{amount}} for this shipment only.":
 		"ამ გზავნილის მიწოდება უფასოა, თუ მასში შემავალი ნივთების ღირებულება მინიმუმ {{amount}}-ია.",
 	"Shipping is calculated separately for each warehouse. Review the final shipping and service fee at checkout.":

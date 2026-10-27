@@ -1,5 +1,5 @@
-import { createHmac } from "node:crypto";
 import { z } from "zod";
+import { publicStoreId } from "#/features/stores/store.server";
 import { env } from "#/server/env.server";
 
 const ruleSchema = z
@@ -29,9 +29,7 @@ export function parseShippingRules(value: unknown) {
 export function warehouseShipping(warehouse: string) {
 	const rules = parseShippingRules(env.WAREHOUSE_SHIPPING_RULES);
 	return {
-		groupId: createHmac("sha256", env.BETTER_AUTH_SECRET)
-			.update(warehouse)
-			.digest("hex"),
+		groupId: publicStoreId(warehouse),
 		rule:
 			rules && Object.hasOwn(rules, warehouse)
 				? (rules[warehouse] ?? null)

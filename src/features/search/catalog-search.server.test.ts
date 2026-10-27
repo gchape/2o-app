@@ -13,6 +13,7 @@ vi.mock("./catalog-index.server", () => ({
 const docs = buildCatalogDocs([
 	{
 		id: "product",
+		storeId: "a".repeat(64),
 		slug: "product",
 		name: "Product",
 		brand: null,
@@ -76,4 +77,20 @@ describe("catalog prices", () => {
 			);
 		},
 	);
+});
+
+it("retains the anonymous store restriction in results and every facet query", async () => {
+	const storeId = "a".repeat(64);
+	const scope = { mode: "listing" as const, storeId };
+	const result = await searchCatalog(scope, DEFAULT_FILTERS, 1, 48);
+	expect(result.items[0]?.storeId).toBe(storeId);
+	expect(result.items[0]).not.toHaveProperty("warehouse");
+	await catalogFacets(scope, {
+		...DEFAULT_FILTERS,
+		brands: ["Nike"],
+		minPrice: 5000,
+	});
+	for (const call of [...ft.search.mock.calls, ...ft.aggregate.mock.calls]) {
+		expect(call[1]).toContain(`@store:{${storeId}}`);
+	}
 });

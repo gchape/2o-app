@@ -32,6 +32,7 @@ export function textClause(q: string | undefined) {
 /** The FT.SEARCH query for a scope and its filters. Clauses are ANDed by juxtaposition. */
 export function buildQuery(scope: CatalogScope, filters: CatalogFilters) {
 	const clauses = [
+		scope.storeId && tag("store", [scope.storeId]),
 		scope.department && tag("department", [scope.department]),
 		scope.category && tag("category", [scope.category]),
 		textClause(filters.q),

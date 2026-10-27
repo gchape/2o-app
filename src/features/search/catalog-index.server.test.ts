@@ -5,6 +5,9 @@ const { ft, findMany, redis } = vi.hoisted(() => ({
 	findMany: vi.fn(),
 	redis: { scan: vi.fn() },
 }));
+vi.mock("#/server/env.server", () => ({
+	env: { BETTER_AUTH_SECRET: "test-store-id-secret" },
+}));
 vi.mock("./redis-ft.server", () => ({ ft }));
 vi.mock("#/db", () => ({ db: { query: { product: { findMany } } } }));
 vi.mock("#/server/redis.server", () => ({ getRedis: async () => redis }));
